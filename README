@@ -1,0 +1,15 @@
+GitBlit plugin
+==============
+
+In order to use GitBlit as GitWeb replacement, please apply
+the following configuration to your Gerrit config.
+(assuming plugin was copied as gitblit.jar)
+
+[gitweb]
+        type = custom
+        url = /plugins/gitblit/
+        linkname = gitblit
+        project = summary/${project}.git
+        revision = commit/${project}.git/${commit}
+        branch = log/${project}.git/${branch}
+        filehistory = history/${project}.git/${branch}/${file}

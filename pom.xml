@@ -1,0 +1,191 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<!--
+Copyright (C) 2012 The Android Open Source Project
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.googlesource.gerrit.plugins.gitblit</groupId>
+  <artifactId>gitblit-plugin</artifactId>
+  <description>GitBlit for Gerrit integrated as a plugin</description>
+  <name>Gerrit - GitBlit Plugin</name>
+  <version>1.0-SNAPSHOT</version>
+  <properties>
+    <Gerrit-ApiType>plugin</Gerrit-ApiType>
+    <Gerrit-ApiVersion>2.6-SNAPSHOT</Gerrit-ApiVersion>
+    <Gerrit-ReloadMode>reload</Gerrit-ReloadMode>
+    <Gerrit-InitStep>com.googlesource.gerrit.plugins.gitblit.GitBlitInitStep</Gerrit-InitStep>
+    <Gerrit-HttpModule>com.googlesource.gerrit.plugins.gitblit.GitBlitModule</Gerrit-HttpModule>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>com.google.gerrit</groupId>
+      <artifactId>gerrit-plugin-api</artifactId>
+      <version>${Gerrit-ApiVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.gitblit</groupId>
+      <artifactId>gitblit</artifactId>
+      <version>1.2.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.wicket</groupId>
+      <artifactId>wicket-auth-roles</artifactId>
+      <version>1.4.20-selfload</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.wicket</groupId>
+      <artifactId>wicket-extensions</artifactId>
+      <version>1.4.20-selfload</version>
+    </dependency>
+    <dependency>
+      <groupId>org.wicketstuff</groupId>
+      <artifactId>googlecharts</artifactId>
+      <version>1.4.20</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+      <version>4.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
+      <version>1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-net</groupId>
+      <artifactId>commons-net</artifactId>
+      <scope>provided</scope>
+      <version>3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy-all</artifactId>
+      <version>1.8.6</version>
+    </dependency>
+    <dependency>
+      <groupId>com.beust</groupId>
+      <artifactId>jcommander</artifactId>
+      <version>1.17</version>
+    </dependency>
+    <dependency>
+      <groupId>jdom</groupId>
+      <artifactId>jdom</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>3.6.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-highlighter</artifactId>
+      <version>3.6.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-memory</artifactId>
+      <version>3.6.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.tautua.markdownpapers</groupId>
+      <artifactId>markdownpapers-core</artifactId>
+      <version>1.2.7</version>
+    </dependency>
+    <dependency>
+      <groupId>rome</groupId>
+      <artifactId>rome</artifactId>
+      <version>1.0-selfload</version>
+    </dependency>
+    <dependency>
+      <groupId>com.unboundid</groupId>
+      <artifactId>unboundid-ldapsdk</artifactId>
+      <version>2.3.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.wicket</groupId>
+      <artifactId>wicket</artifactId>
+      <version>1.4.20-selfload</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.5.1</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.4</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>1.6</version>
+        <configuration>
+          <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+          <artifactSet>
+            <excludes>
+              <exclude>com.google.gerrit:*</exclude>
+              <exclude>org.bouncycastle:*</exclude>
+              <exclude>org.slf4j:*</exclude>
+              <exclude>com.google.guava:*</exclude>
+              <exclude>org.eclipse.jgit:*</exclude>
+            </excludes>
+          </artifactSet>
+          <transformers>
+            <transformer
+              implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+              <manifestEntries>
+                <Gerrit-HttpModule>${Gerrit-HttpModule}</Gerrit-HttpModule>
+                <Gerrit-InitStep>${Gerrit-InitStep}</Gerrit-InitStep>
+                <Implementation-Vendor>Gerrit Code Review</Implementation-Vendor>
+                <Implementation-URL>http://code.google.com/p/gerrit/</Implementation-URL>
+                <Implementation-Title>Plugin ${project.artifactId}</Implementation-Title>
+                <Implementation-Version>${project.version}</Implementation-Version>
+                <Gerrit-ApiType>${Gerrit-ApiType}</Gerrit-ApiType>
+                <Gerrit-ApiVersion>${Gerrit-ApiVersion}</Gerrit-ApiVersion>
+                <Gerrit-ReloadMode>${Gerrit-ReloadMode}</Gerrit-ReloadMode>
+              </manifestEntries>
+            </transformer>
+          </transformers>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <repositories>
+    <repository>
+      <id>gerritforge-gitblit-repository</id>
+      <url>http://gerritforge.com/snapshot/</url>
+    </repository>
+  </repositories>
+
+</project>
