@@ -26,7 +26,6 @@ import com.google.common.base.Strings;
 import com.google.gerrit.httpd.WebSession;
 import com.google.gerrit.server.account.AccountException;
 import com.google.gerrit.server.account.AccountManager;
-import com.google.gerrit.server.account.AuthMethod;
 import com.google.gerrit.server.account.AuthRequest;
 import com.google.gerrit.server.account.AuthResult;
 import com.google.gerrit.server.project.ProjectControl;
@@ -102,7 +101,7 @@ public class GerritToGitBlitUserService implements IUserService {
 
     try {
       AuthResult authResp = accountManager.authenticate(who);
-      webSession.get().login(authResp, AuthMethod.PASSWORD, false);
+      webSession.get().login(authResp, false);
     } catch (AccountException e) {
       log.warn("Authentication failed for '" + username + "'", e);
       return null;
