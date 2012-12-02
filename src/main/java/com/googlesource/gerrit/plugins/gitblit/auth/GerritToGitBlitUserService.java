@@ -70,18 +70,18 @@ public class GerritToGitBlitUserService implements IUserService {
   public UserModel authenticateSSO(String username, String sessionToken) {
     WebSession session = webSession.get();
 
-    if (session.getToken() == null || !session.getToken().equals(sessionToken)) {
+    if (session.getSessionId() == null || !session.getSessionId().equals(sessionToken)) {
       log.warn("Invalid Gerrit session token for user '" + username + "'");
       return null;
     }
 
     if (!session.isSignedIn()) {
-      log.warn("Gerrit session " + session.getToken() + " is not signed-in");
+      log.warn("Gerrit session " + session.getSessionId() + " is not signed-in");
       return null;
     }
 
     if (!session.getCurrentUser().getUserName().equals(username)) {
-      log.warn("Gerrit session " + session.getToken()
+      log.warn("Gerrit session " + session.getSessionId()
           + " is not assigned to user " + username);
       return null;
     }

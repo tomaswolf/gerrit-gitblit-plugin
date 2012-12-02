@@ -64,7 +64,7 @@ public class GerritAuthFilter {
         || httpRequest.getHeader("Authorization") != null) {
       request.setAttribute("gerrit-username", webSession.get().getCurrentUser()
           .getUserName());
-      request.setAttribute("gerrit-token", webSession.get().getToken());
+      request.setAttribute("gerrit-token", webSession.get().getSessionId());
       return true;
     } else {
       httpResponse.setStatus(HttpURLConnection.HTTP_UNAUTHORIZED);
