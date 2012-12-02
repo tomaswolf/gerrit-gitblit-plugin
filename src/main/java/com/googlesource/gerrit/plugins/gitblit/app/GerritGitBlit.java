@@ -23,6 +23,7 @@ import com.gitblit.GitBlit;
 import com.gitblit.models.UserModel;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.googlesource.gerrit.plugins.gitblit.auth.GerritToGitBlitUserModel;
 import com.googlesource.gerrit.plugins.gitblit.auth.GerritToGitBlitUserService;
 
 @Singleton
@@ -36,12 +37,17 @@ public class GerritGitBlit extends GitBlit {
   public UserModel authenticate(HttpServletRequest request) {
     String user = (String) request.getAttribute("gerrit-username");
     String token = (String) request.getAttribute("gerrit-token");
-    if (token == null) {
-      return null;
+    String password = (String) request.getAttribute("gerrit-password");
+    if (token != null) {
+      return GitBlit.self().authenticate(user,
+          (GerritToGitBlitUserService.SESSIONAUTH + token).toCharArray());
+    } else if(user != null && password != null){
+      return GitBlit.self().authenticate(user, password.toCharArray());
+    } else {
+      return GitBlit.self().authenticate(
+          GerritToGitBlitUserModel.ANONYMOUS_USER,
+          GerritToGitBlitUserModel.ANONYMOUS_PASSWORD);
     }
-
-    return GitBlit.self().authenticate(user,
-        (GerritToGitBlitUserService.SESSIONAUTH + token).toCharArray());
   }
 
   @Override

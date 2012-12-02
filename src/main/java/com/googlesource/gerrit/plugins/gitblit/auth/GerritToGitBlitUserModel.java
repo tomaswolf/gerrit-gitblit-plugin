@@ -25,9 +25,12 @@ import com.gitblit.utils.StringUtils;
 import com.google.gerrit.reviewdb.client.Project.NameKey;
 import com.google.gerrit.server.project.NoSuchProjectException;
 import com.google.gerrit.server.project.ProjectControl;
+import com.google.gerrit.server.project.ProjectControl.Factory;
 import com.google.gerrit.server.project.RefControl;
 
 public class GerritToGitBlitUserModel extends UserModel {
+  public static final String ANONYMOUS_USER = "$anonymous";
+  public static final char[] ANONYMOUS_PASSWORD = ANONYMOUS_USER.toCharArray();
 
   private static final long serialVersionUID = 1L;
 
@@ -56,6 +59,11 @@ public class GerritToGitBlitUserModel extends UserModel {
     super(username);
     this.username = username;
     this.isAuthenticated = true;
+    this.projectControlFactory = projectControlFactory;
+  }
+
+  public GerritToGitBlitUserModel(final ProjectControl.Factory projectControlFactory) {
+    super(ANONYMOUS_USER);
     this.projectControlFactory = projectControlFactory;
   }
 
@@ -211,5 +219,9 @@ public class GerritToGitBlitUserModel extends UserModel {
   @Override
   public int compareTo(UserModel o) {
     return username.compareTo(o.username);
+  }
+
+  public static UserModel getAnonymous(Factory projectControl) {
+    return new GerritToGitBlitUserModel(ANONYMOUS_USER, projectControl);
   }
 }

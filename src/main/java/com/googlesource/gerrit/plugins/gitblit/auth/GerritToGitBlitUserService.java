@@ -58,7 +58,10 @@ public class GerritToGitBlitUserService implements IUserService {
   public UserModel authenticate(String username, char[] password) {
     String passwordString = new String(password);
 
-    if (passwordString.startsWith(GerritToGitBlitUserService.SESSIONAUTH)) {
+    if (username.equals(GerritToGitBlitUserModel.ANONYMOUS_USER)) {
+      return GerritToGitBlitUserModel.getAnonymous(projectControl);
+    } else if (passwordString
+        .startsWith(GerritToGitBlitUserService.SESSIONAUTH)) {
       return authenticateSSO(username,
           passwordString.substring(GerritToGitBlitUserService.SESSIONAUTH
               .length()));
