@@ -47,10 +47,10 @@ public class GitBlitInitStep implements InitStep {
     Section gitWeb = sections.get("gitweb", null);
     gitWeb.set("type", "custom");
     gitWeb.set("url", "plugins/");
-    gitWeb.set("project", pluginName + "/summary/${project}");
-    gitWeb.set("revision", pluginName + "/commit/${project}/${commit}");
-    gitWeb.set("branch", pluginName + "/log/${project}/${branch}");
-    gitWeb.set("filehistory", pluginName + "/history/${project}/${branch}/${file}");
+    gitWeb.set("project", pluginName + "/summary/?r=${project}");
+    gitWeb.set("revision", pluginName + "/commit/?r=${project}&h=${commit}");
+    gitWeb.set("branch", pluginName + "/log/?r=${project}&h=${branch}");
+    gitWeb.set("filehistory", pluginName + "/history/?f=${file}&r=${project}&h=${branch}");
     gitWeb.string("Link name", "linkname", "GitBlit");
   }
 
