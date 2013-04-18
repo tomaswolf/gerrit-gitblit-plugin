@@ -20,7 +20,7 @@ limitations under the License.
   <artifactId>gitblit-plugin</artifactId>
   <description>GitBlit for Gerrit integrated as a plugin</description>
   <name>Gerrit - GitBlit Plugin</name>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.1-SNAPSHOT</version>
   <properties>
     <Gerrit-ApiType>plugin</Gerrit-ApiType>
     <Gerrit-ApiVersion>2.6-SNAPSHOT</Gerrit-ApiVersion>
@@ -37,7 +37,7 @@ limitations under the License.
     <dependency>
       <groupId>com.gitblit</groupId>
       <artifactId>gitblit</artifactId>
-      <version>1.2.0-SNAPSHOT</version>
+      <version>1.3.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.wicket</groupId>
@@ -190,6 +190,10 @@ limitations under the License.
     <repository>
       <id>gerritforge-gitblit-repository</id>
       <url>http://gerritforge.com/snapshot/</url>
+    </repository>
+    <repository>
+      <id>jgit-snapshots</id>
+      <url>https://repo.eclipse.org/content/groups/snapshots</url>
     </repository>
   </repositories>
 

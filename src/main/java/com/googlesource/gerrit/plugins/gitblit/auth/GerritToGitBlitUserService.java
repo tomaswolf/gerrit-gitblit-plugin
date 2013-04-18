@@ -13,6 +13,7 @@
 // limitations under the License.
 package com.googlesource.gerrit.plugins.gitblit.auth;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -260,12 +261,12 @@ public class GerritToGitBlitUserService implements IUserService {
   }
 
   @Override
-  public boolean updateUserModels(List<UserModel> models) {
+  public boolean updateTeamModels(Collection<TeamModel> arg0) {
     return false;
   }
 
   @Override
-  public boolean updateTeamModels(List<TeamModel> models) {
+  public boolean updateUserModels(Collection<UserModel> arg0) {
     return false;
   }
 }

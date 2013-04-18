@@ -45,10 +45,11 @@ import com.googlesource.gerrit.plugins.gitblit.app.GerritGitBlit;
 import com.googlesource.gerrit.plugins.gitblit.app.GerritToGitBlitWebApp;
 import com.googlesource.gerrit.plugins.gitblit.app.GitBlitSettings;
 import com.googlesource.gerrit.plugins.gitblit.auth.GerritAuthFilter;
+import com.googlesource.gerrit.plugins.gitblit.auth.GerritToGitBlitUserService;
 
 @Singleton
 public class GerritWicketFilter extends WicketFilter {
-  private static final String GITBLIT_REFERENCE_PROPERTIES = "reference.properties";
+  private static final String GITBLIT_GERRIT_PROPERTIES = "/gitblit.properties";
 
   private static final Logger log = LoggerFactory
       .getLogger(GerritWicketFilter.class);
@@ -77,21 +78,23 @@ public class GerritWicketFilter extends WicketFilter {
 
     try {
       InputStream resin =
-          getClass().getResourceAsStream(GITBLIT_REFERENCE_PROPERTIES);
+          getClass().getResourceAsStream(GITBLIT_GERRIT_PROPERTIES);
       Properties properties = null;
       try {
         properties = new Properties();
         properties.load(resin);
         properties.put("git.repositoriesFolder", repoManager.getBasePath()
-            .toString());
+            .getAbsolutePath());
+        properties.put("realm.userService",
+            GerritToGitBlitUserService.class.getName());
       } finally {
         resin.close();
       }
       IStoredSettings settings = new GitBlitSettings(properties);
-      GitBlit.self().configureContext(settings, false);
+      GitBlit.self().configureContext(settings, repoManager.getBasePath(),
+          false);
       GitBlit.self().contextInitialized(
-          new ServletContextEvent(filterConfig.getServletContext()),
-          getClass().getResourceAsStream(GITBLIT_REFERENCE_PROPERTIES));
+          new ServletContextEvent(filterConfig.getServletContext()));
       super.init(new CustomFilterConfig(filterConfig));
     } catch (Exception e) {
       throw new ServletException(e);

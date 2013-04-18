@@ -13,3 +13,12 @@ the following configuration to your Gerrit config.
         revision = commit/${project}.git/${commit}
         branch = log/${project}.git/${branch}
         filehistory = history/${project}.git/${branch}/${file}
+
+How to build:
+
+gitblit.jar (optionally):
+1. clone GitBlit
+2. ant -DresourceFolderPrefix=static installMaven
+
+gerrit-gitblit-plugin:
+mvn package
