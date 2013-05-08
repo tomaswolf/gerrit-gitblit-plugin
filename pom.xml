@@ -23,8 +23,8 @@ limitations under the License.
   <version>2.8-SNAPSHOT</version>
   <properties>
     <Gerrit-ApiType>plugin</Gerrit-ApiType>
-    <Gerrit-ReloadMode>reload</Gerrit-ReloadMode>
     <Gerrit-ApiVersion>${project.version}</Gerrit-ApiVersion>
+    <Gerrit-ReloadMode>restart</Gerrit-ReloadMode>
     <Gerrit-InitStep>com.googlesource.gerrit.plugins.gitblit.GitBlitInitStep</Gerrit-InitStep>
     <Gerrit-HttpModule>com.googlesource.gerrit.plugins.gitblit.GitBlitModule</Gerrit-HttpModule>
   </properties>
