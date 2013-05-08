@@ -26,7 +26,8 @@ limitations under the License.
     <Gerrit-ApiVersion>${project.version}</Gerrit-ApiVersion>
     <Gerrit-ReloadMode>restart</Gerrit-ReloadMode>
     <Gerrit-InitStep>com.googlesource.gerrit.plugins.gitblit.GitBlitInitStep</Gerrit-InitStep>
-    <Gerrit-HttpModule>com.googlesource.gerrit.plugins.gitblit.GitBlitModule</Gerrit-HttpModule>
+    <Gerrit-Module>com.googlesource.gerrit.plugins.gitblit.GitBlitModule</Gerrit-Module>
+    <Gerrit-HttpModule>com.googlesource.gerrit.plugins.gitblit.GitBlitServletModule</Gerrit-HttpModule>
   </properties>
   <dependencies>
     <dependency>
@@ -161,6 +162,7 @@ limitations under the License.
             <transformer
               implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
               <manifestEntries>
+                <Gerrit-Module>${Gerrit-Module}</Gerrit-Module>
                 <Gerrit-HttpModule>${Gerrit-HttpModule}</Gerrit-HttpModule>
                 <Gerrit-InitStep>${Gerrit-InitStep}</Gerrit-InitStep>
                 <Implementation-Vendor>Gerrit Code Review</Implementation-Vendor>
