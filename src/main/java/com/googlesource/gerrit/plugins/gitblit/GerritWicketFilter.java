@@ -15,6 +15,8 @@ package com.googlesource.gerrit.plugins.gitblit;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -30,13 +32,16 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import org.apache.wicket.protocol.http.WicketFilter;
+import org.eclipse.jgit.lib.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitblit.Constants;
 import com.gitblit.GitBlit;
 import com.gitblit.IStoredSettings;
+import com.google.gerrit.common.data.GerritConfig;
 import com.google.gerrit.httpd.WebSession;
+import com.google.gerrit.server.config.GerritServerConfig;
 import com.google.gerrit.server.git.LocalDiskRepositoryManager;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -50,7 +55,6 @@ import com.googlesource.gerrit.plugins.gitblit.auth.GerritToGitBlitUserService;
 @Singleton
 public class GerritWicketFilter extends WicketFilter {
   private static final String GITBLIT_GERRIT_PROPERTIES = "/gitblit.properties";
-
   private static final Logger log = LoggerFactory
       .getLogger(GerritWicketFilter.class);
 
@@ -60,16 +64,19 @@ public class GerritWicketFilter extends WicketFilter {
   // We need Guice to create the GerritGitBlit instance
   private final GerritGitBlit gitBlit;
   private final GerritAuthFilter gerritAuthFilter;
+  private final GitBlitUrlsConfig config;
 
   @Inject
   public GerritWicketFilter(final LocalDiskRepositoryManager repoManager,
       final Provider<WebSession> webSession, final GerritGitBlit gitBlit,
-      final GerritAuthFilter gerritAuthFilter) {
+      final GerritAuthFilter gerritAuthFilter, final @GerritServerConfig Config config,
+      final GerritConfig gerritConfig) {
 
     this.repoManager = repoManager;
     this.webSession = webSession;
     this.gitBlit = gitBlit;
     this.gerritAuthFilter = gerritAuthFilter;
+    this.config = new GitBlitUrlsConfig(config);
   }
 
   @Override
@@ -87,6 +94,8 @@ public class GerritWicketFilter extends WicketFilter {
             .getAbsolutePath());
         properties.put("realm.userService",
             GerritToGitBlitUserService.class.getName());
+        properties.put("web.otherUrls",
+            (config.getGitHttpUrl() + " " + config.getGitSshUrl()).trim());
       } finally {
         resin.close();
       }
