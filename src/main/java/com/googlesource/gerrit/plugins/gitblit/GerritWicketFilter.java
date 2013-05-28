@@ -94,8 +94,14 @@ public class GerritWicketFilter extends WicketFilter {
             .getAbsolutePath());
         properties.put("realm.userService",
             GerritToGitBlitUserService.class.getName());
-        properties.put("web.otherUrls",
-            (config.getGitHttpUrl() + " " + config.getGitSshUrl()).trim());
+        if (properties.get("web.otherUrls") != null) {
+	    properties.put("web.otherUrls",
+                (config.getGitHttpUrl() + " " + config.getGitSshUrl()).trim()
+                + " " + properties.get("web.otherUrls"));
+        } else {
+            properties.put("web.otherUrls",
+                (config.getGitHttpUrl() + " " + config.getGitSshUrl()).trim());
+        }
       } finally {
         resin.close();
       }
