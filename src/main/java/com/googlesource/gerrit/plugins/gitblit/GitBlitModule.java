@@ -43,6 +43,7 @@ public class GitBlitModule extends ServletModule {
 
     serve("/pages/*").with(WrappedPagesServlet.class);
     serve("/feed/*").with(WrappedSyndicationServlet.class);
+    serve("/zip/*").with(WrappedDownloadZipServlet.class);
 
     filter("/*").through(GerritWicketFilter.class);
     filter("/pages/*").through(WrappedPagesFilter.class);
