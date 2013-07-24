@@ -15,8 +15,6 @@ package com.googlesource.gerrit.plugins.gitblit;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
