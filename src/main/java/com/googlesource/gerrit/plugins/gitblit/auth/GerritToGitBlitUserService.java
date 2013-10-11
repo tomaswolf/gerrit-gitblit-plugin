@@ -14,6 +14,7 @@
 package com.googlesource.gerrit.plugins.gitblit.auth;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -185,27 +186,27 @@ public class GerritToGitBlitUserService implements IUserService {
 
   @Override
   public List<String> getAllUsernames() {
-    return null;
+    return Collections.emptyList();
   }
 
   @Override
   public List<UserModel> getAllUsers() {
-    return null;
+    return Collections.emptyList();
   }
 
   @Override
   public List<String> getAllTeamNames() {
-    return null;
+    return Collections.emptyList();
   }
 
   @Override
   public List<TeamModel> getAllTeams() {
-    return null;
+    return Collections.emptyList();
   }
 
   @Override
   public List<String> getTeamnamesForRepositoryRole(String role) {
-    return null;
+    return Collections.emptyList();
   }
 
   @Override
@@ -241,7 +242,7 @@ public class GerritToGitBlitUserService implements IUserService {
 
   @Override
   public List<String> getUsernamesForRepositoryRole(String role) {
-    return null;
+    return Collections.emptyList();
   }
 
   @Override
