@@ -24,7 +24,7 @@ public class GerritToGitBlitWebApp extends GitBlitWebApp {
     protected IRequestCycleProcessor newRequestCycleProcessor() {
         return new WebRequestCycleProcessor() {
             protected IRequestCodingStrategy newRequestCodingStrategy() {
-                return new StaticCodingStrategy();
+                return new StaticCodingStrategy("summary/", "project/");
             }
         };
     }
