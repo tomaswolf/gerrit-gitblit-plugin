@@ -17,8 +17,17 @@ import org.apache.wicket.Request;
 import org.apache.wicket.RequestCycle;
 import org.apache.wicket.protocol.http.request.WebRequestCodingStrategy;
 import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StaticCodingStrategy extends WebRequestCodingStrategy {
+  private static final Logger LOG = LoggerFactory
+      .getLogger(StaticCodingStrategy.class);
+  private String[] ignoreResourceUrlPrefixes;
+
+  public StaticCodingStrategy(String... ignoreResourceUrlPrefixes) {
+    this.ignoreResourceUrlPrefixes = ignoreResourceUrlPrefixes;
+  }
 
   @Override
   public String rewriteStaticRelativeUrl(String url) {
@@ -28,10 +37,23 @@ public class StaticCodingStrategy extends WebRequestCodingStrategy {
       return url;
     }
 
+    if(isMatchingIgnoreUrlPrefixes(url)) {
+      return url;
+    }
+
     int depth =
         ((ServletWebRequest) RequestCycle.get().getRequest())
             .getDepthRelativeToWicketHandler();
     return getRelativeStaticUrl(url, depth);
+  }
+
+  private boolean isMatchingIgnoreUrlPrefixes(String url) {
+    for (String ignoredUrlPrefix : ignoreResourceUrlPrefixes) {
+      if(url.startsWith(ignoredUrlPrefix)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public static String getRelativePrefix(Request request) {
@@ -59,6 +81,8 @@ public class StaticCodingStrategy extends WebRequestCodingStrategy {
                                  // static resources from gitblit plugin jar
                                  // file
     urlBuffer.append(url);
+
+    LOG.debug("Rewriting URL " + url + " to " + urlBuffer);
 
     return urlBuffer.toString();
   }
