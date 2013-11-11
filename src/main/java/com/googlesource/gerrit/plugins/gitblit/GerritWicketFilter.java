@@ -14,11 +14,9 @@
 package com.googlesource.gerrit.plugins.gitblit;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Properties;
 import java.util.Vector;
 
 import javax.servlet.FilterChain;
@@ -30,17 +28,12 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import org.apache.wicket.protocol.http.WicketFilter;
-import org.eclipse.jgit.lib.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitblit.Constants;
 import com.gitblit.GitBlit;
-import com.gitblit.IStoredSettings;
-import com.google.gerrit.common.data.GerritConfig;
 import com.google.gerrit.httpd.WebSession;
-import com.google.gerrit.server.config.GerritServerConfig;
-import com.google.gerrit.server.git.LocalDiskRepositoryManager;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -48,33 +41,27 @@ import com.googlesource.gerrit.plugins.gitblit.app.GerritGitBlit;
 import com.googlesource.gerrit.plugins.gitblit.app.GerritToGitBlitWebApp;
 import com.googlesource.gerrit.plugins.gitblit.app.GitBlitSettings;
 import com.googlesource.gerrit.plugins.gitblit.auth.GerritAuthFilter;
-import com.googlesource.gerrit.plugins.gitblit.auth.GerritToGitBlitUserService;
 
 @Singleton
 public class GerritWicketFilter extends WicketFilter {
-  private static final String GITBLIT_GERRIT_PROPERTIES = "/gitblit.properties";
   private static final Logger log = LoggerFactory
       .getLogger(GerritWicketFilter.class);
 
-  private final LocalDiskRepositoryManager repoManager;
   private final Provider<WebSession> webSession;
   @SuppressWarnings("unused")
   // We need Guice to create the GerritGitBlit instance
   private final GerritGitBlit gitBlit;
   private final GerritAuthFilter gerritAuthFilter;
-  private final GitBlitUrlsConfig config;
+  private final GitBlitSettings settings;
 
   @Inject
-  public GerritWicketFilter(final LocalDiskRepositoryManager repoManager,
+  public GerritWicketFilter(
       final Provider<WebSession> webSession, final GerritGitBlit gitBlit,
-      final GerritAuthFilter gerritAuthFilter, final @GerritServerConfig Config config,
-      final GerritConfig gerritConfig) {
-
-    this.repoManager = repoManager;
+      final GerritAuthFilter gerritAuthFilter, final GitBlitSettings settings) {
     this.webSession = webSession;
     this.gitBlit = gitBlit;
     this.gerritAuthFilter = gerritAuthFilter;
-    this.config = new GitBlitUrlsConfig(config);
+    this.settings = settings;
   }
 
   @Override
@@ -82,29 +69,7 @@ public class GerritWicketFilter extends WicketFilter {
     showGitBlitBanner();
 
     try {
-      InputStream resin =
-          getClass().getResourceAsStream(GITBLIT_GERRIT_PROPERTIES);
-      Properties properties = null;
-      try {
-        properties = new Properties();
-        properties.load(resin);
-        properties.put("git.repositoriesFolder", repoManager.getBasePath()
-            .getAbsolutePath());
-        properties.put("realm.userService",
-            GerritToGitBlitUserService.class.getName());
-        if (properties.get("web.otherUrls") != null) {
-	    properties.put("web.otherUrls",
-                (config.getGitHttpUrl() + " " + config.getGitSshUrl()).trim()
-                + " " + properties.get("web.otherUrls"));
-        } else {
-            properties.put("web.otherUrls",
-                (config.getGitHttpUrl() + " " + config.getGitSshUrl()).trim());
-        }
-      } finally {
-        resin.close();
-      }
-      IStoredSettings settings = new GitBlitSettings(properties);
-      GitBlit.self().configureContext(settings, repoManager.getBasePath(),
+      GitBlit.self().configureContext(settings, settings.getBasePath(),
           false);
       GitBlit.self().contextInitialized(
           new ServletContextEvent(filterConfig.getServletContext()));
