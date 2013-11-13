@@ -156,6 +156,11 @@ limitations under the License.
               <exclude>org.slf4j:*</exclude>
               <exclude>com.google.guava:*</exclude>
               <exclude>org.eclipse.jgit:*</exclude>
+              <exclude>log4j:*</exclude>
+              <exclude>com.google.code.gson:*</exclude>
+              <exclude>com.googlecode.javaewah:*</exclude>
+              <exclude>com.jcraft:*</exclude>
+              <exclude>javax.servlet:*</exclude>
             </excludes>
           </artifactSet>
           <transformers>
