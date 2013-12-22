@@ -54,4 +54,7 @@ public class GitBlitInitStep implements InitStep {
     gitWeb.string("Link name", "linkname", "GitBlit");
   }
 
+  @Override
+  public void postRun() throws Exception {
+  }
 }
