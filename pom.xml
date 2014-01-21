@@ -196,6 +196,10 @@ limitations under the License.
 
   <repositories>
     <repository>
+      <id>gerrit-api-repository</id>
+      <url>https://gerrit-api.commondatastorage.googleapis.com/release</url>
+    </repository>
+    <repository>
       <id>gerritforge-gitblit-repository</id>
       <url>http://gerritforge.com/snapshot/</url>
     </repository>
