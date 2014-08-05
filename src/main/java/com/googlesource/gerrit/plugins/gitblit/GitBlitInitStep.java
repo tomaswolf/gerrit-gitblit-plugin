@@ -51,6 +51,8 @@ public class GitBlitInitStep implements InitStep {
     gitWeb.set("revision", pluginName + "/commit/?r=${project}&h=${commit}");
     gitWeb.set("branch", pluginName + "/log/?r=${project}&h=${branch}");
     gitWeb.set("filehistory", pluginName + "/history/?f=${file}&r=${project}&h=${branch}");
+    gitWeb.set("file", pluginName + "/blob/?r=${project}&h=${commit}&f=${file}");
+    gitWeb.set("roottree", pluginName + "/tree/?r=${project}&h=${commit}");
     gitWeb.string("Link name", "linkname", "GitBlit");
   }
 
