@@ -13,15 +13,15 @@
 // limitations under the License.
 package com.googlesource.gerrit.plugins.gitblit;
 
-import com.gitblit.SyndicationServlet;
+import com.gitblit.servlet.SyndicationServlet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
 @SuppressWarnings("serial")
 public class WrappedSyndicationServlet extends SyndicationServlet {
-  @Inject
-  public WrappedSyndicationServlet() {
-    super();
-  }
+	@Inject
+	public WrappedSyndicationServlet() {
+		super();
+	}
 }

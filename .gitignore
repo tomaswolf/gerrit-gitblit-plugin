@@ -1,3 +1,5 @@
+/.DS_Store
+/.factorypath
 /.classpath
 /.project
 /.settings
@@ -5,3 +7,4 @@
 /.settings/org.maven.ide.eclipse.prefs
 /.idea
 /target
+/dependency-reduced-pom.xml

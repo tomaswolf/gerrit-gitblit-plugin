@@ -21,41 +21,45 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import com.gitblit.PagesFilter;
 import com.gitblit.models.UserModel;
+import com.gitblit.servlet.PagesFilter;
 import com.google.gerrit.httpd.WebSession;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.googlesource.gerrit.plugins.gitblit.auth.GerritAuthFilter;
+import com.googlesource.gerrit.plugins.gitblit.auth.GerritAuthenticationFilter;
 
 @Singleton
 public class WrappedPagesFilter extends PagesFilter {
-  private final GerritAuthFilter gerritAuthFilter;
-  private final Provider<WebSession> webSession;
+	private final GerritAuthenticationFilter gerritAuthFilter;
+	private final Provider<WebSession> webSession;
 
-  @Inject
-  public WrappedPagesFilter(final Provider<WebSession> webSession, final GerritAuthFilter gerritAuthFilter) {
-    super();
+	@Inject
+	public WrappedPagesFilter(final Provider<WebSession> webSession, final GerritAuthenticationFilter gerritAuthFilter) {
+		super();
 
-    this.webSession = webSession;
-    this.gerritAuthFilter = gerritAuthFilter;
-  }
+		this.webSession = webSession;
+		this.gerritAuthFilter = gerritAuthFilter;
+	}
 
-  @Override
-  public void doFilter(ServletRequest request, ServletResponse response,
-      FilterChain chain) throws IOException, ServletException {
-    if (gerritAuthFilter.doFilter(webSession, request, response, chain)) {
-      super.doFilter(request, response, chain);
-    }
-  }
+	@Override
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+		if (gerritAuthFilter.doFilter(webSession, request, response, chain)) {
+			super.doFilter(request, response, chain);
+		}
+	}
 
-  @Override
-  protected UserModel getUser(HttpServletRequest httpRequest) {
-    UserModel userModel = gerritAuthFilter.getUser(httpRequest);
-    if (userModel == null)
-      return super.getUser(httpRequest);
-    else
-      return userModel;
-  }
+	@Override
+	protected UserModel getUser(HttpServletRequest httpRequest) {
+		UserModel userModel = gerritAuthFilter.getUser(httpRequest);
+		if (userModel == null) {
+			return super.getUser(httpRequest);
+		} else {
+			return userModel;
+		}
+	}
+
+	// XXX: Probably needs the same servlet path hack as the syndication and raw filters. But we don't use it, since we don't use
+	// GitBlit/Gerrit with GitHub, so I can't be sure and don't care anyway.
+
 }

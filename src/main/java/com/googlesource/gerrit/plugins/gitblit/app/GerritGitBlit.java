@@ -13,53 +13,28 @@
 // limitations under the License.
 package com.googlesource.gerrit.plugins.gitblit.app;
 
-import java.io.InputStream;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.wicket.util.resource.ResourceStreamNotFoundException;
-
 import com.gitblit.GitBlit;
-import com.gitblit.models.UserModel;
+import com.gitblit.manager.IAuthenticationManager;
+import com.gitblit.manager.IFederationManager;
+import com.gitblit.manager.INotificationManager;
+import com.gitblit.manager.IPluginManager;
+import com.gitblit.manager.IProjectManager;
+import com.gitblit.manager.IRepositoryManager;
+import com.gitblit.manager.IRuntimeManager;
+import com.gitblit.manager.IUserManager;
+import com.gitblit.transport.ssh.IPublicKeyManager;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.googlesource.gerrit.plugins.gitblit.auth.GerritToGitBlitUserModel;
-import com.googlesource.gerrit.plugins.gitblit.auth.GerritToGitBlitUserService;
 
 @Singleton
 public class GerritGitBlit extends GitBlit {
 
-  @Inject
-  public GerritGitBlit(GerritToGitBlitUserService userService) {
-    super(userService);
-  }
+	@Inject
+	public GerritGitBlit(IRuntimeManager runtimeManager, IPluginManager pluginManager, INotificationManager notificationManager,
+			IUserManager userManager, IAuthenticationManager authenticationManager, IPublicKeyManager publicKeyManager,
+			IRepositoryManager repositoryManager, IProjectManager projectManager, IFederationManager federationManager) {
+		super(runtimeManager, pluginManager, notificationManager, userManager, authenticationManager, publicKeyManager, repositoryManager,
+				projectManager, federationManager);
+	}
 
-  public UserModel authenticate(HttpServletRequest request) {
-    String user = (String) request.getAttribute("gerrit-username");
-    String token = (String) request.getAttribute("gerrit-token");
-    String password = (String) request.getAttribute("gerrit-password");
-    if (token != null) {
-      return GitBlit.self().authenticate(user,
-          (GerritToGitBlitUserService.SESSIONAUTH + token).toCharArray());
-    } else if(user != null && password != null){
-      return GitBlit.self().authenticate(user, password.toCharArray());
-    } else {
-      return GitBlit.self().authenticate(
-          GerritToGitBlitUserModel.ANONYMOUS_USER,
-          GerritToGitBlitUserModel.ANONYMOUS_PASSWORD);
-    }
-  }
-
-  @Override
-  public InputStream getResourceAsStream(String file)
-      throws ResourceStreamNotFoundException {
-    String resourceName = "/static/" + file;
-    InputStream is = getClass().getResourceAsStream(resourceName);
-    if (is == null) {
-      throw new ResourceStreamNotFoundException("Cannot access resource "
-          + resourceName + " using class-loader " + getClass().getClassLoader());
-    }
-
-    return is;
-  }
 }

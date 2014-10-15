@@ -13,42 +13,86 @@
 // limitations under the License.
 package com.googlesource.gerrit.plugins.gitblit;
 
-import org.eclipse.jgit.lib.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gitblit.IUserService;
+import com.gitblit.IStoredSettings;
+import com.gitblit.manager.IAuthenticationManager;
+import com.gitblit.manager.IFederationManager;
+import com.gitblit.manager.IGitblit;
+import com.gitblit.manager.INotificationManager;
+import com.gitblit.manager.IPluginManager;
+import com.gitblit.manager.IProjectManager;
+import com.gitblit.manager.IRepositoryManager;
+import com.gitblit.manager.IRuntimeManager;
+import com.gitblit.manager.IUserManager;
+import com.gitblit.servlet.GitblitContext;
+import com.gitblit.transport.ssh.IPublicKeyManager;
+import com.gitblit.wicket.GitBlitWebApp;
 import com.google.gerrit.extensions.annotations.PluginName;
-import com.google.gerrit.server.config.GerritServerConfig;
-import com.google.gerrit.server.config.SitePaths;
 import com.google.inject.Inject;
 import com.google.inject.servlet.ServletModule;
 import com.googlesource.gerrit.plugins.gitblit.app.GerritGitBlit;
-import com.googlesource.gerrit.plugins.gitblit.auth.GerritToGitBlitUserService;
+import com.googlesource.gerrit.plugins.gitblit.app.GerritGitBlitContext;
+import com.googlesource.gerrit.plugins.gitblit.app.GerritGitBlitRuntimeManager;
+import com.googlesource.gerrit.plugins.gitblit.app.GerritGitBlitWebApp;
+import com.googlesource.gerrit.plugins.gitblit.app.GitBlitSettings;
+import com.googlesource.gerrit.plugins.gitblit.auth.GerritGitBlitAuthenticationManager;
+import com.googlesource.gerrit.plugins.gitblit.auth.GerritGitBlitRepositoryManager;
+import com.googlesource.gerrit.plugins.gitblit.auth.GerritGitBlitUserManager;
+import com.googlesource.gerrit.plugins.gitblit.dagger.GerritDaggerModule;
+import com.googlesource.gerrit.plugins.gitblit.dagger.PublicKeyManagerProvider;
+import com.googlesource.gerrit.plugins.gitblit.dagger.WrappedFederationManager;
+import com.googlesource.gerrit.plugins.gitblit.dagger.WrappedNotificationManager;
+import com.googlesource.gerrit.plugins.gitblit.dagger.WrappedPluginManager;
+import com.googlesource.gerrit.plugins.gitblit.dagger.WrappedProjectManager;
 
 public class GitBlitServletModule extends ServletModule {
-  private static final Logger log = LoggerFactory.getLogger(GitBlitServletModule.class);
+	private static final Logger log = LoggerFactory.getLogger(GitBlitServletModule.class);
 
-  @Inject
-  public GitBlitServletModule(@PluginName final String name,
-      @GerritServerConfig final Config gerritConfig, final SitePaths sitePaths) {
-    log.info("Create GitBlitModule with name='" + name);
-  }
+	@Inject
+	public GitBlitServletModule(@PluginName final String name) {
+		log.info("Create GitBlitModule with name '{}'", name);
+	}
 
-  @Override
-  protected void configureServlets() {
-    log.info("Configuring servlet and filters");
-    bind(IUserService.class).to(GerritToGitBlitUserService.class);
-    bind(GerritGitBlit.class);
+	@Override
+	protected void configureServlets() {
+		log.info("Configuring servlet and filters");
+		// Changed things
+		bind(IStoredSettings.class).to(GitBlitSettings.class);
+		bind(IRuntimeManager.class).to(GerritGitBlitRuntimeManager.class);
+		bind(IUserManager.class).to(GerritGitBlitUserManager.class);
+		bind(IAuthenticationManager.class).to(GerritGitBlitAuthenticationManager.class);
+		bind(IRepositoryManager.class).to(GerritGitBlitRepositoryManager.class);
+		bind(GitblitContext.class).to(GerritGitBlitContext.class);
+		bind(IGitblit.class).to(GerritGitBlit.class);
+		bind(GitBlitWebApp.class).to(GerritGitBlitWebApp.class);
+		bind(GerritDaggerModule.class);
 
-    serve("/pages/*").with(WrappedPagesServlet.class);
-    serve("/feed/*").with(WrappedSyndicationServlet.class);
-    serve("/zip/*").with(WrappedDownloadZipServlet.class);
-    serve("/logo.png").with(WrappedLogoServlet.class);
-    serve("/static/logo.png").with(WrappedLogoServlet.class);
+		// Unchanged but wrapped things (dagger-guice bridge)
 
-    filter("/*").through(GerritWicketFilter.class);
-    filter("/pages/*").through(WrappedPagesFilter.class);
-    filter("/feed/*").through(WrappedSyndicationFilter.class);
-  }
+		bind(IPluginManager.class).to(WrappedPluginManager.class);
+		bind(INotificationManager.class).to(WrappedNotificationManager.class);
+		bind(IPublicKeyManager.class).toProvider(PublicKeyManagerProvider.class);
+		bind(IProjectManager.class).to(WrappedProjectManager.class);
+		bind(IFederationManager.class).to(WrappedFederationManager.class);
+
+		// Servlets
+		serve("/pages/*").with(WrappedPagesServlet.class);
+		serve('/' + WrappedRawFilter.SERVLET_RELATIVE_PATH + '*').with(WrappedRawServlet.class);
+		serve('/' + WrappedSyndicationFilter.SERVLET_RELATIVE_PATH + '*').with(WrappedSyndicationServlet.class);
+		serve("/zip/*").with(WrappedDownloadZipServlet.class);
+		serve("/logo.png").with(WrappedLogoServlet.class);
+		serve("/static/logo.png").with(WrappedLogoServlet.class);
+		serve("/graph/*").with(WrappedBranchGraphServlet.class);
+		serve("/static/*").with(StaticResourcesServlet.class);
+		serve("/clippy.swf").with(StaticResourcesServlet.class);
+		serve("/pt").with(WrappedPtServlet.class);
+
+		// Filters
+		filter("/*").through(GerritWicketFilter.class);
+		filter("/pages/*").through(WrappedPagesFilter.class); // Probably needs this path hack, too...
+		filter('/' + WrappedRawFilter.SERVLET_RELATIVE_PATH + '*').through(WrappedRawFilter.class);
+		filter('/' + WrappedSyndicationFilter.SERVLET_RELATIVE_PATH + '*').through(WrappedSyndicationFilter.class);
+	}
 }

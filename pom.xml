@@ -20,16 +20,38 @@ limitations under the License.
   <artifactId>gitblit-plugin</artifactId>
   <description>GitBlit for Gerrit integrated as a plugin</description>
   <name>Gerrit - GitBlit Plugin</name>
-  <version>2.9-SNAPSHOT</version>
+  <version>2.9.1.160.1</version><!-- Gerrit API version followed by collapsed GitBlit version, followed by plugin version -->
+  <licenses>
+    <license>
+      <name>Apache License 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+    </license>
+  </licenses>  
   <properties>
     <Gerrit-ApiType>plugin</Gerrit-ApiType>
-    <Gerrit-ApiVersion>${project.version}</Gerrit-ApiVersion>
+    <Gerrit-ApiVersion>2.9.1</Gerrit-ApiVersion>
     <Gerrit-ReloadMode>restart</Gerrit-ReloadMode>
     <Gerrit-InitStep>com.googlesource.gerrit.plugins.gitblit.GitBlitInitStep</Gerrit-InitStep>
     <Gerrit-Module>com.googlesource.gerrit.plugins.gitblit.GitBlitModule</Gerrit-Module>
     <Gerrit-HttpModule>com.googlesource.gerrit.plugins.gitblit.GitBlitServletModule</Gerrit-HttpModule>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencies>
+    <!--  We need dagger support (and m2e-apt installed and enabled in Eclipse) for our guice bridge. -->
+    <dependency>
+      <groupId>com.squareup.dagger</groupId>
+      <artifactId>dagger</artifactId>
+      <version>1.1.0</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.dagger</groupId>
+      <artifactId>dagger-compiler</artifactId>
+      <version>1.1.0</version>
+      <type>jar</type>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
     <dependency>
       <groupId>com.google.gerrit</groupId>
       <artifactId>gerrit-plugin-api</artifactId>
@@ -38,7 +60,7 @@ limitations under the License.
     <dependency>
       <groupId>com.gitblit</groupId>
       <artifactId>gitblit</artifactId>
-      <version>1.4.0-SNAPSHOT</version>
+      <version>1.6.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.wicket</groupId>
@@ -51,75 +73,9 @@ limitations under the License.
       <version>1.4.21</version>
     </dependency>
     <dependency>
-      <groupId>org.wicketstuff</groupId>
-      <artifactId>googlecharts</artifactId>
-      <version>1.4.21</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpcore</artifactId>
-      <version>4.2.1</version>
-    </dependency>
-    <dependency>
-      <groupId>javax.mail</groupId>
-      <artifactId>mail</artifactId>
-      <version>1.4</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-net</groupId>
-      <artifactId>commons-net</artifactId>
-      <scope>provided</scope>
-      <version>3.1</version>
-    </dependency>
-      <dependency>
-        <groupId>commons-codec</groupId>
-        <artifactId>commons-codec</artifactId>
-        <version>1.6</version>
-      </dependency>
-    <dependency>
-      <groupId>org.codehaus.groovy</groupId>
-      <artifactId>groovy-all</artifactId>
-      <version>1.8.8</version>
-    </dependency>
-    <dependency>
-      <groupId>com.beust</groupId>
-      <artifactId>jcommander</artifactId>
-      <version>1.17</version>
-    </dependency>
-    <dependency>
-      <groupId>jdom</groupId>
-      <artifactId>jdom</artifactId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-core</artifactId>
-      <version>3.6.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-highlighter</artifactId>
-      <version>3.6.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-memory</artifactId>
-      <version>3.6.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.tautua.markdownpapers</groupId>
-      <artifactId>markdownpapers-core</artifactId>
-      <version>1.3.2</version>
-    </dependency>
-    <dependency>
       <groupId>rome</groupId>
       <artifactId>rome</artifactId>
       <version>1.0-selfload</version>
-    </dependency>
-    <dependency>
-      <groupId>com.unboundid</groupId>
-      <artifactId>unboundid-ldapsdk</artifactId>
-      <version>2.3.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.wicket</groupId>
@@ -134,9 +90,18 @@ limitations under the License.
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.5.1</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>1.7</source>
+          <target>1.7</target>
         </configuration>
+        <dependencies>
+		    <dependency>
+		      <groupId>com.squareup.dagger</groupId>
+		      <artifactId>dagger-compiler</artifactId>
+		      <version>1.1.0</version>
+		      <type>jar</type>
+		      <scope>compile</scope>
+		    </dependency>
+	    </dependencies>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -146,13 +111,22 @@ limitations under the License.
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>1.6</version>
+        <version>2.3</version>
         <configuration>
           <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
           <artifactSet>
             <excludes>
               <exclude>com.google.gerrit:*</exclude>
               <exclude>org.bouncycastle:*</exclude>
+              <!--
+              	Exclude the part of parboiled that we have rewritten in our own project!
+              
+             	We do need to include the rest of parboiled, though, because we will
+             	relocate both parboiled and pegdown below to ensure that gitblit uses
+             	the 1.4.2 pegdown version, not the pegdown 1.2.1 bundled with Gerrit.
+             	See below.
+               -->
+              <exclude>org.parboiled:parboiled-java:*</exclude>
               <exclude>org.slf4j:*</exclude>
               <exclude>com.google.guava:*</exclude>
               <exclude>org.eclipse.jgit:*</exclude>
@@ -171,7 +145,7 @@ limitations under the License.
                 <Gerrit-Module>${Gerrit-Module}</Gerrit-Module>
                 <Gerrit-HttpModule>${Gerrit-HttpModule}</Gerrit-HttpModule>
                 <Gerrit-InitStep>${Gerrit-InitStep}</Gerrit-InitStep>
-                <Implementation-Vendor>Gerrit Code Review</Implementation-Vendor>
+                <Implementation-Vendor>tw201207</Implementation-Vendor>
                 <Implementation-URL>http://code.google.com/p/gerrit/</Implementation-URL>
                 <Implementation-Title>Plugin ${project.artifactId}</Implementation-Title>
                 <Implementation-Version>${project.version}</Implementation-Version>
@@ -188,6 +162,46 @@ limitations under the License.
             <goals>
               <goal>shade</goal>
             </goals>
+            <!--
+              Gerrit 2.9.1 includes pegdown 1.2.1, which won't work with GitBlit 1.6.0, but which will
+              always be used at runtime because classloading goes to the parent classloader first.
+              Since I don't know how to install a parent-last classloader and make sure it gets used
+              for all gitblit stuff, nor know whether that be a good idea, we relocate our pegdown 1.4.2.
+              Doing so will rewrite the affected bytecode in this jar to use the relocated versions.
+              
+              However, just relocating pegdown is not good enough. For some reason, this leads at runtime
+              to a java.lang.ClassNotFoundException: shaded.org.pegdown.Parser$SuperNodeCreator from
+              inside parboiled (although that class is there!). No idea why.
+              
+              Also relocating the standard parboiled 1.1.6 doesn't help much. Parboiled uses a hardcoded
+              string referencing a parboiled class in RuleMethodRewriter that the maven shade plugin does
+              not know how to rewrite. So we end up with a
+              java.lang.NoSuchMethodError: shaded.org.parboiled.support.Var.<init>(Lorg/parboiled/common/Factory;)V.
+              
+              Therefore, we exclude the parboiled-java 1.1.6 from shading above and have included the sources
+              directly in the gitblit-plugin. (Also has the advantage that we get rid of warnings about duplicates
+              during shading. Whoever put together that parboiled-jar:1.1.6 in the maven repo included some
+              spurious classes that are already in parboiled-core.)
+              
+              Effectively this substitutes our own version of parboiled-java for the normal parboiled-java:1.1.6.
+              When we then relocate these classes, everything works because we've fixed that hardcoded class name.
+              
+              Also note: relocating pegdown and excluding parboiled altogether (hoping we'd use the one in Gerrit)
+              doesn't work either.
+             -->
+            <configuration>
+              <relocations>
+                <relocation>
+                  <pattern>org.pegdown</pattern>
+                  <shadedPattern>shaded.org.pegdown</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.parboiled</pattern>
+                  <shadedPattern>shaded.org.parboiled</shadedPattern>
+                </relocation>
+              </relocations>
+            </configuration>
+            
           </execution>
         </executions>
       </plugin>
@@ -199,11 +213,26 @@ limitations under the License.
       <id>gerrit-api-repository</id>
       <url>https://gerrit-api.commondatastorage.googleapis.com/release</url>
     </repository>
+	<repository>
+	  <id>com.gitblit</id>
+	  <name>Gitblit</name>
+	  <url>http://gitblit.github.io/gitblit-maven/</url>
+	  <layout>default</layout>
+	</repository>
+	<!-- 
+		Still needed for the wicket-selfload and rome-selfload.
+		
+		See http://www.slideshare.net/lucamilanesio/gitblit-plugin-for-gerrit-code-review.
+		
+		Strange that this would be needed. Is there no other way to ensure that wicket and rome
+		have the current thread's context classloader set to the Guice classloader, i.e., the one
+		set in Gerrit's ServerPlugin?
+	 -->
     <repository>
       <id>gerritforge-gitblit-repository</id>
       <url>http://gerritforge.com/snapshot/</url>
     </repository>
-    <repository>
+	<repository>
       <id>jgit-snapshots</id>
       <url>https://repo.eclipse.org/content/groups/snapshots</url>
     </repository>

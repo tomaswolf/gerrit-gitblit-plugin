@@ -21,42 +21,41 @@ import com.google.gerrit.pgm.util.ConsoleUI;
 import com.google.inject.Inject;
 
 public class GitBlitInitStep implements InitStep {
-  private final ConsoleUI ui;
-  private final String pluginName;
-  private final Factory sections;
+	private final ConsoleUI ui;
+	private final String pluginName;
+	private final Factory sections;
 
-  @Inject
-  public GitBlitInitStep(final ConsoleUI ui, final Section.Factory sections,
-      @PluginName final String pluginName) {
-    this.ui = ui;
-    this.pluginName = pluginName;
-    this.sections = sections;
-  }
+	@Inject
+	public GitBlitInitStep(final ConsoleUI ui, final Section.Factory sections, @PluginName final String pluginName) {
+		this.ui = ui;
+		this.pluginName = pluginName;
+		this.sections = sections;
+	}
 
-  @Override
-  public void run() throws Exception {
-    ui.message("\n");
-    ui.header("GitBlit Integration");
+	@Override
+	public void run() throws Exception {
+		ui.message("\n");
+		ui.header("GitBlit Integration");
 
-    if(ui.yesno(true, "Do you want to use GitBlit as your GitWeb viewer ?")) {
-      configureGitBlit();
-    }
-  }
+		if (ui.yesno(true, "Do you want to use GitBlit as your GitWeb viewer ?")) {
+			configureGitBlit();
+		}
+	}
 
-  private void configureGitBlit() {
-    Section gitWeb = sections.get("gitweb", null);
-    gitWeb.set("type", "custom");
-    gitWeb.set("url", "plugins/");
-    gitWeb.set("project", pluginName + "/summary/?r=${project}");
-    gitWeb.set("revision", pluginName + "/commit/?r=${project}&h=${commit}");
-    gitWeb.set("branch", pluginName + "/log/?r=${project}&h=${branch}");
-    gitWeb.set("filehistory", pluginName + "/history/?f=${file}&r=${project}&h=${branch}");
-    gitWeb.set("file", pluginName + "/blob/?r=${project}&h=${commit}&f=${file}");
-    gitWeb.set("roottree", pluginName + "/tree/?r=${project}&h=${commit}");
-    gitWeb.string("Link name", "linkname", "GitBlit");
-  }
+	private void configureGitBlit() {
+		Section gitWeb = sections.get("gitweb", null);
+		gitWeb.set("type", "custom");
+		gitWeb.set("url", "plugins/");
+		gitWeb.set("project", pluginName + "/summary/?r=${project}");
+		gitWeb.set("revision", pluginName + "/commit/?r=${project}&h=${commit}");
+		gitWeb.set("branch", pluginName + "/log/?r=${project}&h=${branch}");
+		gitWeb.set("filehistory", pluginName + "/history/?f=${file}&r=${project}&h=${branch}");
+		gitWeb.set("file", pluginName + "/blob/?r=${project}&h=${commit}&f=${file}");
+		gitWeb.set("roottree", pluginName + "/tree/?r=${project}&h=${commit}");
+		gitWeb.string("Link name", "linkname", "GitBlit");
+	}
 
-  @Override
-  public void postRun() throws Exception {
-  }
+	@Override
+	public void postRun() throws Exception {
+	}
 }

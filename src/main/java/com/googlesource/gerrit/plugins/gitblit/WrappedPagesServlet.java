@@ -13,15 +13,15 @@
 // limitations under the License.
 package com.googlesource.gerrit.plugins.gitblit;
 
-import com.gitblit.PagesServlet;
+import com.gitblit.servlet.PagesServlet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
 @SuppressWarnings("serial")
 public class WrappedPagesServlet extends PagesServlet {
-  @Inject
-  public WrappedPagesServlet() {
-   super();
-  }
+	@Inject
+	public WrappedPagesServlet() {
+		super();
+	}
 }

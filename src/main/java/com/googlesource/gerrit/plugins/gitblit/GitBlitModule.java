@@ -19,9 +19,9 @@ import com.google.inject.AbstractModule;
 
 public class GitBlitModule extends AbstractModule {
 
-  @Override
-  protected void configure() {
-    DynamicSet.bind(binder(), TopMenu.class).to(GitBlitTopMenu.class);
-  }
+	@Override
+	protected void configure() {
+		DynamicSet.bind(binder(), TopMenu.class).to(GitBlitTopMenu.class);
+	}
 
 }

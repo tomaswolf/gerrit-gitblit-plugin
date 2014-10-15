@@ -1,0 +1,122 @@
+// Copyright (C) 2012 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+package com.googlesource.gerrit.plugins.gitblit.auth;
+
+import java.io.IOException;
+
+import com.gitblit.Constants.AccessPermission;
+import com.gitblit.Constants.AccessRestrictionType;
+import com.gitblit.models.RepositoryModel;
+import com.gitblit.models.UserModel;
+import com.google.common.base.Strings;
+import com.google.gerrit.reviewdb.client.Project.NameKey;
+import com.google.gerrit.server.CurrentUser;
+import com.google.gerrit.server.IdentifiedUser;
+import com.google.gerrit.server.project.NoSuchProjectException;
+import com.google.gerrit.server.project.ProjectControl;
+import com.google.gerrit.server.project.RefControl;
+import com.google.inject.Provider;
+
+/**
+ * A {@link UserModel} that obeys gerrit's access restrictions on repositories and branches.
+ */
+public class GerritGitBlitUserModel extends UserModel {
+	public static final String ANONYMOUS_USER = "$anonymous";
+	public static final char[] ANONYMOUS_PASSWORD = ANONYMOUS_USER.toCharArray();
+
+	private static final long serialVersionUID = 1L;
+
+	private transient final ProjectControl.GenericFactory projectControlFactory;
+	private transient final Provider<? extends CurrentUser> userProvider;
+
+	public GerritGitBlitUserModel(final ProjectControl.GenericFactory projectControlFactory, final Provider<? extends CurrentUser> userProvider) {
+		this(ANONYMOUS_USER, projectControlFactory, userProvider);
+		this.isAuthenticated = false;
+	}
+
+	public GerritGitBlitUserModel(String username, final ProjectControl.GenericFactory projectControlFactory, final Provider<? extends CurrentUser> userProvider) {
+		super(username);
+		this.username = username;
+		this.isAuthenticated = true;
+		this.projectControlFactory = projectControlFactory;
+		this.userProvider = userProvider;
+	}
+
+	@Override
+	protected boolean canAccess(final RepositoryModel repository, final AccessRestrictionType ifRestriction, final AccessPermission requirePermission) {
+		try {
+			ProjectControl control = projectControlFactory.controlFor(new NameKey(getRepositoryName(repository.name)), userProvider.get());
+			if (control == null) {
+				return false;
+			}
+			// This is from the original "official" plugin. But is it correct? Isn't CLONE "receive" pack and PUSH "upload" pack?
+			switch (ifRestriction) {
+			case VIEW:
+				return control.isVisible();
+			case CLONE:
+				return control.canRunUploadPack();
+			case PUSH:
+				return control.canRunReceivePack();
+			default:
+				return true;
+			}
+		} catch (NoSuchProjectException | IOException e) {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean hasRepositoryPermission(String name) {
+		try {
+			ProjectControl control = projectControlFactory.controlFor(new NameKey(getRepositoryName(name)), userProvider.get());
+			return control != null && control.isVisible();
+		} catch (NoSuchProjectException | IOException e) {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean canView(RepositoryModel repository, String ref) {
+		try {
+			ProjectControl control = projectControlFactory.controlFor(new NameKey(getRepositoryName(repository.name)), userProvider.get());
+			if (control != null && control.isVisible()) {
+				RefControl branchCtrl = control.controlForRef(ref);
+				return branchCtrl != null && branchCtrl.isVisible();
+			}
+		} catch (NoSuchProjectException | IOException e) {
+			// Silently ignore and return false below.
+		}
+		return false;
+	}
+
+	@Override
+	public String getDisplayName() {
+		if (!ANONYMOUS_USER.equals(username) && Strings.isNullOrEmpty(displayName)) {
+			CurrentUser user = userProvider.get();
+			if (user != null && user.isIdentifiedUser()) {
+				displayName = ((IdentifiedUser) user).getAccount().getFullName();
+				return displayName;
+			}
+		}
+		return super.getDisplayName();
+	}
+
+	private String getRepositoryName(final String name) {
+		if (name.endsWith(".git")) {
+			return name.substring(0, name.length() - 4);
+		}
+		return name;
+	}
+
+}
