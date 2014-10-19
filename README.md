@@ -186,8 +186,8 @@ If you want to lock the GitBlit plugin to allow only logged-in users to browse, 
 I use Eclipse for development (currently Kepler) with m2e and m2e-apt installed. Make sure m2e-apt is enabled for the project.
 
 To build, run the maven target "package", for instance from the Eclipse IDE right-click the pom.xml file, select "Maven build..." from the
-context menu, enter "package" as target and click "Run". This produces a file "gitblit-plugin-2.9.1.160.jar" in the target directory.
-Install that in Gerrit as `gitblit.jar`. It should end up in `$GERRIT_SITE/plugins/gerrit.jar`.
+context menu, enter "package" as target and click "Run". This produces a file "gitblit-plugin-2.9.1.160.1.jar" in the target directory.
+Install that in Gerrit as `gitblit.jar`. It should end up in `$GERRIT_SITE/plugins/gitblit.jar`.
 
 Since I do not know and do not use [buck](http://facebook.github.io/buck/), I have removed the two `BUCK` files. This is a pure maven project.
 If you need the BUCK files for some reason, [check them out](https://gerrit.googlesource.com/plugins/gitblit/+/1c2f070def1d37b28bde5a8a9eee8e26b9a9560c)
