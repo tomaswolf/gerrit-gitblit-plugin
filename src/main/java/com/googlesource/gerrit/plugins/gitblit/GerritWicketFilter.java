@@ -68,7 +68,7 @@ public class GerritWicketFilter extends WicketFilter {
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 		log.info(Constants.BORDER);
-		log.info("Starting GitBlit" + Constants.getGitBlitVersion());
+		log.info("Starting GitBlit " + Constants.getVersion());
 		log.info(Constants.BORDER);
 		try {
 			applicationContext.contextInitialized(new ServletContextEvent(filterConfig.getServletContext()));

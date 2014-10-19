@@ -57,7 +57,7 @@ some servlets and setting them up through Guice, one has to do quite a bit more 
 * The dependency on the Gerrit API has been changed from 2.9-SNAPSHOT to the official 2.9.1 release.
 * Removed all the transitive dependencies from the `pom.xml`.
 * The whole authentication/user model logic had to be refactored due to GitBlit changes.
-* GitBlit 1.6.0 still uses the [dagger injection framework](http://square.github.io/dagger/} (though it doesn't make much use of it).
+* GitBlit 1.6.0 still uses the [dagger injection framework](http://square.github.io/dagger/) (though it doesn't make much use of it).
   To make that work in GitBlit 1.6.0 with the Guice-configured Gerrit plugin, it was necessary to add a fully-blown bridge
   module to make dagger use the guice injector. (Which also meant I had to install m2e-apt in my Eclipse and enable it, and
   add the dagger dependencies.)
@@ -140,7 +140,7 @@ own file. That is no longer necessary with _this_ plugin.
 
 To see the built-in configuration, access it at _<Your_Gerrit_URL>_/plugins/gitblit/static/gitblit.properties.
 
-By default, the built-in configuration does allow anonymous browsing, sbject to the repository and ref-level vaccess restrictions defined in Gerrit.
+By default, the built-in configuration does allow anonymous browsing, subject to the repository and ref-level vaccess restrictions defined in Gerrit.
 If you want to lock the GitBlit plugin to allow only logged-in users to browse, set in `$GERRIT_SITE/etc/gitblit.properties` the key
 `web.authenticateViewPages = true`. This is the only key of the built-in configuration that you _can_ override. 
 
@@ -178,7 +178,8 @@ If you want to lock the GitBlit plugin to allow only logged-in users to browse, 
   Since it is apparently fixed in GitBlit master, I'll just wait for the next official release than add morework-arounds that I'll just
   have to remove sometime later.
 
-* In any case, see **points 7 and 8 of the `LICENSE`** (no guarantees, no warranty, no liability).
+* In any case, see **points 7 and 8 of the [`LICENSE`](https://github.com/tomaswolf/gerrit-gitblit-plugin/blob/master/LICENSE)** 
+  (no guarantees, no warranty, no liability).
 
 # Building
 
