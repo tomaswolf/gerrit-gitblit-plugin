@@ -5,6 +5,8 @@ forked originally from [master revision 28d2c98](https://gerrit.googlesource.com
 
 It integrates [GitBlit](https://github.com/gitblit/gitblit) as a repository browser into [Gerrit](https://code.google.com/p/gerrit/) as a Gerrit plugin.
 
+Pre-built jars (Java 7) are available as **[releases](https://github.com/tomaswolf/gerrit-gitblit-plugin/releases)**.
+
 ## Motivation
 
 Luca's plugin is a bit dated by now. He described his integration in a [slideshow](http://www.slideshare.net/lucamilanesio/gitblit-plugin-for-gerrit-code-review).
