@@ -149,22 +149,11 @@ If you want to lock the GitBlit plugin to allow only logged-in users to browse, 
 
 # Caveats and To-dos
 
-* This plugin _still_ depends on Luca's hacked [Apache Wicket](https://github.com/lucamilanesio/wicket/commit/4a3f2c1dccf064008f223bb554c90e12c1c3b55d)
-  and [Apache Rome](https://github.com/lucamilanesio/rome/commit/f13a20ae1e1f5df6a5bf4b83e8fb8fae6dda7a13). I'm not too happy about
-  this, but haven't gotten around yet to examine if there might be some better way to do this. Would have to analyze the threading
-  in these two; maybe it's as easy as setting the thread's context class loader at strategic places (and resetting it at other
-  strategic places). But I suspect that might not work reliably.
-  
-  *TODO 1*: I should see if there's any way I could make this work with standard, unmodified Wicket and Rome. One thing that's been mentioned
-  for the original plugin is to put the Wicket and Rome jars into `$GERRIT_SITE/lib`, maybe even extract them automatically from the plugin
-  jar during installation. (Though the latter would make manual installation (copy jar file) impossible.) Would have to check why placing
-  these libraries in `$GERRIT_SITE/lib` should make any difference.
-
 * I have not gotten around to try out Lucene indexing of Gerrit repositories in GitBlit. Since GitBlit and Gerrit use again different
   Lucene versions, I suspect one might run into similar classloading problems as with pegdown. GitBlit 1.6.0 uses Lucene 4.6, while
   Gerrit 2.9.1 uses Lucene 4.8.1. (At least Gerrit uses a newer version, so maybe it might work.)
   
-  *TODO 2*: I should give it a try and see if there any problems, and if so, if they can be worked around relatively easily in a self-contained
+  *TODO 1*: I should give it a try and see if there any problems, and if so, if they can be worked around relatively easily in a self-contained
   way in the plugin itself. Even nicer: could GitBlit be made (easily!) to use Gerrit's Lucene index?
   
 * I run this plugin in a firewalled private network, and it seems to me that the authentication stuff is good enough. I do _not_ know

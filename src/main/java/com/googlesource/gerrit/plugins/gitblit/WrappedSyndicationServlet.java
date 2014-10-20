@@ -13,6 +13,12 @@
 // limitations under the License.
 package com.googlesource.gerrit.plugins.gitblit;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.gitblit.servlet.SyndicationServlet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -20,8 +26,34 @@ import com.google.inject.Singleton;
 @Singleton
 @SuppressWarnings("serial")
 public class WrappedSyndicationServlet extends SyndicationServlet {
+
 	@Inject
 	public WrappedSyndicationServlet() {
 		super();
 	}
+
+	@Override
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+		// Set thread context class loader for Rome, which is used internally
+		ClassLoader original = Thread.currentThread().getContextClassLoader();
+		try {
+			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+			super.doGet(request, response);
+		} finally {
+			Thread.currentThread().setContextClassLoader(original);
+		}
+	}
+
+	@Override
+	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+		// Set thread context class loader for Rome, which is used internally
+		ClassLoader original = Thread.currentThread().getContextClassLoader();
+		try {
+			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+			super.doPost(request, response);
+		} finally {
+			Thread.currentThread().setContextClassLoader(original);
+		}
+	}
+
 }

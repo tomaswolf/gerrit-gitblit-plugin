@@ -20,7 +20,7 @@ limitations under the License.
   <artifactId>gitblit-plugin</artifactId>
   <description>GitBlit for Gerrit integrated as a plugin</description>
   <name>Gerrit - GitBlit Plugin</name>
-  <version>2.9.1.160.1</version><!-- Gerrit API version followed by collapsed GitBlit version, followed by plugin version -->
+  <version>2.9.1.160.1-SNAPSHOT</version><!-- Gerrit API version followed by collapsed GitBlit version, followed by plugin version -->
   <licenses>
     <license>
       <name>Apache License 2.0</name>
@@ -64,6 +64,11 @@ limitations under the License.
     </dependency>
     <dependency>
       <groupId>org.apache.wicket</groupId>
+      <artifactId>wicket</artifactId>
+      <version>1.4.21</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.wicket</groupId>
       <artifactId>wicket-auth-roles</artifactId>
       <version>1.4.21</version>
     </dependency>
@@ -71,16 +76,6 @@ limitations under the License.
       <groupId>org.apache.wicket</groupId>
       <artifactId>wicket-extensions</artifactId>
       <version>1.4.21</version>
-    </dependency>
-    <dependency>
-      <groupId>rome</groupId>
-      <artifactId>rome</artifactId>
-      <version>1.0-selfload</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.wicket</groupId>
-      <artifactId>wicket</artifactId>
-      <version>1.4.21-selfload</version>
     </dependency>
   </dependencies>
   <build>
@@ -190,6 +185,27 @@ limitations under the License.
               doesn't work either.
              -->
             <configuration>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <!--
+                       Do not include wicket.properties. Otherwise, listeners get registered eagerly up front, and
+                       even twice. Looks like a bug in wicket. See org.apache.wicket.Initializer (which is set up in
+                       this file; wicket reads the class name from it and then loads the class in
+                       org.apache.wicket.Application.initializeComponents()). However, the initializer then performs
+                       this no longer needed eager listener interface registration. See
+                       org.apache.wicket.RequestListenerInterface.registerRequestListenerInterface() and the constructor,
+                       which already registers the interface.
+                      -->
+                    <exclude>wicket.properties</exclude>
+                    <!-- No signatures; we'd end up with the wrong ones anyway. -->
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
               <relocations>
                 <relocation>
                   <pattern>org.pegdown</pattern>
@@ -219,19 +235,6 @@ limitations under the License.
 	  <url>http://gitblit.github.io/gitblit-maven/</url>
 	  <layout>default</layout>
 	</repository>
-	<!-- 
-		Still needed for the wicket-selfload and rome-selfload.
-		
-		See http://www.slideshare.net/lucamilanesio/gitblit-plugin-for-gerrit-code-review.
-		
-		Strange that this would be needed. Is there no other way to ensure that wicket and rome
-		have the current thread's context classloader set to the Guice classloader, i.e., the one
-		set in Gerrit's ServerPlugin?
-	 -->
-    <repository>
-      <id>gerritforge-gitblit-repository</id>
-      <url>http://gerritforge.com/snapshot/</url>
-    </repository>
 	<repository>
       <id>jgit-snapshots</id>
       <url>https://repo.eclipse.org/content/groups/snapshots</url>

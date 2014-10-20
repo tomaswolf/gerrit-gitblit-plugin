@@ -89,6 +89,11 @@ public class GerritWicketFilter extends WicketFilter {
 	}
 
 	@Override
+	protected ClassLoader getClassLoader() {
+		return getClass().getClassLoader();
+	}
+
+	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		if (gerritAuthFilter.doFilter(webSession, request, response, chain)) {
 			super.doFilter(request, response, chain);
