@@ -11,7 +11,7 @@ Pre-built jars (Java 7) are available as **[releases](https://github.com/tomaswo
 
 The basic reason for doing this was to adapt the official plugin to work with a modern Gerrit (v2.9.1) and a modern GitBlit (v1.6.0).
 
-The official plugin is a bit dated by now. He described his integration in a [slideshow](http://www.slideshare.net/lucamilanesio/gitblit-plugin-for-gerrit-code-review).
+The official plugin is a bit dated by now. Luca described his integration in a [slideshow](http://www.slideshare.net/lucamilanesio/gitblit-plugin-for-gerrit-code-review).
 Basically, this Gerrit-GitBlit plugin depends on a hacked version of Apache Wicket (classloading in UI), and on a hacked version
 of Apache Rome (classloading in RSS feeder). Additionally, it only works with a specially hacked version of GitBlit 1.4.0. In
 particular, Luca moved all the static resources in GitBlit into a "/static" subdirectory so that they'd be accessible by the
