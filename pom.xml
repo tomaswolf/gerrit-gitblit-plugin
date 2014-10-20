@@ -141,7 +141,7 @@ limitations under the License.
                 <Gerrit-HttpModule>${Gerrit-HttpModule}</Gerrit-HttpModule>
                 <Gerrit-InitStep>${Gerrit-InitStep}</Gerrit-InitStep>
                 <Implementation-Vendor>tw201207</Implementation-Vendor>
-                <Implementation-URL>http://code.google.com/p/gerrit/</Implementation-URL>
+                <Implementation-URL>https://github.com/tomaswolf/gerrit-gitblit-plugin</Implementation-URL>
                 <Implementation-Title>Plugin ${project.artifactId}</Implementation-Title>
                 <Implementation-Version>${project.version}</Implementation-Version>
                 <Gerrit-ApiType>${Gerrit-ApiType}</Gerrit-ApiType>
