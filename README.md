@@ -9,7 +9,9 @@ Pre-built jars (Java 7) are available as **[releases](https://github.com/tomaswo
 
 ## Motivation
 
-Luca's plugin is a bit dated by now. He described his integration in a [slideshow](http://www.slideshare.net/lucamilanesio/gitblit-plugin-for-gerrit-code-review).
+The basic reason for doing this was to adapt the official plugin to work with a modern Gerrit (v2.9.1) and a modern GitBlit (v1.6.0).
+
+The official plugin is a bit dated by now. He described his integration in a [slideshow](http://www.slideshare.net/lucamilanesio/gitblit-plugin-for-gerrit-code-review).
 Basically, this Gerrit-GitBlit plugin depends on a hacked version of Apache Wicket (classloading in UI), and on a hacked version
 of Apache Rome (classloading in RSS feeder). Additionally, it only works with a specially hacked version of GitBlit 1.4.0. In
 particular, Luca moved all the static resources in GitBlit into a "/static" subdirectory so that they'd be accessible by the
@@ -17,11 +19,11 @@ standard Gerrit plugin mechanism, which does handle this directory specially.
 
 This works more or less, but has a number of problems:
 
-* Luca's plugin doesn't produce branch graphs. That's [Gerrit bug 2942](https://code.google.com/p/gerrit/issues/detail?id=2942).
+* The official plugin doesn't produce branch graphs. That's [Gerrit bug 2942](https://code.google.com/p/gerrit/issues/detail?id=2942).
 * It somehow doesn't serve the Flash copy-paste helper.
 * GitBlit 1.4.0 produces diagrams and graphs using the Google charts API, making requests to Google.
 * RSS feeds didn't work for me.
-* Luca's plugin sets the base path for GitBlit to Gerrit's git directory. It should point somewhere else.
+* The official plugin sets the base path for GitBlit to Gerrit's git directory. It should point somewhere else.
 * Using a specially hacked GitBlit jar hosted at an apparently non-browseable Maven repository at GerritForge is a lock-in that
   I wanted to avoid. It means there's no reasonably easy path to get bug fixes in GitBlit since this fork of GitBlit was produced.
   I wanted to have a Gerrit-GitBlit plugin working with the latest standard official release of GitBlit from
@@ -31,9 +33,8 @@ You might [wonder](https://groups.google.com/forum/#!topic/repo-discuss/yi6IG_Xg
 GitBlit as a Gerrit plugin makes sense at all. The basic problem this plugin tries to overcome is the lack of any decent repository
 browser in Gerrit. While you can make it use GitBlit, gitweb, gitiles or any other external browser, I don't readily see how one
 would propagate all the view and action permissions defined in Gerrit to such an external browser, be it GitBlit or something else.
-That would need a fully-blown SSO setup. Luca's integration approach has the benefit that these rights can rather easily be propagated
-to GitBlit, so if a user cannot see or modify a branch or repository in Gerrit, he also won't be able to see it through this GitBlit
-plugin.
+Luca's integration approach has the benefit that these rights can rather easily be propagated to GitBlit, so if a user cannot see
+or modify a branch or repository in Gerrit, he also won't be able to see it through this GitBlit plugin.
 
 Still, Gerrit is a git server, and shoving a fully blown down-configured other git server like GitBlit into Gerrit to get a
 repository browser with a nice UI smells like overkill. I share James Moger's [puzzlement](https://groups.google.com/d/msg/repo-discuss/yi6IG_Xgekc/uzLUoMInGD0J)
