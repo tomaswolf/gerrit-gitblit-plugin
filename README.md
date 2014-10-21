@@ -56,16 +56,17 @@ some servlets and setting them up through Guice, one has to do quite a bit more 
 * I've given GitBlit its own base directory (at Gerrit's `$GERRIT_SITE/etc/gitblit`) to avoid that it creates subdirectories
   in the git repository directory that don't have anything to do with git repositories (specifically, a tickets and a plugins
   directory -- off-topic thought: what happens if you add GitBlit plugins to this Gerrit plugin?).
-* The dependency has been changed from Luca's special GitBlit version to the standard GitBlit 1.6.0 distribution.
+* The dependency on GitBlit has been changed from Luca's special GitBlit version to the standard GitBlit 1.6.0 distribution.
+* The dependencies for Apache Wicket and Apache Rome have been changed to the standard distributions.
 * The dependency on the Gerrit API has been changed from 2.9-SNAPSHOT to the official 2.9.1 release.
 * Removed all the transitive dependencies from the `pom.xml`.
 * The whole authentication/user model logic had to be refactored due to GitBlit changes.
 * GitBlit 1.6.0 still uses the [dagger injection framework](http://square.github.io/dagger/) (though it doesn't make much use of it).
   To make that work in GitBlit 1.6.0 with the Guice-configured Gerrit plugin, it was necessary to add a fully-blown bridge
-  module to make dagger use the guice injector. (Which also meant I had to install m2e-apt in my Eclipse and enable it, and
+  module to make dagger use the Guice injector. (Which also meant I had to install m2e-apt in my Eclipse and enable it, and
   add the dagger dependencies.)
 
-  > Off-topic: I'm not sure if GitBlit wouldn't be much better off using Guice in the first place. Currently, it uses dagger
+  > Off-topic: Maybe GitBlit would be much better off using Guice in the first place. Currently, it uses dagger
   only in a rather restricted way, apparently because dagger's use of the standard `javax.inject` annotations conflicts with
   typical web CDI containers that also use those, pick them up, and then want to do their own injections, which results in an
   unholy mess all over the place. Guice doesn't use the `javax.inject` annotations.
@@ -149,9 +150,7 @@ If you want to lock the GitBlit plugin to allow only logged-in users to browse, 
 
 # Caveats and To-dos
 
-* I have not gotten around to try out Lucene indexing of Gerrit repositories in GitBlit. Since GitBlit and Gerrit use again different
-  Lucene versions, I suspect one might run into similar classloading problems as with pegdown. GitBlit 1.6.0 uses Lucene 4.6, while
-  Gerrit 2.9.1 uses Lucene 4.8.1. (At least Gerrit uses a newer version, so maybe it might work.)
+* I have not gotten around to try out Lucene indexing of Gerrit repositories in GitBlit.
   
   *TODO 1*: I should give it a try and see if there any problems, and if so, if they can be worked around relatively easily in a self-contained
   way in the plugin itself. Even nicer: could GitBlit be made (easily!) to use Gerrit's Lucene index?

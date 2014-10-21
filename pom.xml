@@ -20,7 +20,7 @@ limitations under the License.
   <artifactId>gitblit-plugin</artifactId>
   <description>GitBlit for Gerrit integrated as a plugin</description>
   <name>Gerrit - GitBlit Plugin</name>
-  <version>2.9.1.160.1-SNAPSHOT</version><!-- Gerrit API version followed by collapsed GitBlit version, followed by plugin version -->
+  <version>2.9.1.160.2-SNAPSHOT</version><!-- Gerrit API version followed by collapsed GitBlit version, followed by plugin version -->
   <licenses>
     <license>
       <name>Apache License 2.0</name>
@@ -142,12 +142,9 @@ limitations under the License.
               <exclude>org.apache.lucene:lucene-queryparser</exclude><!-- In Gerrit API. GitBlit 4.6.0, Gerrit 4.6.0 -->             
               <exclude>commons-io:commons-io</exclude><!-- In Gerrit API. GitBlit 2.2, Gerrit 1.4 -->
               <exclude>commons-codec:commons-codec</exclude><!-- In Gerrit API. GitBlit 1.7, Gerrit 1.4 -->
-              <exclude>com.toedter:*</exclude><!-- Used only in GitBlit client, which doesn't run -->
               <exclude>org.tukaani:*</exclude><!-- In Gerrit API. GitBlit 1.0, Gerrit 1.4 -->
-              <!-- 
-                TODO: How to get rid of 6MB of groovy stuff that is only used to run pre- and post-hooks in GitblitReceivePack??
-                This is even more annoying since we don't even run GitReceivePack!
-               -->
+              <exclude>com.toedter:*</exclude><!-- Used only in GitBlit client, which doesn't run -->
+              <exclude>org.codehaus.groovy:groovy-all</exclude><!-- Used only for GitBlit push hooks, which never run in this plugin. 6MB of dead code! -->
             </excludes>
           </artifactSet>
           <transformers>
@@ -204,13 +201,22 @@ limitations under the License.
              -->
             <configuration>
               <filters>
-                <!--
-                   I would have liked to exclude com.gitblit.Launcher.class, com.gitblit.GitBlitServer.class, com/gitblit/authority/**,
-                   and com/gtblit/client/** but keep com/gitblit/client/Translation.class, but apparently filtering all but one is
-                   not possible with these paths except enumerating all the other classes to throw away. (Throwing these away would
-                   have eliminated the GitBlit GO server and the stand-alone GitBlit client, which we both do not need.) A pity that
-                   the GitBlit code uses this Translation class in one other place. Anyway, the size reduction is not much.
-                  -->
+                <filter>
+                  <artifact>com.gitblit:gitblit</artifact>
+                  <excludes>
+                    <!--  Throw away the GitBlit GO server and the GitBlit client. We don't need them. -->
+                    <exclude>com/gitblit/authority/**</exclude>
+                    <exclude>com/gitblit/client/**</exclude>
+                    <exclude>com/gitblit/GitBlitServer.class</exclude>
+                    <exclude>com/gitblit/GitBlitServer$*.class</exclude>
+                    <exclude>com/gitblit/Launcher.class</exclude>
+                    <exclude>com/gitblit/Launcher$*.class</exclude>
+                    <!--
+                      There's one class in there that we need: com/gitblit/Translation.class. We supply that one
+                      in our own Gerrit-GitBlit plugin bundle.
+                      -->
+                  </excludes>
+                </filter>
                 <filter>
                   <artifact>*:*</artifact>
                   <excludes>
