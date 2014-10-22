@@ -56,7 +56,7 @@ some servlets and setting them up through Guice, one has to do quite a bit more 
 * I've given GitBlit its own base directory (at Gerrit's `$GERRIT_SITE/etc/gitblit`) to avoid that it creates subdirectories
   in the git repository directory that don't have anything to do with git repositories (specifically, a tickets and a plugins
   directory -- off-topic thought: what happens if you add GitBlit plugins to this Gerrit plugin?).
-* The dependency on GitBlit has been changed from Luca's special GitBlit version to the standard GitBlit 1.6.0 distribution.
+* The dependency on GitBlit has been changed from Luca's special GitBlit version to the standard GitBlit 1.6.x distribution.
 * The dependencies for Apache Wicket and Apache Rome have been changed to the standard distributions.
 * The dependency on the Gerrit API has been changed from 2.9-SNAPSHOT to the official 2.9.1 release.
 * Removed all the transitive dependencies from the `pom.xml`.
@@ -122,7 +122,7 @@ In Gerrit's `gerrit.config`, define the `[gitweb]` section as follows (assuming 
         roottree = gitblit/tree/?r=${project}&h=${commit}
 ```
 
-This is normally done automatically if you add the pugin and run through `java -jar gerrit.war init -d site_path`, but you can also
+This is normally done automatically if you add the plugin and run through `java -jar gerrit.war init -d site_path`, but you can also
 add this manually to Gerrit's config file. The `linkname` can be adapted to your taste.
 
 ## GitBlit configuration
