@@ -108,7 +108,8 @@ public class GerritWicketFilter extends WicketFilter {
 			HashMap<String, String> props = new HashMap<String, String>();
 			props.put("applicationClassName", GerritGitBlitWebApp.class.getName());
 			props.put("filterMappingUrlPattern", "/*");
-			props.put("ignorePaths", "pages/," + WrappedSyndicationFilter.SERVLET_RELATIVE_PATH + ',' + WrappedRawFilter.SERVLET_RELATIVE_PATH);
+			props.put("ignorePaths", WrappedPagesFilter.SERVLET_RELATIVE_PATH + ',' + WrappedSyndicationFilter.SERVLET_RELATIVE_PATH + ','
+					+ WrappedRawFilter.SERVLET_RELATIVE_PATH);
 			return props;
 		}
 

@@ -59,7 +59,21 @@ public class WrappedPagesFilter extends PagesFilter {
 		}
 	}
 
-	// XXX: Probably needs the same servlet path hack as the syndication and raw filters. But we don't use it, since we don't use
-	// GitBlit/Gerrit with GitHub, so I can't be sure and don't care anyway.
+	/**
+	 * Super class uses httpRequest.getServletPath() in getFullUrl(), but that returns an empty string. Apparently one doesn't have that path yet in a filter?
+	 * Instead of trying to figure out how to determine this path here from the FilterConfig, I've taken the easy route and have hard-coded it.
+	 * <p>
+	 * {@link GitBlitServletModule} uses this constant to define the paths for the filter and the servlet.
+	 * </p>
+	 */
+	public static final String SERVLET_RELATIVE_PATH = "pages/";
+
+	@Override
+	protected String extractRepositoryName(String url) {
+		if (url.startsWith(SERVLET_RELATIVE_PATH)) {
+			return super.extractRepositoryName(url.substring(SERVLET_RELATIVE_PATH.length()));
+		}
+		return super.extractRepositoryName(url);
+	}
 
 }

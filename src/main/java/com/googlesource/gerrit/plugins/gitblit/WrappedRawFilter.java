@@ -21,9 +21,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.gitblit.models.UserModel;
 import com.gitblit.servlet.RawFilter;
 import com.google.gerrit.httpd.WebSession;
@@ -34,7 +31,6 @@ import com.googlesource.gerrit.plugins.gitblit.auth.GerritAuthenticationFilter;
 
 @Singleton
 public class WrappedRawFilter extends RawFilter {
-	private static final Logger log = LoggerFactory.getLogger(WrappedRawFilter.class);
 
 	private final GerritAuthenticationFilter gerritAuthFilter;
 	private final Provider<WebSession> webSession;
@@ -65,9 +61,8 @@ public class WrappedRawFilter extends RawFilter {
 	}
 
 	/**
-	 * Super class uses httpRequest.getServletPath() in getFullUrl(), but that returns an empty string. Apparently one doesn't have that path yet in a
-	 * filter? Instead of trying to figure out how to determine this path here from the FilterConfig, I've taken the easy route and have hard-coded
-	 * it.
+	 * Super class uses httpRequest.getServletPath() in getFullUrl(), but that returns an empty string. Apparently one doesn't have that path yet in a filter?
+	 * Instead of trying to figure out how to determine this path here from the FilterConfig, I've taken the easy route and have hard-coded it.
 	 * <p>
 	 * {@link GitBlitServletModule} uses this constant to define the paths for the filter and the servlet.
 	 * </p>
@@ -76,7 +71,6 @@ public class WrappedRawFilter extends RawFilter {
 
 	@Override
 	protected String extractRepositoryName(String url) {
-		log.info("url = " + url);
 		if (url.startsWith(SERVLET_RELATIVE_PATH)) {
 			return super.extractRepositoryName(url.substring(SERVLET_RELATIVE_PATH.length()));
 		}

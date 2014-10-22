@@ -18,11 +18,13 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitblit.Constants;
+import com.gitblit.Constants.AuthenticationType;
 import com.gitblit.IStoredSettings;
 import com.gitblit.Keys;
 import com.gitblit.manager.IAuthenticationManager;
@@ -30,8 +32,8 @@ import com.gitblit.models.TeamModel;
 import com.gitblit.models.UserModel;
 import com.gitblit.transport.ssh.SshKey;
 import com.gitblit.utils.StringUtils;
-import com.gitblit.wicket.GitBlitWebSession;
 import com.google.common.base.Strings;
+import com.google.gerrit.extensions.annotations.PluginCanonicalWebUrl;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.httpd.WebSession;
 import com.google.gerrit.server.account.AccountException;
@@ -50,16 +52,42 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 	private final GerritGitBlitUserManager userManager;
 	private final IStoredSettings settings;
 
-	private final String pluginName;
+	/**
+	 * Path part of the canonical plugin URL.
+	 */
+	private final String hostRelativePluginPath;
 
 	@Inject
 	public GerritGitBlitAuthenticationManager(final AccountManager gerritAccountManager, final Provider<WebSession> gerritSession,
-			final GerritGitBlitUserManager userManager, final IStoredSettings settings, @PluginName String pluginName) {
+			final GerritGitBlitUserManager userManager, final IStoredSettings settings, @PluginName String pluginName, @PluginCanonicalWebUrl String pluginUrl) {
 		this.gerritAccountManager = gerritAccountManager;
 		this.gerritSession = gerritSession;
 		this.userManager = userManager;
 		this.settings = settings;
-		this.pluginName = pluginName;
+		this.hostRelativePluginPath = extractPluginPath(pluginUrl, pluginName);
+	}
+
+	/**
+	 * Determines the path part of the plugin Url. Should work OK even if Gerrit isn't at the root path, for instance at //somehost:someport/gerrit/.
+	 * 
+	 * @param pluginUrl
+	 *            as determined by Gerrit's plugin infrastructure
+	 * @param pluginName
+	 *            name of this plugin
+	 * @return the absolute path to the plugin on this server.
+	 */
+	private String extractPluginPath(String pluginUrl, String pluginName) {
+		// Let's be defensive
+		int idx = -1;
+		if (pluginUrl != null) {
+			idx = pluginUrl.indexOf("//");
+			idx = pluginUrl.indexOf('/', idx < 0 ? 0 : idx + 2);
+		}
+		if (idx < 0) { // Huh?
+			return "/plugins/" + pluginName; // A reasonable default; works only correctly if Gerrit is on the root path
+		}
+		// We do know that in any case it ends with /plugins/ + pluginName...
+		return pluginUrl.substring(idx);
 	}
 
 	@Override
@@ -73,33 +101,34 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 	}
 
 	@Override
-	public UserModel authenticate(HttpServletRequest httpRequest) {
+	public UserModel authenticate(final HttpServletRequest httpRequest) {
 		// Added by the GerritAuthenticationFilter.
 		String username = (String) httpRequest.getAttribute("gerrit-username");
 		String token = (String) httpRequest.getAttribute("gerrit-token");
 		String password = (String) httpRequest.getAttribute("gerrit-password");
 
 		if (!Strings.isNullOrEmpty(token)) {
-			return authenticateFromSession(username, token);
+			return authenticateFromSession(httpRequest, username, token);
 		} else if (!Strings.isNullOrEmpty(password)) {
-			return authenticateViaGerrit(username, password);
+			return authenticateViaGerrit(httpRequest, username, password);
 		} else if (GerritGitBlitUserModel.ANONYMOUS_USER.equals(username)) {
+			// XXX Do we really still need this branch? We "inherited" that from the old official plugin...
 			return userManager.getUserModel(username);
 		}
 		return null;
 	}
 
 	@Override
-	public UserModel authenticate(String username, SshKey key) {
+	public UserModel authenticate(final String username, final SshKey key) {
 		return null;
 	}
 
 	@Override
-	public UserModel authenticate(HttpServletRequest httpRequest, boolean requiresCertificate) {
+	public UserModel authenticate(final HttpServletRequest httpRequest, final boolean requiresCertificate) {
 		return authenticate(httpRequest);
 	}
 
-	private UserModel authenticateFromSession(String username, String token) {
+	private UserModel authenticateFromSession(final HttpServletRequest httpRequest, String username, String token) {
 		WebSession session = gerritSession.get();
 
 		if (session.getSessionId() == null || !session.getSessionId().equals(token)) {
@@ -116,16 +145,15 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 			log.warn("Gerrit session {} is not assigned to user {}", session.getSessionId(), username);
 			return null;
 		}
-
-		return loggedIn(userManager.getUserModel(username), token, null);
+		return loggedIn(httpRequest, userManager.getUserModel(username), token, null);
 	}
 
 	@Override
 	public UserModel authenticate(String username, char[] password) {
-		return authenticateViaGerrit(username, new String(password));
+		return authenticateViaGerrit(null, username, new String(password));
 	}
 
-	private UserModel authenticateViaGerrit(String username, String password) {
+	private UserModel authenticateViaGerrit(HttpServletRequest httpRequest, String username, String password) {
 		if (Strings.isNullOrEmpty(username)) {
 			log.warn("Authentication failed: no username");
 			return null;
@@ -142,7 +170,7 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 			AuthResult authResp = gerritAccountManager.authenticate(who);
 			gerritSession.get().login(authResp, false);
 			log.info("Logged in {}", username);
-			return loggedIn(userManager.getUserModel(username), password, authResp);
+			return loggedIn(httpRequest, userManager.getUserModel(username), password, authResp);
 		} catch (AccountException e) {
 			log.warn("Authentication failed for user '" + username + '\'', e);
 			return null;
@@ -165,41 +193,57 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 		return null;
 	}
 
-	@Override
-	public void setCookie(HttpServletResponse response, UserModel user) {
-		// XXX next version of GitBlit has a three-param setCookie (also gets the request)
-		if (settings.getBoolean(Keys.web.allowCookieAuthentication, true)) {
-			GitBlitWebSession session = GitBlitWebSession.get();
-			boolean standardLogin = session.authenticationType.isStandard();
+	private boolean isStandardLogin(HttpServletRequest request) {
+		if (request == null) {
+			log.warn("(Internal) Deprecated cookie method called.");
+			return false;
+		}
+		HttpSession session = request.getSession();
+		AuthenticationType authenticationType = (AuthenticationType) session.getAttribute(Constants.AUTHENTICATION_TYPE);
+		return authenticationType != null && authenticationType.isStandard();
+	}
 
-			if (standardLogin) {
-				Cookie userCookie;
-				if (user == null) {
-					// clear cookie for logout
+	@Override
+	@Deprecated
+	public void setCookie(HttpServletResponse response, UserModel user) {
+		setCookie(null, response, user);
+	}
+
+	@Override
+	public void setCookie(HttpServletRequest request, HttpServletResponse response, UserModel user) {
+		if (settings.getBoolean(Keys.web.allowCookieAuthentication, true) && isStandardLogin(request)) {
+			Cookie userCookie;
+			if (user == null) {
+				// clear cookie for logout
+				userCookie = new Cookie(Constants.NAME, "");
+			} else {
+				// set cookie for login
+				String cookie = userManager.getCookie(user);
+				if (Strings.isNullOrEmpty(cookie)) {
+					// create empty cookie
 					userCookie = new Cookie(Constants.NAME, "");
 				} else {
-					// set cookie for login
-					String cookie = userManager.getCookie(user);
-					if (Strings.isNullOrEmpty(cookie)) {
-						// create empty cookie
-						userCookie = new Cookie(Constants.NAME, "");
-					} else {
-						// create real cookie
-						userCookie = new Cookie(Constants.NAME, cookie);
-						// expire the cookie in 7 days
-						userCookie.setMaxAge((int) TimeUnit.DAYS.toSeconds(7));
-					}
+					// create real cookie
+					userCookie = new Cookie(Constants.NAME, cookie);
+					// expire the cookie in 7 days
+					userCookie.setMaxAge((int) TimeUnit.DAYS.toSeconds(7));
 				}
-				userCookie.setPath("/plugins/" + pluginName);
-				response.addCookie(userCookie);
 			}
+			userCookie.setPath(hostRelativePluginPath);
+			response.addCookie(userCookie);
 		}
 	}
 
 	@Override
+	@Deprecated
 	public void logout(HttpServletResponse response, UserModel user) {
+		logout(null, response, user);
+	}
+
+	@Override
+	public void logout(HttpServletRequest request, HttpServletResponse response, UserModel user) {
 		gerritSession.get().logout();
-		setCookie(response, null);
+		setCookie(request, response, null);
 	}
 
 	@Override
@@ -227,7 +271,7 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 		return false;
 	}
 
-	private UserModel loggedIn(UserModel user, String credentials, AuthResult authentication) {
+	private UserModel loggedIn(HttpServletRequest request, UserModel user, String credentials, AuthResult authentication) {
 		if (authentication != null && !gerritSession.get().getCurrentUser().isIdentifiedUser()) {
 			log.warn("Setting account after log-in for " + user.getName());
 			// We just logged in via Gerrit. However, if somehow somewhere some code called getCurrentUser() on that WebSession object before,
@@ -237,6 +281,9 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 			// around this by forcing the account id to the account we just authenticated. In this request, this user won't be able to do
 			// Gerrit administration, but we're inside GitBlit anyway, so there's no need for this anyway.
 			gerritSession.get().setUserAccountId(authentication.getAccountId());
+		}
+		if (request != null) {
+			request.getSession().setAttribute(Constants.AUTHENTICATION_TYPE, AuthenticationType.CREDENTIALS);
 		}
 		user.cookie = StringUtils.getSHA1(user.getName() + credentials); // Code from GitBlit
 		return user;

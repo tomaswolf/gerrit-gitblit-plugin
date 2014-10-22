@@ -24,6 +24,7 @@ import com.gitblit.manager.IRepositoryManager;
 import com.gitblit.manager.IRuntimeManager;
 import com.gitblit.manager.IUserManager;
 import com.gitblit.transport.ssh.IPublicKeyManager;
+import com.gitblit.utils.XssFilter;
 import com.gitblit.wicket.GitBlitWebApp;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -34,13 +35,14 @@ import dagger.Provides;
 /**
  * Dagger-Guice bridge module for all our overridden GitBlit managers.
  * 
- * Needed because GitblitContext uses dagger injections. We provide this module instead of the standard module. Note that this essentially replaces
- * dagger injection by Guice injection.
+ * Needed because GitblitContext uses dagger injections. We provide this module instead of the standard module. Note that this essentially replaces dagger
+ * injection by Guice injection.
  */
 @com.google.inject.Singleton
 @Module(library = true, injects = {
 // @format:off
 	IStoredSettings.class,
+	XssFilter.class,
 	// Overridden core managers
 	IRuntimeManager.class,
 	IUserManager.class,
@@ -71,6 +73,12 @@ public final class GerritDaggerModule {
 	@javax.inject.Singleton
 	IStoredSettings provideSettings() {
 		return injector.getInstance(IStoredSettings.class);
+	}
+
+	@Provides
+	@javax.inject.Singleton
+	XssFilter provideXssFilter() {
+		return injector.getInstance(XssFilter.class);
 	}
 
 	@Provides

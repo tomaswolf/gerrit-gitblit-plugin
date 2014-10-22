@@ -9,7 +9,7 @@ Pre-built jars (Java 7) are available as **[releases](https://github.com/tomaswo
 
 ## Motivation
 
-The basic reason for doing this was to adapt the official plugin to work with a modern Gerrit (v2.9.1) and a modern GitBlit (v1.6.0).
+The basic reason for doing this was to adapt the official plugin to work with a modern Gerrit (v2.9.1) and a modern GitBlit (v1.6.x).
 
 The official plugin is a bit dated by now. Luca described his integration in a [slideshow](http://www.slideshare.net/lucamilanesio/gitblit-plugin-for-gerrit-code-review).
 Basically, this Gerrit-GitBlit plugin depends on a hacked version of Apache Wicket (classloading in UI), and on a hacked version
@@ -49,7 +49,7 @@ A lot.
 
 Well, maybe not that much. But GitBlit has changed quite bit since 1.4.0; it's internal structure is different, and thus the
 Guice injection setup must be much more complete. Whereas the original plugin was able to get this to work mostly with just wrapping
-some servlets and setting them up through Guice, one has to do quite a bit more with GitBlit 1.6.0.
+some servlets and setting them up through Guice, one has to do quite a bit more with GitBlit 1.6.x.
 
 * I've fixed the "missing branch graphs": [Gerrit bug 2942](https://code.google.com/p/gerrit/issues/detail?id=2942)
 * I've made the RSS feed work.
@@ -61,8 +61,8 @@ some servlets and setting them up through Guice, one has to do quite a bit more 
 * The dependency on the Gerrit API has been changed from 2.9-SNAPSHOT to the official 2.9.1 release.
 * Removed all the transitive dependencies from the `pom.xml`.
 * The whole authentication/user model logic had to be refactored due to GitBlit changes.
-* GitBlit 1.6.0 still uses the [dagger injection framework](http://square.github.io/dagger/) (though it doesn't make much use of it).
-  To make that work in GitBlit 1.6.0 with the Guice-configured Gerrit plugin, it was necessary to add a fully-blown bridge
+* GitBlit 1.6.x still uses the [dagger injection framework](http://square.github.io/dagger/) (though it doesn't make much use of it).
+  To make that work in GitBlit 1.6.x with the Guice-configured Gerrit plugin, it was necessary to add a fully-blown bridge
   module to make dagger use the Guice injector. (Which also meant I had to install m2e-apt in my Eclipse and enable it, and
   add the dagger dependencies.)
 
@@ -76,14 +76,10 @@ some servlets and setting them up through Guice, one has to do quite a bit more 
 
 Additional modifications were due to changes in GitBlit:
 
-* GitBlit 1.6.0 uses the [flotr2](https://github.com/HumbleSoftware/Flotr2) library to generate charts and graphs. It doesn't make
+* GitBlit 1.6.x uses the [flotr2](https://github.com/HumbleSoftware/Flotr2) library to generate charts and graphs. It doesn't make
   requests to Google anymore. But to get that to work in the plugin, some more URL rewriting was necessary to make the flotr2 static
   resources be served from within the plugin jar.
-* GitBlit 1.6.0 added "raw" links, but the implementation of the servlet that should serve them is buggy. That needed an extra
-  override to get it to work. (Can be removed if a newer version of GitBlit is relased and used in this plugin. The bug has
-  been [fixed in GitBlit since 1.6.0](https://github.com/gitblit/gitblit/commits/master/src/main/java/com/gitblit/servlet/RawServlet.java),
-  even though I'm not fond of all that hand-crafted URL mangling they do.)
-* GitBlit 1.6.0 switched to the [pegdown](https://github.com/sirthias/pegdown) [markdown](https://en.wikipedia.org/wiki/Markdown)
+* GitBlit 1.6.x switched to the [pegdown](https://github.com/sirthias/pegdown) [markdown](https://en.wikipedia.org/wiki/Markdown)
   parser.
   
 The last point proved to be rather nasty. Gerrit itself uses and includes pegdown and exposes it in the Gerrit API. However,
@@ -142,7 +138,7 @@ Note that the loading order of GitBlit configurations is different from Luca's o
 file _or_ the built-in configuration, which meant if you wanted to customize GitBlit, you had to include the contents of the built-in config in your
 own file. That is no longer necessary with _this_ plugin.
 
-To see the built-in configuration, access it at _<Your_Gerrit_URL>_/plugins/gitblit/static/gitblit.properties.
+To see the built-in configuration, access it at _\<Your_Gerrit_URL>_/plugins/gitblit/static/gitblit.properties.
 
 By default, the built-in configuration does allow anonymous browsing, subject to the repository and ref-level vaccess restrictions defined in Gerrit.
 If you want to lock the GitBlit plugin to allow only logged-in users to browse, set in `$GERRIT_SITE/etc/gitblit.properties` the key
@@ -160,14 +156,8 @@ If you want to lock the GitBlit plugin to allow only logged-in users to browse, 
   expert and cannot make any guarantees. I strongly suspect that the RSS feed does not honour ref-level visibility restrictions; it only
   honours repository-level visibility.
   
-* Since I do not use this in combination with any GitHub repositories, I cannot tell whether the `WrappedPagesFilter` and its servlet
-  would work. I suspect _not;_ see the comment in that file, and in the raw and syndication filter implementations for what might need to
-  be done.
-
 * GitBlit 1.6.0 has a bug that will make the "raw" links fail for repositories in nested directories under `$GERRIT_SITE/git`. It works
-  for repositories located directly in that directory. Fixing this would be simple, but would involve copying more code than I like.
-  Since it is apparently fixed in GitBlit master, I'll just wait for the next official release than add morework-arounds that I'll just
-  have to remove sometime later.
+  for repositories located directly in that directory. This bug has been fixed in GitBlit 1.6.1.
 
 * In any case, see **points 7 and 8 of the [`LICENSE`](https://github.com/tomaswolf/gerrit-gitblit-plugin/blob/master/LICENSE)** 
   (no guarantees, no warranty, no liability).
@@ -177,7 +167,7 @@ If you want to lock the GitBlit plugin to allow only logged-in users to browse, 
 I use Eclipse for development (currently Kepler) with m2e and m2e-apt installed. Make sure m2e-apt is enabled for the project.
 
 To build, run the maven target "package", for instance from the Eclipse IDE right-click the pom.xml file, select "Maven build..." from the
-context menu, enter "package" as target and click "Run". This produces a file "gitblit-plugin-2.9.1.160.1.jar" in the target directory.
+context menu, enter "package" as target and click "Run". This produces a file "gitblit-plugin-_VERSION_.jar" in the target directory.
 Install that in Gerrit as `gitblit.jar`. It should end up in `$GERRIT_SITE/plugins/gitblit.jar`.
 
 Since I do not know and do not use [buck](http://facebook.github.io/buck/), I have removed the two `BUCK` files. This is a pure maven project.

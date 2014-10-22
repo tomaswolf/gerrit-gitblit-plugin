@@ -28,6 +28,8 @@ import com.gitblit.manager.IRuntimeManager;
 import com.gitblit.manager.IUserManager;
 import com.gitblit.servlet.GitblitContext;
 import com.gitblit.transport.ssh.IPublicKeyManager;
+import com.gitblit.utils.JSoupXssFilter;
+import com.gitblit.utils.XssFilter;
 import com.gitblit.wicket.GitBlitWebApp;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.inject.Inject;
@@ -76,9 +78,10 @@ public class GitBlitServletModule extends ServletModule {
 		bind(IPublicKeyManager.class).toProvider(PublicKeyManagerProvider.class);
 		bind(IProjectManager.class).to(WrappedProjectManager.class);
 		bind(IFederationManager.class).to(WrappedFederationManager.class);
+		bind(XssFilter.class).to(JSoupXssFilter.class);
 
 		// Servlets
-		serve("/pages/*").with(WrappedPagesServlet.class);
+		serve('/' + WrappedPagesFilter.SERVLET_RELATIVE_PATH + '*').with(WrappedPagesServlet.class);
 		serve('/' + WrappedRawFilter.SERVLET_RELATIVE_PATH + '*').with(WrappedRawServlet.class);
 		serve('/' + WrappedSyndicationFilter.SERVLET_RELATIVE_PATH + '*').with(WrappedSyndicationServlet.class);
 		serve("/zip/*").with(WrappedDownloadZipServlet.class);
@@ -91,7 +94,7 @@ public class GitBlitServletModule extends ServletModule {
 
 		// Filters
 		filter("/*").through(GerritWicketFilter.class);
-		filter("/pages/*").through(WrappedPagesFilter.class); // Probably needs this path hack, too...
+		filter('/' + WrappedPagesFilter.SERVLET_RELATIVE_PATH + '*').through(WrappedPagesFilter.class);
 		filter('/' + WrappedRawFilter.SERVLET_RELATIVE_PATH + '*').through(WrappedRawFilter.class);
 		filter('/' + WrappedSyndicationFilter.SERVLET_RELATIVE_PATH + '*').through(WrappedSyndicationFilter.class);
 	}

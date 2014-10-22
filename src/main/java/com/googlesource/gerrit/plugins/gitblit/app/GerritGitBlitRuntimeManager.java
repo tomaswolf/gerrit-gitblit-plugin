@@ -14,6 +14,7 @@
 package com.googlesource.gerrit.plugins.gitblit.app;
 
 import com.gitblit.manager.RuntimeManager;
+import com.gitblit.utils.XssFilter;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -21,8 +22,8 @@ import com.google.inject.Singleton;
 public class GerritGitBlitRuntimeManager extends RuntimeManager {
 
 	@Inject
-	public GerritGitBlitRuntimeManager(GitBlitSettings settings) {
-		super(settings, settings.getBasePath());
+	public GerritGitBlitRuntimeManager(GitBlitSettings settings, XssFilter xssFilter) {
+		super(settings, xssFilter, settings.getBasePath());
 	}
 
 }
