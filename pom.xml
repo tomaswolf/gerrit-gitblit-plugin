@@ -238,6 +238,7 @@ limitations under the License.
                     <exclude>META-INF/*.DSA</exclude>
                     <exclude>META-INF/*.RSA</exclude>
                     <exclude>META-INF/maven/</exclude><!--  Don't know why we have that at all in the jar. -->
+                    <exclude>.idea/**</exclude><!--  Ditto. -->
                   </excludes>
                 </filter>
               </filters>
