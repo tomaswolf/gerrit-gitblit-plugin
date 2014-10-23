@@ -10,7 +10,7 @@
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
-// limitations under the License.package com.googlesource.gerrit.plugins.gitblit;
+// limitations under the License.
 package com.googlesource.gerrit.plugins.gitblit.auth;
 
 import com.gitblit.manager.IPluginManager;
@@ -71,4 +71,16 @@ public class GerritGitBlitRepositoryManager extends RepositoryManager {
 	//
 	// As a result, login and logout work as expected, and if GitBlit is configured to allow anonymous viewing, non-logged-in (anonymous) users can
 	// indeed only see what they're supposed to see and have to log-in otherwise.
+
+	@Override
+	public boolean deleteRepository(String repositoryName) {
+		// Just to be sure. Shouldn't be called anyway.
+		return true;
+	}
+
+	@Override
+	public boolean deleteRepositoryModel(RepositoryModel model) {
+		// Just to be sure. Shouldn't be called anyway.
+		return true;
+	}
 }

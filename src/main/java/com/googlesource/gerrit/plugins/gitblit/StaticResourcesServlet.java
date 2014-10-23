@@ -10,7 +10,7 @@
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
-// limitations under the License.package com.googlesource.gerrit.plugins.gitblit;
+// limitations under the License.
 package com.googlesource.gerrit.plugins.gitblit;
 
 import java.io.File;
@@ -44,8 +44,8 @@ public class StaticResourcesServlet extends HttpServlet {
 	private static final long serialVersionUID = 5262736289985705065L;
 
 	/**
-	 * The resource must either be in one of the allowed subdirectories, or must match the filename pattern. If neither is true, we return a 404.
-	 * There's a whole lot of other stuff there that we don't want to expose.
+	 * The resource must either be in one of the allowed subdirectories, or must match the filename pattern. If neither is true, we return a 404. There's a
+	 * whole lot of other stuff there that we don't want to expose.
 	 */
 	private static final Set<String> ALLOWED_SUBDIRECTORIES = ImmutableSet.of("bootstrap", "flotr2", "fontawesome");
 	private static final Pattern ALLOWED_FILE_NAMES = Pattern.compile("^(?:gitblit\\.properties|.*\\.(?:png|css|js|swf))$");

@@ -32,7 +32,9 @@ import com.gitblit.utils.JSoupXssFilter;
 import com.gitblit.utils.XssFilter;
 import com.gitblit.wicket.GitBlitWebApp;
 import com.google.gerrit.extensions.annotations.PluginName;
+import com.google.gerrit.extensions.events.LifecycleListener;
 import com.google.inject.Inject;
+import com.google.inject.internal.UniqueAnnotations;
 import com.google.inject.servlet.ServletModule;
 import com.googlesource.gerrit.plugins.gitblit.app.GerritGitBlit;
 import com.googlesource.gerrit.plugins.gitblit.app.GerritGitBlitContext;
@@ -60,6 +62,10 @@ public class GitBlitServletModule extends ServletModule {
 	@Override
 	protected void configureServlets() {
 		log.info("Configuring servlet and filters");
+		// Plugin life-cycle listener
+		bind(PluginActivator.class);
+		bind(LifecycleListener.class).annotatedWith(UniqueAnnotations.create()).to(PluginActivator.class);
+
 		// Changed things
 		bind(IStoredSettings.class).to(GitBlitSettings.class);
 		bind(IRuntimeManager.class).to(GerritGitBlitRuntimeManager.class);

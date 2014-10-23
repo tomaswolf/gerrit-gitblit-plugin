@@ -55,6 +55,8 @@ public class GerritWicketFilter extends WicketFilter {
 	private final GitblitContext applicationContext;
 	private final GerritGitBlitWebApp webApp;
 
+	private String pluginInstanceKey;
+
 	@Inject
 	public GerritWicketFilter(final Provider<WebSession> webSession, final GerritGitBlit gitBlit, final GitblitContext context,
 			final GerritAuthenticationFilter gerritAuthFilter, final GerritGitBlitWebApp webApp) {
@@ -63,6 +65,20 @@ public class GerritWicketFilter extends WicketFilter {
 		this.gerritAuthFilter = gerritAuthFilter;
 		this.applicationContext = context;
 		this.webApp = webApp;
+	}
+
+	/**
+	 * Sets a unique key that is different for each plugin instance (i.e., different for each load of the plugin.)
+	 * 
+	 * @param key
+	 *            for this plugin instance.
+	 */
+	public void setPluginInstanceKey(String key) {
+		this.pluginInstanceKey = key;
+	}
+
+	public String getPluginInstanceKey() {
+		return pluginInstanceKey;
 	}
 
 	@Override
@@ -83,6 +99,7 @@ public class GerritWicketFilter extends WicketFilter {
 		return new IWebApplicationFactory() {
 			@Override
 			public WebApplication createApplication(WicketFilter filter) {
+				webApp.setPluginInstanceKey(getPluginInstanceKey());
 				return webApp;
 			}
 		};
