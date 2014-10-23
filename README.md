@@ -100,6 +100,24 @@ To work around that, I had to include the sources of [parboiled-java](https://gi
 and [fix that bug](https://github.com/sirthias/parboiled/pull/82/files) myself. If and when Gerrit ever upgrades to
 pegdown 1.4.2, it should be possible to remove this work-around (and the parboiled-java sources from this project).
 
+# Installation
+
+Download the [latest release](https://github.com/tomaswolf/gerrit-gitblit-plugin/releases) for your Gerrit version and install
+the downloaded jar file as `gitblit.jar` in Gerrit.
+
+If [remote plugin administration](https://gerrit-documentation.storage.googleapis.com/Documentation/2.9.1/config-gerrit.html#plugins)
+is enabled in Gerrit, this can be done for instance by doing (assuming you downloaded `gitblit-plugin.VERSION.jar`)
+```
+ssh YOUR_GERRIT_URL gerrit plugin install - -n gitblit < gitblit-plugin.VERSION.jar
+ssh YOUR_GERRIT_URL gerrit plugin reload gitblit
+``` 
+
+Note: this is a fairly large plugin, adding many classes to the JVM Gerrit runs in. Depending on what kind of JVM you're using, I
+cannot exclude the possibility that adding GitBlit to Gerrit might lead to "java.lang.OutOfMemoryError: PermGen space". If you
+ever observe this, increase the "PermGen" memory for Gerrit. For the HotSpot JVM, you'd do that by adding the option 
+`container.javaOptions = -XX:MaxPermSize=320m` to `gerrit.config`. Possibly you then also might want to increase Gerrit's maximum
+heap size a bit (that's `container.heapLimit`). See the [Gerrit documentation](https://gerrit-documentation.storage.googleapis.com/Documentation/2.9.1/config-gerrit.html#container).
+
 # Configuration
 
 There's two different configurations: one for Gerrit so it knows how to generate links that will be processed by the plugin, and
