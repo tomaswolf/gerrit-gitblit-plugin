@@ -174,7 +174,14 @@ If you want to lock the GitBlit plugin to allow only logged-in users to browse, 
   whether it would be good enough for running this on a public network, or whether I goofed somewhere big time. I'm no web security
   expert and cannot make any guarantees. I strongly suspect that the RSS feed does not honour ref-level visibility restrictions; it only
   honours repository-level visibility.
-  
+
+* I do _not_ know how well GitBlit scales. It does not seem to be clusterable: according to its author, James Moger,
+  "[Gitblit is heavily filesystem based and does not support clustering.](https://groups.google.com/forum/#!topic/gitblit/Puc_3o-zTd0)"
+  Additionally, he gives "[Small workgroups that require centralized repositories.](http://gitblit.com/faq.html#H15)" as the target
+  audience. I run this plugin for such a group, and it appears to work mostly fine. Only the "commidiff" links on even moderately sized
+  commits are bothersome: although patches are generates very quickly, the "commitdiff", which is basically just a nicely laid out patch
+  display in the UI, takes ages and is taxing on the client browser.
+
 * GitBlit 1.6.0 has a bug that will make the "raw" links fail for repositories in nested directories under `$GERRIT_SITE/git`. It works
   for repositories located directly in that directory. This bug has been fixed in GitBlit 1.6.1.
 
