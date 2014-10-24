@@ -179,7 +179,7 @@ If you want to lock the GitBlit plugin to allow only logged-in users to browse, 
   "[Gitblit is heavily filesystem based and does not support clustering.](https://groups.google.com/forum/#!topic/gitblit/Puc_3o-zTd0)"
   Additionally, he gives "[Small workgroups that require centralized repositories.](http://gitblit.com/faq.html#H15)" as the target
   audience. I run this plugin for such a group, and it appears to work mostly fine. Only the "commidiff" links on even moderately sized
-  commits are bothersome: although patches are generates very quickly, the "commitdiff", which is basically just a nicely laid out patch
+  commits are bothersome: although patches are generated very quickly, the "commitdiff", which is basically just a nicely laid out patch
   display in the UI, takes ages and is taxing on the client browser.
 
 * GitBlit 1.6.0 has a bug that will make the "raw" links fail for repositories in nested directories under `$GERRIT_SITE/git`. It works
