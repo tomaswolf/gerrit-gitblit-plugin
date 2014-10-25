@@ -16,7 +16,7 @@ public class GerritGitBlitAuthenticatedRequest extends AuthenticatedRequest {
 
 	@Override
 	public void setUser(UserModel user) {
-		// Make this operation accessible publicly,in particular to the WrappedSyndicationFilter
+		// Make this operation accessible publicly, in particular to the WrappedSyndicationFilter
 		super.setUser(user);
 	}
 

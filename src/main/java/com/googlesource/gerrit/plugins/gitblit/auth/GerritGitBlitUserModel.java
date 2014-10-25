@@ -19,6 +19,7 @@ import com.gitblit.Constants.AccessPermission;
 import com.gitblit.Constants.AccessRestrictionType;
 import com.gitblit.models.RepositoryModel;
 import com.gitblit.models.UserModel;
+import com.gitblit.utils.StringUtils;
 import com.google.common.base.Strings;
 import com.google.gerrit.reviewdb.client.Project.NameKey;
 import com.google.gerrit.server.CurrentUser;
@@ -56,7 +57,7 @@ public class GerritGitBlitUserModel extends UserModel {
 	@Override
 	protected boolean canAccess(final RepositoryModel repository, final AccessRestrictionType ifRestriction, final AccessPermission requirePermission) {
 		try {
-			ProjectControl control = projectControlFactory.controlFor(new NameKey(getRepositoryName(repository.name)), userProvider.get());
+			ProjectControl control = projectControlFactory.controlFor(new NameKey(StringUtils.stripDotGit(repository.name)), userProvider.get());
 			if (control == null) {
 				return false;
 			}
@@ -79,7 +80,7 @@ public class GerritGitBlitUserModel extends UserModel {
 	@Override
 	public boolean hasRepositoryPermission(String name) {
 		try {
-			ProjectControl control = projectControlFactory.controlFor(new NameKey(getRepositoryName(name)), userProvider.get());
+			ProjectControl control = projectControlFactory.controlFor(new NameKey(StringUtils.stripDotGit(name)), userProvider.get());
 			return control != null && control.isVisible();
 		} catch (NoSuchProjectException | IOException e) {
 			return false;
@@ -89,7 +90,7 @@ public class GerritGitBlitUserModel extends UserModel {
 	@Override
 	public boolean canView(RepositoryModel repository, String ref) {
 		try {
-			ProjectControl control = projectControlFactory.controlFor(new NameKey(getRepositoryName(repository.name)), userProvider.get());
+			ProjectControl control = projectControlFactory.controlFor(new NameKey(StringUtils.stripDotGit(repository.name)), userProvider.get());
 			if (control != null && control.isVisible()) {
 				RefControl branchCtrl = control.controlForRef(ref);
 				return branchCtrl != null && branchCtrl.isVisible();
@@ -110,13 +111,6 @@ public class GerritGitBlitUserModel extends UserModel {
 			}
 		}
 		return super.getDisplayName();
-	}
-
-	private String getRepositoryName(final String name) {
-		if (name.endsWith(".git")) {
-			return name.substring(0, name.length() - 4);
-		}
-		return name;
 	}
 
 }

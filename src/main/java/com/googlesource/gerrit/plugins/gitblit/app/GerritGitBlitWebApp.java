@@ -17,6 +17,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.wicket.IRequestTarget;
 import org.apache.wicket.RequestCycle;
+import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.IHeaderResponseDecorator;
 import org.apache.wicket.protocol.http.WebRequest;
@@ -96,7 +97,21 @@ public class GerritGitBlitWebApp extends GitBlitWebApp {
 					resetWicketSessionOnPluginReload((WebRequestCycle) requestCycle);
 				}
 				// If the user logged out in Gerrit, we must tell GitBlit's Wicket session about it.
-				GitBlitWebSession wicketSession = GitBlitWebSession.get();
+				GitBlitWebSession wicketSession;
+				// For some reason that's unclear to me we still sometimes get a ClassCastException here after
+				// a plugin reload. Possibly ThreadLocals also survive plugin reload?
+				try {
+					wicketSession = GitBlitWebSession.get();
+				} catch (ClassCastException ex) {
+					if (requestCycle instanceof WebRequestCycle) {
+						log.info("Force cleanup");
+						forceCleanup((WebRequestCycle) requestCycle);
+					} else {
+						log.warn("Not a web request: {}", requestCycle.getClass().getName());
+						Session.unset(); // reset ThreadLocal
+					}
+					wicketSession = GitBlitWebSession.get();
+				}
 				if (wicketSession.isLoggedIn() && !gerritSesssion.get().isSignedIn()) {
 					wicketSession.replaceSession();
 					wicketSession.setUser(null);
@@ -112,25 +127,46 @@ public class GerritGitBlitWebApp extends GitBlitWebApp {
 					String currentPluginInstanceKey = getPluginInstanceKey();
 					if (sessionPluginInstanceKey instanceof String) {
 						if (!sessionPluginInstanceKey.equals(currentPluginInstanceKey)) {
-							log.info("Clean up after plugin reload");
-							// Plugin was restarted during the session. Wicket has stored unserialized Java objects in this session
-							// object. We must remove them, so that Wicket creates a new Wicket session, otherwise we end up with
-							// ClassCastExceptions further down the line. We mustn't try to get the session and invalidate or replace
-							// it; we must just shoot it dead by removing it from the real HTTP session object.
-							for (String name : getSessionStore().getAttributeNames(request)) {
-								log.info("Removing {}", name);
-								getSessionStore().removeAttribute(request, name);
-							}
-							// Also remove the session unbinding listener. It's already too late to properly do anything with this
-							// orphan object that has a class that nobody knows anymore.
-							realSession.removeAttribute("Wicket:SessionUnbindingListener-" + getApplicationKey());
-							// The above is a bit very hacky. A Wicket Guru might know a cleaner way, but I don't.
-							realSession.setAttribute(INSTANCE_ATTRIBUTE, currentPluginInstanceKey);
+							cleanUp(realSession, request, currentPluginInstanceKey);
 						}
 					} else {
+						Session.unset();
 						realSession.setAttribute(INSTANCE_ATTRIBUTE, currentPluginInstanceKey);
 					}
+				} else {
+					// Should not occur.
+					log.warn("No HTTP session");
+					Session.unset();
 				}
+			}
+
+			private void forceCleanup(WebRequestCycle requestCycle) {
+				WebRequest request = requestCycle.getWebRequest();
+				HttpSession realSession = request.getHttpServletRequest().getSession();
+				if (realSession != null) {
+					cleanUp(realSession, request, getPluginInstanceKey());
+				} else {
+					log.warn("No HTTPSession in force cleanup");
+					Session.unset();
+				}
+			}
+
+			private void cleanUp(HttpSession realSession, WebRequest request, String currentPluginInstanceKey) {
+				log.info("Clean up after plugin reload");
+				// Plugin was restarted during the session. Wicket has stored unserialized Java objects in this session
+				// object. We must remove them, so that Wicket creates a new Wicket session, otherwise we end up with
+				// ClassCastExceptions further down the line. We mustn't try to get the session and invalidate or replace
+				// it; we must just shoot it dead by removing it from the real HTTP session object.
+				for (String name : getSessionStore().getAttributeNames(request)) {
+					log.info("Removing {}", name);
+					getSessionStore().removeAttribute(request, name);
+				}
+				// Also remove the session unbinding listener. It's already too late to properly do anything with this
+				// orphan object that has a class that nobody knows anymore.
+				realSession.removeAttribute("Wicket:SessionUnbindingListener-" + getApplicationKey());
+				Session.unset();
+				// The above is a bit very hacky. A Wicket Guru might know a cleaner way, but I don't.
+				realSession.setAttribute(INSTANCE_ATTRIBUTE, currentPluginInstanceKey);
 			}
 
 			@Override

@@ -36,4 +36,7 @@ public class GerritGitBlitContext extends GitblitContext {
 		return new Object[] { guiceBridge };
 	}
 
+	public void destroy() {
+		super.destroyContext(null);
+	}
 }

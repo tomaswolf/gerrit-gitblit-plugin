@@ -20,14 +20,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.eclipse.jgit.lib.Config;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gitblit.IStoredSettings;
 import com.gitblit.Keys;
+import com.gitblit.utils.StringUtils;
 import com.google.common.base.Charsets;
+import com.google.common.collect.Sets;
 import com.google.gerrit.server.config.GerritServerConfig;
 import com.google.gerrit.server.config.SitePaths;
 import com.google.gerrit.server.git.LocalDiskRepositoryManager;
@@ -38,9 +44,13 @@ import com.googlesource.gerrit.plugins.gitblit.auth.GerritGitBlitUserManager;
 
 @Singleton
 public class GitBlitSettings extends IStoredSettings {
+	private static final Logger log = LoggerFactory.getLogger(GitBlitSettings.class);
+
 	private static final String GERRIT_GITBLIT_PROPERTIES = "/gitblit.properties";
 	private static final String GERRIT_GITBLIT_PROPERTY_SOURCE_KEY = "gerrit_gitblit.property_source";
 	private static final String GITBLIT_DIR = "gitblit";
+
+	private static final String INCLUDE_KEY = "include"; // Keys.include doesn't exist for GitBlit < 1.7.0
 
 	private final File homeDir;
 
@@ -105,6 +115,79 @@ public class GitBlitSettings extends IStoredSettings {
 	}
 
 	/**
+	 * Tests whether the {@code candidate} {@link File} is in the set {@code alreadySeen} and logs a warning if so.
+	 * 
+	 * @param candidate
+	 *            File to test
+	 * @param alreadySeen
+	 *            set of files to tests against
+	 * @return {@code true} if the file is in the set, {@code false} if not.
+	 */
+	private boolean alreadyVisited(File candidate, Set<File> alreadySeen) {
+		if (alreadySeen.contains(candidate)) {
+			log.warn("Cyclic include of settings file {}: {}", candidate.getPath(), alreadySeen.toString());
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * GitBlit 1.7.0 has introduced the notion of including properties files. We have to re-build this functionality here.
+	 * 
+	 * @param properties
+	 *            to merge the included properties into
+	 * @param parent
+	 *            parent file the properties were loaded from
+	 * @param alreadySeen
+	 *            set of files already visited in the current include chain; used to detect cycles and avoid endless recursion and stack overflow. Must contain
+	 *            {@code parent}.
+	 */
+	protected void loadIncludedSettings(final Properties properties, final File parent, final Set<File> alreadySeen) {
+		Object includes = properties.remove(INCLUDE_KEY);
+		if (!(includes instanceof String)) {
+			return;
+		}
+		// It's a comma-separated list of possibly double-quoted strings
+		for (String f : StringUtils.getStringsFromValue((String) includes, ",")) {
+			String fileName = f.trim();
+			if (fileName.isEmpty()) {
+				continue;
+			}
+			try {
+				File file = new File(fileName);
+				if (file.isAbsolute()) {
+					file = file.getCanonicalFile();
+				} else {
+					// Try different possibilities: relative to parent, if not there, try relative to base dir.
+					file = new File(parent.getParentFile(), fileName).getCanonicalFile();
+					if (!file.exists()) {
+						file = new File(getBasePath(), fileName).getCanonicalFile();
+					}
+				}
+				if (alreadyVisited(file, alreadySeen)) {
+					continue;
+				}
+				alreadySeen.add(file);
+				try (InputStream stream = new FileInputStream(file)) {
+					Properties nested = new Properties();
+					loadFromStream(nested, stream);
+					loadIncludedSettings(nested, file, alreadySeen);
+					// Now merge them. Don't overwrite, since we load in inverse order.
+					for (Map.Entry<Object, Object> entry : nested.entrySet()) {
+						if (!properties.containsKey(entry.getKey())) {
+							properties.put(entry.getKey(), entry.getValue());
+						}
+					}
+				} finally {
+					alreadySeen.remove(file);
+				}
+			} catch (IOException ex) {
+				log.warn("Cannot load included settings '{}' from {}: {}", new Object[] { fileName, alreadySeen.toString(), ex.getLocalizedMessage() });
+			}
+		}
+	}
+
+	/**
 	 * Loads the properties from the user-supplied gitblit.properties in $GERRIT_SITE/etc, if it exists, and then overwrites with the built-in properties to
 	 * ensure that GitBlit is set up as a viewer only and uses Gerrit's git repositories.
 	 * 
@@ -121,13 +204,18 @@ public class GitBlitSettings extends IStoredSettings {
 	 */
 	protected void load(final Properties properties, final File directory, GitBlitUrlsConfig config, File gerritGitDirectory) throws IOException {
 		// First, try to load from the user-supplied file, if any.
-		File userProperties = new File(directory, GERRIT_GITBLIT_PROPERTIES);
-		try {
-			loadFromStream(properties, new FileInputStream(userProperties));
+		File userFile = new File(directory, GERRIT_GITBLIT_PROPERTIES);
+		try (InputStream stream = new FileInputStream(userFile)) {
+			loadFromStream(properties, stream);
+			loadIncludedSettings(properties, userFile, Sets.newLinkedHashSet(Collections.singleton(userFile)));
 			// Record the fact that we loaded the user settings in the properties themselves so that toString() can show it. Useful for debugging.
-			properties.put(GERRIT_GITBLIT_PROPERTY_SOURCE_KEY, userProperties.getAbsolutePath());
-		} catch (FileNotFoundException ex) {
-			// Silently ignore.
+			properties.put(GERRIT_GITBLIT_PROPERTY_SOURCE_KEY, userFile.getAbsolutePath());
+		} catch (IOException ex) {
+			// Silently ignore if the file doesn't exist
+			if (!(ex instanceof FileNotFoundException)) {
+				// It was something else
+				log.warn("Cannot load settings file {}: {}", userFile.getPath(), ex.getLocalizedMessage());
+			}
 		}
 		// Remember this key, since we allow overriding the built-in configuration for this one.
 		final Object authenticationRequired = properties.get(Keys.web.authenticateViewPages);
