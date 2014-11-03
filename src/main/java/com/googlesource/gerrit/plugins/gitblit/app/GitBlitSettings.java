@@ -46,6 +46,7 @@ import com.googlesource.gerrit.plugins.gitblit.auth.GerritGitBlitUserManager;
 public class GitBlitSettings extends IStoredSettings {
 	private static final Logger log = LoggerFactory.getLogger(GitBlitSettings.class);
 
+	private static final String OVERRIDABLE_DEFAULT_PROPERTIES = "/gitblit-plugin-default.properties";
 	private static final String GERRIT_GITBLIT_PROPERTIES = "/gitblit.properties";
 	private static final String GERRIT_GITBLIT_PROPERTY_SOURCE_KEY = "gerrit_gitblit.property_source";
 	private static final String GITBLIT_DIR = "gitblit";
@@ -132,6 +133,22 @@ public class GitBlitSettings extends IStoredSettings {
 	}
 
 	/**
+	 * Merge the settings from {@code source} into {@code into}, preserving values already present in {@code into}.
+	 * 
+	 * @param source
+	 *            {@link Properties} to read entries to merge from
+	 * @param into
+	 *            {@link Properties} to merge the settings from {@code source} into
+	 */
+	protected void merge(Properties source, Properties into) {
+		for (Map.Entry<Object, Object> entry : source.entrySet()) {
+			if (!into.containsKey(entry.getKey())) {
+				into.put(entry.getKey(), entry.getValue());
+			}
+		}
+	}
+
+	/**
 	 * GitBlit 1.7.0 has introduced the notion of including properties files. We have to re-build this functionality here.
 	 * 
 	 * @param properties
@@ -172,12 +189,7 @@ public class GitBlitSettings extends IStoredSettings {
 					Properties nested = new Properties();
 					loadFromStream(nested, stream);
 					loadIncludedSettings(nested, file, alreadySeen);
-					// Now merge them. Don't overwrite, since we load in inverse order.
-					for (Map.Entry<Object, Object> entry : nested.entrySet()) {
-						if (!properties.containsKey(entry.getKey())) {
-							properties.put(entry.getKey(), entry.getValue());
-						}
-					}
+					merge(nested, properties);
 				} finally {
 					alreadySeen.remove(file);
 				}
@@ -217,7 +229,14 @@ public class GitBlitSettings extends IStoredSettings {
 				log.warn("Cannot load settings file {}: {}", userFile.getPath(), ex.getLocalizedMessage());
 			}
 		}
+		// Read our default properties and merge them in, if they're not set yet. Note: although we
+		// should always find them, we keep mum if we don't.
+		Properties defaults = new Properties();
+		loadFromStream(defaults, getClass().getResourceAsStream(OVERRIDABLE_DEFAULT_PROPERTIES));
+		merge(defaults, properties);
 		// Remember this key, since we allow overriding the built-in configuration for this one.
+		// Left in our otherwise non-overridable properties because I want users who access the
+		// built-in configuration to see this one.
 		final Object authenticationRequired = properties.get(Keys.web.authenticateViewPages);
 		// Override with the built-in viewer-only configuration
 		InputStream stream = getClass().getResourceAsStream(GERRIT_GITBLIT_PROPERTIES);
