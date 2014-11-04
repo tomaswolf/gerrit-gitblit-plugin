@@ -62,7 +62,7 @@ public class WrappedSyndicationFilter extends SyndicationFilter {
 		//
 		// Also omit all the stuff about GitBlit projects. We use GitBlit only as a viewer, and Gerrit has no such concept. A
 		// Gerrit project _is_ a repository.
-		HttpServletRequest httpRequest = (HttpServletRequest) request;
+		HttpServletRequest httpRequest = new FixedGuiceHttpServletRequest((HttpServletRequest) request);
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
 		String fullUrl = getFullUrl(httpRequest);

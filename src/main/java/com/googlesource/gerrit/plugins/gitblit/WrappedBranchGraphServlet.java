@@ -13,6 +13,12 @@
 // limitations under the License.
 package com.googlesource.gerrit.plugins.gitblit;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.gitblit.servlet.BranchGraphServlet;
 import com.google.inject.Singleton;
 
@@ -23,5 +29,10 @@ public class WrappedBranchGraphServlet extends BranchGraphServlet {
 
 	public WrappedBranchGraphServlet() {
 		super();
+	}
+
+	@Override
+	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		super.service(new FixedGuiceHttpServletRequest(request), response);
 	}
 }

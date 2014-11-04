@@ -13,6 +13,12 @@
 // limitations under the License.
 package com.googlesource.gerrit.plugins.gitblit;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.gitblit.servlet.PtServlet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -24,4 +30,10 @@ public class WrappedPtServlet extends PtServlet {
 	public WrappedPtServlet() {
 		super();
 	}
+
+	@Override
+	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		super.service(new FixedGuiceHttpServletRequest(request), response);
+	}
+
 }

@@ -85,6 +85,11 @@ public class StaticResourcesServlet extends HttpServlet {
 	}
 
 	@Override
+	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		super.service(new FixedGuiceHttpServletRequest(request), response);
+	}
+
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// Extract the filename from the request
 		String resourcePath = request.getPathInfo(); // Is already relative to /static!
