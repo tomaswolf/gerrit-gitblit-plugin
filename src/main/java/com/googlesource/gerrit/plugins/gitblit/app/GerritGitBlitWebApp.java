@@ -13,6 +13,9 @@
 // limitations under the License.
 package com.googlesource.gerrit.plugins.gitblit.app;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpSession;
 
 import org.apache.wicket.IRequestTarget;
@@ -20,6 +23,7 @@ import org.apache.wicket.RequestCycle;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.IHeaderResponseDecorator;
+import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.protocol.http.WebRequest;
 import org.apache.wicket.protocol.http.WebRequestCycle;
 import org.apache.wicket.protocol.http.WebRequestCycleProcessor;
@@ -29,6 +33,7 @@ import org.apache.wicket.request.RequestParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gitblit.Keys;
 import com.gitblit.manager.IAuthenticationManager;
 import com.gitblit.manager.IFederationManager;
 import com.gitblit.manager.IGitblit;
@@ -39,8 +44,10 @@ import com.gitblit.manager.IRepositoryManager;
 import com.gitblit.manager.IRuntimeManager;
 import com.gitblit.manager.IUserManager;
 import com.gitblit.transport.ssh.IPublicKeyManager;
+import com.gitblit.wicket.CacheControl;
 import com.gitblit.wicket.GitBlitWebApp;
 import com.gitblit.wicket.GitBlitWebSession;
+import com.gitblit.wicket.GitblitParamUrlCodingStrategy;
 import com.google.gerrit.httpd.WebSession;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -54,6 +61,12 @@ public class GerritGitBlitWebApp extends GitBlitWebApp {
 
 	private final Provider<WebSession> gerritSesssion;
 
+	// We have to re-implement this bit from the super class because we have to override mount below because the XSS filtering in the
+	// GitblitParamUrlCodingStrategy is wrong (it triggers on perfectly harmless UTF-8 characters like à). Luckily this cacheablePages
+	// is not accessed locally in the super class except in two getters, which we also override.
+	private final Map<String, CacheControl> cacheablePages = new HashMap<String, CacheControl>();
+
+	/** A key that is unique for each plugin instance. */
 	private String pluginInstanceKey;
 
 	@Inject
@@ -85,6 +98,30 @@ public class GerritGitBlitWebApp extends GitBlitWebApp {
 
 	public String getPluginInstanceKey() {
 		return pluginInstanceKey;
+	}
+
+	@Override
+	public void mount(String location, Class<? extends WebPage> clazz, String... parameters) {
+		if (parameters == null || !settings().getBoolean(Keys.web.mountParameters, true)) {
+			parameters = new String[0];
+		}
+		mount(new GitblitParamUrlCodingStrategy(settings(), new FixedUrlXSSFilter(), location, clazz, parameters));
+
+		// map the mount point to the cache control definition
+		if (clazz.isAnnotationPresent(CacheControl.class)) {
+			CacheControl cacheControl = clazz.getAnnotation(CacheControl.class);
+			cacheablePages.put(location.substring(1), cacheControl);
+		}
+	}
+
+	@Override
+	public boolean isCacheablePage(String mountPoint) {
+		return cacheablePages.containsKey(mountPoint);
+	}
+
+	@Override
+	public CacheControl getCacheControl(String mountPoint) {
+		return cacheablePages.get(mountPoint);
 	}
 
 	@Override
