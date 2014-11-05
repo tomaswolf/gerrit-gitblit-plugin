@@ -69,7 +69,7 @@ some servlets and setting them up through Guice, one has to do quite a bit more 
   > Off-topic: Maybe GitBlit would be much better off using Guice in the first place. Currently, it uses dagger
   only in a rather restricted way, apparently because dagger's use of the standard `javax.inject` annotations conflicts with
   typical web CDI containers that also use those, pick them up, and then want to do their own injections, which results in an
-  unholy mess all over the place. Guice doesn't use the `javax.inject` annotations.
+  unholy mess all over the place. With Guice one doesn't have to use the JSR-330 annotations.
 
 * I've introduced a new servlet to serve those static resources from wherever they are in the original standard GitBlit jar.
   This also serves clippy.swf correctly now.
@@ -159,7 +159,7 @@ own file. That is no longer necessary with _this_ plugin.
 
 To see the built-in configuration, access it at _\<Your_Gerrit_URL>_/plugins/gitblit/static/gitblit.properties.
 
-By default, the built-in configuration does allow anonymous browsing, subject to the repository and ref-level vaccess restrictions defined in Gerrit.
+By default, the built-in configuration does allow anonymous browsing, subject to the repository and ref-level access restrictions defined in Gerrit.
 If you want to lock the GitBlit plugin to allow only logged-in users to browse, set in `$GERRIT_SITE/etc/gitblit.properties` the key
 `web.authenticateViewPages = true`. This is the only key of the built-in configuration that you _can_ override. 
 
@@ -179,9 +179,6 @@ If you want to lock the GitBlit plugin to allow only logged-in users to browse, 
   "[Gitblit is heavily filesystem based and does not support clustering.](https://groups.google.com/forum/#!topic/gitblit/Puc_3o-zTd0)"
   Additionally, he gives "[Small workgroups that require centralized repositories.](http://gitblit.com/faq.html#H15)" as the target
   audience. I run this plugin for such a group, and it appears to work fine.
-
-* GitBlit 1.6.0 has a bug that will make the "raw" links fail for repositories in nested directories under `$GERRIT_SITE/git`. It works
-  for repositories located directly in that directory. This bug has been fixed in GitBlit 1.6.1.
 
 * In any case, see **points 7 and 8 of the [`LICENSE`](https://github.com/tomaswolf/gerrit-gitblit-plugin/blob/master/LICENSE)** 
   (no guarantees, no warranty, no liability).
