@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 /**
  * See Guice bug #745: https://github.com/google/guice/issues/745
  * 
- * XXX: remove for Gerrit versions using a Guice version > 3.1.9 (that would mean, when we switch to Gerrit 2.10).
+ * XXX: remove for Gerrit versions using a Guice version >= 4.0-beta5 (that would mean, when we switch to Gerrit 2.10).
  */
 public class FixedGuiceHttpServletRequest extends HttpServletRequestWrapper {
 
