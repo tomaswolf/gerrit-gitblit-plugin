@@ -105,7 +105,7 @@ public class GerritGitBlitWebApp extends GitBlitWebApp {
 		if (parameters == null || !settings().getBoolean(Keys.web.mountParameters, true)) {
 			parameters = new String[0];
 		}
-		mount(new GitblitParamUrlCodingStrategy(settings(), new FixedUrlXSSFilter(), location, clazz, parameters));
+		mount(new GitblitParamUrlCodingStrategy(settings(), new NullXssFilter(), location, clazz, parameters));
 
 		// map the mount point to the cache control definition
 		if (clazz.isAnnotationPresent(CacheControl.class)) {
