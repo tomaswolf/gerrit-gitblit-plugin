@@ -31,6 +31,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.gitblit.Constants;
+import com.gitblit.Keys;
 import com.gitblit.models.GitNote;
 import com.gitblit.models.PathModel.PathChangeModel;
 import com.gitblit.models.SubmoduleModel;
@@ -57,11 +58,9 @@ public class CommitDiffPage extends RepositoryPage {
 
 		Repository r = getRepository();
 
-		RevCommit commit = getCommit();
+		final RevCommit commit = getCommit();
 
-		final DiffOutput diff = DiffUtils.getCommitDiff(r, commit, DiffOutputType.HTML);
-
-		List<String> parents = new ArrayList<String>();
+		final List<String> parents = new ArrayList<String>();
 		if (commit.getParentCount() > 0) {
 			for (RevCommit parent : commit.getParents()) {
 				parents.add(parent.name());
@@ -72,15 +71,17 @@ public class CommitDiffPage extends RepositoryPage {
 		if (parents.size() == 0) {
 			add(new Label("parentLink", getString("gb.none")));
 		} else {
-			add(new LinkPanel("parentLink", null, parents.get(0).substring(0, 8),
-					CommitDiffPage.class, newCommitParameter(parents.get(0))));
+			add(new LinkPanel("parentLink", null, parents.get(0).substring(0, 8), CommitDiffPage.class, newCommitParameter(parents.get(0))));
 		}
-		add(new BookmarkablePageLink<Void>("patchLink", PatchPage.class,
-				WicketUtils.newObjectParameter(repositoryName, objectId)));
-		add(new BookmarkablePageLink<Void>("commitLink", CommitPage.class,
-				WicketUtils.newObjectParameter(repositoryName, objectId)));
+		add(new BookmarkablePageLink<Void>("patchLink", PatchPage.class, WicketUtils.newObjectParameter(repositoryName, objectId)));
+		add(new BookmarkablePageLink<Void>("commitLink", CommitPage.class, WicketUtils.newObjectParameter(repositoryName, objectId)));
 
 		add(new CommitHeaderPanel("commitHeader", repositoryName, commit));
+
+		final List<String> imageExtensions = app().settings().getStrings(Keys.web.imageExtensions);
+		final ImageDiffHandler handler = new ImageDiffHandler(getContextUrl(), repositoryName, parents.isEmpty() ? null : parents.get(0), commit.getName(),
+				imageExtensions);
+		final DiffOutput diff = DiffUtils.getCommitDiff(r, commit, DiffOutputType.HTML, handler);
 
 		// add commit diffstat
 		int insertions = 0;
@@ -103,13 +104,11 @@ public class CommitDiffPage extends RepositoryPage {
 			public void populateItem(final Item<GitNote> item) {
 				GitNote entry = item.getModelObject();
 				item.add(new RefsPanel("refName", repositoryName, Arrays.asList(entry.notesRef)));
-				item.add(createPersonPanel("authorName", entry.notesRef.getAuthorIdent(),
-						Constants.SearchType.AUTHOR));
+				item.add(createPersonPanel("authorName", entry.notesRef.getAuthorIdent(), Constants.SearchType.AUTHOR));
 				item.add(new GravatarImage("noteAuthorAvatar", entry.notesRef.getAuthorIdent()));
-				item.add(WicketUtils.createTimestampLabel("authorDate", entry.notesRef
-						.getAuthorIdent().getWhen(), getTimeZone(), getTimeUtils()));
-				item.add(new Label("noteContent", bugtraqProcessor().processPlainCommitMessage(getRepository(), repositoryName,
-						entry.content)).setEscapeModelStrings(false));
+				item.add(WicketUtils.createTimestampLabel("authorDate", entry.notesRef.getAuthorIdent().getWhen(), getTimeZone(), getTimeUtils()));
+				item.add(new Label("noteContent", bugtraqProcessor().processPlainCommitMessage(getRepository(), repositoryName, entry.content))
+						.setEscapeModelStrings(false));
 			}
 		};
 		add(notesView.setVisible(notes.size() > 0));
@@ -134,9 +133,8 @@ public class CommitDiffPage extends RepositoryPage {
 				String submodulePath = null;
 				if (entry.isTree()) {
 					// tree
-					item.add(new LinkPanel("pathName", null, entry.path, TreePage.class,
-							WicketUtils
-									.newPathParameter(repositoryName, entry.commitId, entry.path)));
+					item.add(new LinkPanel("pathName", null, entry.path, TreePage.class, WicketUtils.newPathParameter(repositoryName, entry.commitId,
+							entry.path)));
 				} else if (entry.isSubmodule()) {
 					// submodule
 					String submoduleId = entry.objectId;
@@ -156,31 +154,23 @@ public class CommitDiffPage extends RepositoryPage {
 					item.add(new ExternalLink("raw", "").setEnabled(false));
 					// submodule
 					item.add(new ExternalLink("patch", "").setEnabled(false));
-					item.add(new BookmarkablePageLink<Void>("view", CommitPage.class, WicketUtils
-							.newObjectParameter(submodulePath, entry.objectId)).setEnabled(hasSubmodule));
+					item.add(new BookmarkablePageLink<Void>("view", CommitPage.class, WicketUtils.newObjectParameter(submodulePath, entry.objectId))
+							.setEnabled(hasSubmodule));
 					item.add(new ExternalLink("blame", "").setEnabled(false));
-					item.add(new BookmarkablePageLink<Void>("history", HistoryPage.class, WicketUtils
-							.newPathParameter(repositoryName, entry.commitId, entry.path))
-							.setEnabled(!entry.changeType.equals(ChangeType.ADD)));
+					item.add(new BookmarkablePageLink<Void>("history", HistoryPage.class, WicketUtils.newPathParameter(repositoryName, entry.commitId,
+							entry.path)).setEnabled(!entry.changeType.equals(ChangeType.ADD)));
 				} else {
 					// tree or blob
-					item.add(new BookmarkablePageLink<Void>("patch", PatchPage.class, WicketUtils
-							.newPathParameter(repositoryName, entry.commitId, entry.path))
-							.setEnabled(!entry.changeType.equals(ChangeType.ADD)
-									&& !entry.changeType.equals(ChangeType.DELETE)));
-					item.add(new BookmarkablePageLink<Void>("view", BlobPage.class, WicketUtils
-							.newPathParameter(repositoryName, entry.commitId, entry.path))
+					item.add(new BookmarkablePageLink<Void>("patch", PatchPage.class, WicketUtils.newPathParameter(repositoryName, entry.commitId, entry.path))
+							.setEnabled(!entry.changeType.equals(ChangeType.ADD) && !entry.changeType.equals(ChangeType.DELETE)));
+					item.add(new BookmarkablePageLink<Void>("view", BlobPage.class, WicketUtils.newPathParameter(repositoryName, entry.commitId, entry.path))
 							.setEnabled(!entry.changeType.equals(ChangeType.DELETE)));
 					String rawUrl = RawServlet.asLink(getContextUrl(), repositoryName, entry.commitId, entry.path);
-					item.add(new ExternalLink("raw", rawUrl)
-							.setEnabled(!entry.changeType.equals(ChangeType.DELETE)));
-					item.add(new BookmarkablePageLink<Void>("blame", BlamePage.class, WicketUtils
-							.newPathParameter(repositoryName, entry.commitId, entry.path))
-							.setEnabled(!entry.changeType.equals(ChangeType.ADD)
-									&& !entry.changeType.equals(ChangeType.DELETE)));
-					item.add(new BookmarkablePageLink<Void>("history", HistoryPage.class, WicketUtils
-							.newPathParameter(repositoryName, entry.commitId, entry.path))
-							.setEnabled(!entry.changeType.equals(ChangeType.ADD)));
+					item.add(new ExternalLink("raw", rawUrl).setEnabled(!entry.changeType.equals(ChangeType.DELETE)));
+					item.add(new BookmarkablePageLink<Void>("blame", BlamePage.class, WicketUtils.newPathParameter(repositoryName, entry.commitId, entry.path))
+							.setEnabled(!entry.changeType.equals(ChangeType.ADD) && !entry.changeType.equals(ChangeType.DELETE)));
+					item.add(new BookmarkablePageLink<Void>("history", HistoryPage.class, WicketUtils.newPathParameter(repositoryName, entry.commitId,
+							entry.path)).setEnabled(!entry.changeType.equals(ChangeType.ADD)));
 				}
 
 				WicketUtils.setAlternatingBackground(item, counter);
@@ -205,4 +195,5 @@ public class CommitDiffPage extends RepositoryPage {
 	protected Class<? extends BasePage> getRepoNavPageClass() {
 		return LogPage.class;
 	}
+
 }

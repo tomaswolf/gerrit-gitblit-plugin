@@ -37,6 +37,7 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 
+import com.gitblit.Keys;
 import com.gitblit.models.PathModel.PathChangeModel;
 import com.gitblit.models.RefModel;
 import com.gitblit.models.RepositoryModel;
@@ -56,9 +57,9 @@ import com.gitblit.wicket.panels.LogPanel;
 
 /**
  * The compare page allows you to compare two branches, tags, or hash ids.
- *
+ * 
  * @author James Moger
- *
+ * 
  */
 public class ComparePage extends RepositoryPage {
 
@@ -111,7 +112,10 @@ public class ComparePage extends RepositoryPage {
 			fromCommitId.setObject(startId);
 			toCommitId.setObject(endId);
 
-			final DiffOutput diff = DiffUtils.getDiff(r, fromCommit, toCommit, DiffOutputType.HTML);
+			final List<String> imageExtensions = app().settings().getStrings(Keys.web.imageExtensions);
+			final ImageDiffHandler handler = new ImageDiffHandler(getContextUrl(), repositoryName, fromCommit.getName(), toCommit.getName(), imageExtensions);
+
+			final DiffOutput diff = DiffUtils.getDiff(r, fromCommit, toCommit, DiffOutputType.HTML, handler);
 
 			// add compare diffstat
 			int insertions = 0;
@@ -123,8 +127,8 @@ public class ComparePage extends RepositoryPage {
 			comparison.add(new DiffStatPanel("diffStat", insertions, deletions));
 
 			// compare page links
-//			comparison.add(new BookmarkablePageLink<Void>("patchLink", PatchPage.class,
-//					WicketUtils.newRangeParameter(repositoryName, fromCommitId.toString(), toCommitId.getObject())));
+			//			comparison.add(new BookmarkablePageLink<Void>("patchLink", PatchPage.class,
+			//					WicketUtils.newRangeParameter(repositoryName, fromCommitId.toString(), toCommitId.getObject())));
 
 			// display list of commits
 			comparison.add(new LogPanel("commitList", repositoryName, objectId, r, 0, 0, repository.showRemoteBranches));
@@ -149,9 +153,7 @@ public class ComparePage extends RepositoryPage {
 					String submodulePath = null;
 					if (entry.isTree()) {
 						// tree
-						item.add(new LinkPanel("pathName", null, entry.path, TreePage.class,
-								WicketUtils
-								.newPathParameter(repositoryName, endId, entry.path)));
+						item.add(new LinkPanel("pathName", null, entry.path, TreePage.class, WicketUtils.newPathParameter(repositoryName, endId, entry.path)));
 					} else if (entry.isSubmodule()) {
 						// submodule
 						String submoduleId = entry.objectId;
@@ -170,30 +172,23 @@ public class ComparePage extends RepositoryPage {
 					if (entry.isSubmodule()) {
 						// submodule
 						item.add(new ExternalLink("patch", "").setEnabled(false));
-						item.add(new BookmarkablePageLink<Void>("view", CommitPage.class, WicketUtils
-								.newObjectParameter(submodulePath, entry.objectId)).setEnabled(hasSubmodule));
+						item.add(new BookmarkablePageLink<Void>("view", CommitPage.class, WicketUtils.newObjectParameter(submodulePath, entry.objectId))
+								.setEnabled(hasSubmodule));
 						item.add(new ExternalLink("raw", "").setEnabled(false));
 						item.add(new ExternalLink("blame", "").setEnabled(false));
-						item.add(new BookmarkablePageLink<Void>("history", HistoryPage.class, WicketUtils
-								.newPathParameter(repositoryName, endId, entry.path))
+						item.add(new BookmarkablePageLink<Void>("history", HistoryPage.class, WicketUtils.newPathParameter(repositoryName, endId, entry.path))
 								.setEnabled(!entry.changeType.equals(ChangeType.ADD)));
 					} else {
 						// tree or blob
-						item.add(new BookmarkablePageLink<Void>("patch", PatchPage.class, WicketUtils
-								.newBlobDiffParameter(repositoryName, startId, endId, entry.path))
-								.setEnabled(!entry.changeType.equals(ChangeType.DELETE)));
-						item.add(new BookmarkablePageLink<Void>("view", BlobPage.class, WicketUtils
-								.newPathParameter(repositoryName, endId, entry.path))
+						item.add(new BookmarkablePageLink<Void>("patch", PatchPage.class, WicketUtils.newBlobDiffParameter(repositoryName, startId, endId,
+								entry.path)).setEnabled(!entry.changeType.equals(ChangeType.DELETE)));
+						item.add(new BookmarkablePageLink<Void>("view", BlobPage.class, WicketUtils.newPathParameter(repositoryName, endId, entry.path))
 								.setEnabled(!entry.changeType.equals(ChangeType.DELETE)));
 						String rawUrl = RawServlet.asLink(getContextUrl(), repositoryName, endId, entry.path);
-						item.add(new ExternalLink("raw", rawUrl)
-								.setEnabled(!entry.changeType.equals(ChangeType.DELETE)));
-						item.add(new BookmarkablePageLink<Void>("blame", BlamePage.class, WicketUtils
-								.newPathParameter(repositoryName, endId, entry.path))
-								.setEnabled(!entry.changeType.equals(ChangeType.ADD)
-										&& !entry.changeType.equals(ChangeType.DELETE)));
-						item.add(new BookmarkablePageLink<Void>("history", HistoryPage.class, WicketUtils
-								.newPathParameter(repositoryName, endId, entry.path))
+						item.add(new ExternalLink("raw", rawUrl).setEnabled(!entry.changeType.equals(ChangeType.DELETE)));
+						item.add(new BookmarkablePageLink<Void>("blame", BlamePage.class, WicketUtils.newPathParameter(repositoryName, endId, entry.path))
+								.setEnabled(!entry.changeType.equals(ChangeType.ADD) && !entry.changeType.equals(ChangeType.DELETE)));
+						item.add(new BookmarkablePageLink<Void>("history", HistoryPage.class, WicketUtils.newPathParameter(repositoryName, endId, entry.path))
 								.setEnabled(!entry.changeType.equals(ChangeType.ADD)));
 					}
 					WicketUtils.setAlternatingBackground(item, counter);
@@ -280,8 +275,7 @@ public class ComparePage extends RepositoryPage {
 		return ComparePage.class;
 	}
 
-	private RevCommit getCommit(Repository r, String rev)
-	{
+	private RevCommit getCommit(Repository r, String rev) {
 		RevCommit otherCommit = JGitUtils.getCommit(r, rev);
 		if (otherCommit == null) {
 			error(MessageFormat.format(getString("gb.failedToFindCommit"), rev, repositoryName, getPageName()), true);
