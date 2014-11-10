@@ -207,7 +207,12 @@ limitations under the License.
                 <filter>
                   <artifact>com.gitblit:gitblit</artifact>
                   <excludes>
-                    <!--  Throw away the GitBlit GO server and the GitBlit client. We don't need them. -->
+                    <!--
+                      Throw away the GitBlit GO server and the GitBlit client. We don't need them.
+
+                      There's one class in there that we need: com/gitblit/client/Translation.class. We supply that one
+                      in our own Gerrit-GitBlit plugin bundle.
+                      -->
                     <exclude>com/gitblit/authority/**</exclude>
                     <exclude>com/gitblit/client/**</exclude>
                     <exclude>com/gitblit/GitBlitServer.class</exclude>
@@ -215,9 +220,9 @@ limitations under the License.
                     <exclude>com/gitblit/Launcher.class</exclude>
                     <exclude>com/gitblit/Launcher$*.class</exclude>
                     <!--
-                      There's one class in there that we need: com/gitblit/Translation.class. We supply that one
-                      in our own Gerrit-GitBlit plugin bundle.
-                      -->
+                      We replace some parts of GitBlit related to tits diff display. This fixes GitBlit issue 450,
+                      and also adds improved image diff capabilities.
+                     -->
                     <exclude>com/gitblit/utils/GitBlitDiffFormatter.class</exclude>
                     <exclude>com/gitblit/utils/DiffUtils.class</exclude>
                     <exclude>com/gitblit/utils/DiffUtils$*.class</exclude>
@@ -225,6 +230,8 @@ limitations under the License.
                     <exclude>com/gitblit/wicket/pages/CommitDiffPage$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/ComparePage.class</exclude>
                     <exclude>com/gitblit/wicket/pages/ComparePage$*.class</exclude>
+                    <exclude>com/gitblit/wicket/pages/BlobDiffPage.class</exclude>
+                    <exclude>com/gitblit/wicket/pages/BlobDiffPage$*.class</exclude>
                     <exclude>gitblit.css</exclude>
                   </excludes>
                 </filter>
