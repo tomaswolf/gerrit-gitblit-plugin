@@ -66,10 +66,7 @@ some servlets and setting them up through Guice, one has to do quite a bit more 
   module to make dagger use the Guice injector. (Which also meant I had to install m2e-apt in my Eclipse and enable it, and
   add the dagger dependencies.)
 
-  > Off-topic: Maybe GitBlit would be much better off using Guice in the first place. Currently, it uses dagger
-  only in a rather restricted way, apparently because dagger's use of the standard `javax.inject` annotations conflicts with
-  typical web CDI containers that also use those, pick them up, and then want to do their own injections, which results in an
-  unholy mess all over the place. With Guice one doesn't have to use the JSR-330 annotations.
+  > Off-topic: GitBlit 1.7.0 will not use dagger anymore but Guice.
 
 * I've introduced a new servlet to serve those static resources from wherever they are in the original standard GitBlit jar.
   This also serves clippy.swf correctly now.
@@ -114,10 +111,14 @@ ssh YOUR_GERRIT_URL gerrit plugin reload gitblit
 
 Note: this is a fairly large plugin, adding many classes to the JVM Gerrit runs in. Depending on what kind of JVM you're using, I
 cannot exclude the possibility that adding GitBlit to Gerrit might lead to "java.lang.OutOfMemoryError: PermGen space". If you
-ever observe this, increase the "PermGen" memory for Gerrit. For the HotSpot JVM, you'd do that by adding the option 
+ever observe this, increase the "PermGen" memory for Gerrit. For the Oracle HotSpot JVM < 8.0, you'd do that by adding the option 
 `container.javaOptions = -XX:MaxPermSize=320m` (or whatever size you deem appropriate) to `gerrit.config`. Possibly you
 then also might want to increase Gerrit's maximum heap size a bit (that's `container.heapLimit`).
 See the [Gerrit documentation](https://gerrit-documentation.storage.googleapis.com/Documentation/2.9.1/config-gerrit.html#container).
+
+As of HotSpot 8.0, this "PermGen space" issue should not occur, and the "-XX:MaxPermSize" option has even been removed from HotSpot.
+See the [Java 8 compatibility guide](http://www.oracle.com/technetwork/java/javase/8-compatibility-guide-2156366.html). The reason
+is that HotSpot 8.0 stores the class metadata no longer in the Java heap but in native memory, like IBM's J9 VM does.
 
 # Configuration
 
