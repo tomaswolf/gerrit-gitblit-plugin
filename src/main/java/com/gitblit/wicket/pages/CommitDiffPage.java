@@ -79,9 +79,12 @@ public class CommitDiffPage extends RepositoryPage {
 		add(new CommitHeaderPanel("commitHeader", repositoryName, commit));
 
 		final List<String> imageExtensions = app().settings().getStrings(Keys.web.imageExtensions);
-		final ImageDiffHandler handler = new ImageDiffHandler(getContextUrl(), repositoryName, parents.isEmpty() ? null : parents.get(0), commit.getName(),
+		final ImageDiffHandler handler = new ImageDiffHandler(this, repositoryName, parents.isEmpty() ? null : parents.get(0), commit.getName(),
 				imageExtensions);
 		final DiffOutput diff = DiffUtils.getCommitDiff(r, commit, DiffOutputType.HTML, handler);
+		if (handler.getImgDiffCount() > 0) {
+			addBottomScript("scripts/imgdiff.js"); // Tiny support script for image diffs
+		}
 
 		// add commit diffstat
 		int insertions = 0;

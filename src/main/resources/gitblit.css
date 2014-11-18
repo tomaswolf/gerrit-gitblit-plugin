@@ -1422,62 +1422,161 @@ div.diff > table {
 	color: #555;
 }
 
-/* Image diffs.
-   Kudos to Lea Verou: http://lea.verou.me/2014/07/image-comparison-slider-with-pure-css/ 
-   Slightly modified by Tom to allow moving the slider fully at the left edge of the images. */
-div.imgdiff {
-	margin: 5px 2px;
-	position: relative;
-	display: inline-block;
-	line-height: 0;
-	padding-left: 18px;
+/* Image diffs. */
+
+/* Note: can't use gradients; IE < 10 doesn't support them. Use pre-created pngs with transparency instead. */
+
+/* Set on body during mouse tracking. */
+.no-select {
+	-webkit-touch-callout:none;
+	-webkit-user-select:none;
+	-khtml-user-select:none;
+	-moz-user-select:none;
+	-ms-user-select:none;
+	user-select:none;
 }
 
-/* Note: width defines the initial position of the slider. Would have liked to have it
-   at 50% initially, but that fails on webkit, which refuses to go below the specified
-   width. (min-width won't help.) This is known behavior of webkit, see
-   https://codereview.chromium.org/239983004 and https://bugs.webkit.org/show_bug.cgi?id=72948
-   There is a hack (setting width to 1px in :hover) to work around this, but that causes
-   ugly screen flicker and makes for a dreadful UI. We're better off setting the slider
-   to the far left initially. */
+div.imgdiff-container {
+	padding: 10px;
+	background: #EEE;
+}
+
+div.imgdiff {
+	margin: 10px 20px;
+	position:relative;
+	display: inline-block;
+	/* Checkerboard background to reveal transparency. */
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAK0lEQVQoz2O8e/cuAzagpKSEVZyJgUQwqoEYwPj//3+sEvfu3RsNJfppAACQZwizxs5QrAAAAABJRU5ErkJggg==);
+    background-repeat: repeat;
+	/* Same with CSS:
+	background-color: white;
+	background-image: linear-gradient(45deg, #DDD 25%, transparent 25%, transparent 75%, #DDD 75%, #DDD), linear-gradient(45deg, #DDD 25%, transparent 25%, transparent 75%, #DDD 75%, #DDD);
+	background-size:16px 16px;
+	background-position:0 0, 8px 8px;
+	*/
+}
+
 div.imgdiff-left {
 	position: absolute;
 	top: 0;
 	bottom: 0;
 	left: 0;
-	width: 18px;
+	width: 0;
 	max-width: 100%;
 	overflow: hidden;
-	resize: horizontal;
-	/* Some border that should be visible on most images, combined of a dark color (red)
-	   and white in case the image was all red itself or used other colors that would make
-	   a thin red line hard to make out. */
-	border-right: 1px solid red;
-	box-shadow: 1px 0px 0px 0px white;
 }
 
-div.imgdiff-left:before {
+img.imgdiff {
+	user-select: none;
+	border: 1px solid #0F0;
+}
+img.imgdiff-old {
+	user-select: none;
+	border: 1px solid #F00;
+}
+
+.imgdiff-opa-container {
+	display: inline-block;
+	width: 200px;
+	height: 4px;
+	margin: 12px 35px 6px 35px;
+	padding: 0;
+	position: relative;
+	border: 1px solid #888;
+	background-color: #DDD;
+}
+
+.imgdiff-opa-container:before {
 	content: '';
 	position: absolute;
-	right: 0;
+	left: -20px;
+	top: -4px;
+	width : 12px;
+	height: 12px;
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAACXBIWXMAAAsTAAALEwEAmpwYAAAA7klEQVQoz13STUrDMRAF8N+02fQDhCpqNyJIvUEXXfYCXtlFsZeQLpRCpYJ01RakxM38IRgIQyZv3rx5SchVaw1c4xm36OEb7/jqcJHgPuZYYopx3h2xwwrriPgtyTzHCx5xg1ESnvJ8lR1fS8pYJvgBEwyywwlD9LGotX6W1DxNpknutkPgnGSzkgOOEzRoogY8zPx9L7VFa0Ku//lAlLTumO1PjYxuhnMT9yV93uUMw2Q+NwU/OGCL95KPskrr+o3mruCAD7xhU1LjOpkX6caoGXib4HVEXKLWKiK67/GEGe6SYJ+SNxFxqbX2/gBxKkhxx1tQIAAAAABJRU5ErkJggg==);
+	/* With CSS: background-image: radial-gradient(6px at 50% 50%, rgba(255, 255, 255, 255) 50%, rgba(255, 255, 255, 0) 6px); */
+}
+
+.imgdiff-opa-container:after {
+	content: '';
+	position: absolute;
+	right: -20px;
+	top: -4px;
+	width : 12px;
+	height: 12px;
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAACXBIWXMAAAsTAAALEwEAmpwYAAABlklEQVQoz02Rr45TYRTE5/z7ynebYNBIFFuLXV2FQRIgWcUDkN3bBNnbR0CQJvsGGLCbIEFgSCrgGXCw7b3fOT2ILQm/ZJIRI2YyhBObzaZm5kVmvszMs8wkJtoR0ZZUr/vLyz/DMBCdwg+PcfzUvC3cHRGBTICZUYpBVb+KyPO+73/SZrOpEccv03hYHMbRp9bk6EEJQITTzFqttZjZ59ls9kwz88K9LQ7j6IfDXsdxgrcGEEFEqJRSAAQzn7fWXmtmvnJ3tNZkHCfc3t5iahOQgJWCBKCq1FqDiDzVzHwcEYgIcndMU8N+v0dmogNQzODufLcrzxiZhAQyEwBASGSedPL/wyDaMTNEJEUEpRi6rkPXdShWoKoQkWBmENGOmWhrxWBmrZSCe7ViPp9jPp+j1opSSpoZmxmY+YOS6rVmvqi1PgEQqkruzgAgImFmXGslVb1h5u2/4x65+/uIOG+tISLu+jLDzKCqN6r6pu/7bzIMA61Wq1/L5fIjgN8ict/MHphZmNl3VX1nJm+vrvof6/Xa/gJuQtCzTqj1dQAAAABJRU5ErkJggg==);
+	/* With CSS: background-image: radial-gradient(6px at 50% 50%, #888, #888 1px, transparent 6px); */
+}
+
+.imgdiff-opa-slider {
+	position:absolute;
+	top : 0;
+	left: -5px;
 	bottom: 0;
-	width: 13px;
-	height: 13px;
-	background: linear-gradient(-45deg, red 50%, transparent 0);
-	background-clip: content-box;
-	cursor: ew-resize;
+	right: -5px;
+	text-align: left;
 }
 
-img.imgdiff-left {
-	margin-left: 18px; /* Compensate for padding on outer div. */
+.imgdiff-opa-handle {
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	position: absolute;
+	top: -3px;
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAACXBIWXMAAAsTAAALEwEAmpwYAAABMklEQVQY022OsU7CUBRA723fpTS0NcVBJuOoQUed0MSJhOiP0IHK6g84ShoM/2HE1TjZxeCA0UF3RW2tLQ73mesgLuiZT3IOwoww7FSLYrrDzHUAMInUbblsX0RR9NJsNgEBAIIg2EjT9DDP8y2ttSsiqEhlTsW58TzvaDAYxBiGB9XJ5PkkSZJdZvZFRAEAIKImUm+et3BVqy11VFHkjTzPN2cS/a6ICDHrxWlR1N+zjz2DmddnOQVziIjJWnuaedUAAENEEP4iPweIImIYRDQmogwR9T+SVkplpVLpzrBt+9KpVEaK6BUReU6a2LY9dl33zIzj+LOx3XgUkRUQsADwSylzalnWk+M4I9/3o36/f42t/RYMT4fQ7XaX0zRpMes1ADAU0b3nuee9495DO2ib37s7ktpA7ddzAAAAAElFTkSuQmCC);
+	/* With CSS: background-image: radial-gradient(5px at 50% 50%, #444, #888, transparent 5px); */
 }
 
-img.imagediff {
-	user-select: none;
+.imgdiff-ovr-slider {
+	display: inline-block;
+	margin: 0;
+	padding: 0;
+	position: relative;
+	text-align: left;
 }
 
-.diff-img {
-	margin: 2px 2px;
+.imgdiff-ovr-handle {
+	display: inline-block;
+	width : 1px;
+	height: 100%;
+	top: 0px;
+	background-color: #444;
+	border-right: 1px solid #FFF;
+}
+
+.imgdiff-ovr-handle:before {
+	content: '';
+	position: absolute;
+	right: -4px;
+	bottom: -5px;
+	width : 10px;
+	height: 10px;
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAACXBIWXMAAAsTAAALEwEAmpwYAAABMklEQVQY022OsU7CUBRA723fpTS0NcVBJuOoQUed0MSJhOiP0IHK6g84ShoM/2HE1TjZxeCA0UF3RW2tLQ73mesgLuiZT3IOwoww7FSLYrrDzHUAMInUbblsX0RR9NJsNgEBAIIg2EjT9DDP8y2ttSsiqEhlTsW58TzvaDAYxBiGB9XJ5PkkSZJdZvZFRAEAIKImUm+et3BVqy11VFHkjTzPN2cS/a6ICDHrxWlR1N+zjz2DmddnOQVziIjJWnuaedUAAENEEP4iPweIImIYRDQmogwR9T+SVkplpVLpzrBt+9KpVEaK6BUReU6a2LY9dl33zIzj+LOx3XgUkRUQsADwSylzalnWk+M4I9/3o36/f42t/RYMT4fQ7XaX0zRpMes1ADAU0b3nuee9495DO2ib37s7ktpA7ddzAAAAAElFTkSuQmCC);
+	/* With CSS: background-image: radial-gradient(5px at 50% 50%, #444, #888, transparent 5px); */
+}
+
+.imgdiff-ovr-handle:after {
+	content: '';
+	position: absolute;
+	right: -4px;
+	top: -5px;
+	width : 10px;
+	height: 10px;
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAACXBIWXMAAAsTAAALEwEAmpwYAAABMklEQVQY022OsU7CUBRA723fpTS0NcVBJuOoQUed0MSJhOiP0IHK6g84ShoM/2HE1TjZxeCA0UF3RW2tLQ73mesgLuiZT3IOwoww7FSLYrrDzHUAMInUbblsX0RR9NJsNgEBAIIg2EjT9DDP8y2ttSsiqEhlTsW58TzvaDAYxBiGB9XJ5PkkSZJdZvZFRAEAIKImUm+et3BVqy11VFHkjTzPN2cS/a6ICDHrxWlR1N+zjz2DmddnOQVziIjJWnuaedUAAENEEP4iPweIImIYRDQmogwR9T+SVkplpVLpzrBt+9KpVEaK6BUReU6a2LY9dl33zIzj+LOx3XgUkRUQsADwSylzalnWk+M4I9/3o36/f42t/RYMT4fQ7XaX0zRpMes1ADAU0b3nuee9495DO2ib37s7ktpA7ddzAAAAAElFTkSuQmCC);
+	/* With CSS: background-image: radial-gradient(5px at 50% 50%, #444, #888, transparent 5px); */
+}
+
+.imgdiff-link {
+	margin: 0px 4px;
+	text-decoration: none;
+	border: none;
+}
+
+.imgdiff-link > img {
+	border: 1px solid transparent; /* Avoid jumping when we change the border */
+	width: 20px;
+	height: 20px;
+	margin-bottom: 10px;
 }
 
 /* End image diffs */

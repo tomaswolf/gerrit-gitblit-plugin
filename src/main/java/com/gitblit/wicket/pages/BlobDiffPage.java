@@ -52,14 +52,20 @@ public class BlobDiffPage extends RepositoryPage {
 		if (StringUtils.isEmpty(baseObjectId)) {
 			// use first parent
 			RevCommit parent = commit.getParentCount() == 0 ? null : commit.getParent(0);
-			ImageDiffHandler handler = new ImageDiffHandler(getContextUrl(), repositoryName, parent.getName(), commit.getName(), imageExtensions);
+			ImageDiffHandler handler = new ImageDiffHandler(this, repositoryName, parent.getName(), commit.getName(), imageExtensions);
 			diff = DiffUtils.getDiff(r, commit, blobPath, DiffOutputType.HTML, handler).content;
+			if (handler.getImgDiffCount() > 0) {
+				addBottomScript("scripts/imgdiff.js"); // Tiny support script for image diffs
+			}
 			add(new BookmarkablePageLink<Void>("patchLink", PatchPage.class, WicketUtils.newPathParameter(repositoryName, objectId, blobPath)));
 		} else {
 			// base commit specified
 			RevCommit baseCommit = JGitUtils.getCommit(r, baseObjectId);
-			ImageDiffHandler handler = new ImageDiffHandler(getContextUrl(), repositoryName, baseCommit.getName(), commit.getName(), imageExtensions);
+			ImageDiffHandler handler = new ImageDiffHandler(this, repositoryName, baseCommit.getName(), commit.getName(), imageExtensions);
 			diff = DiffUtils.getDiff(r, baseCommit, commit, blobPath, DiffOutputType.HTML, handler).content;
+			if (handler.getImgDiffCount() > 0) {
+				addBottomScript("scripts/imgdiff.js"); // Tiny support script for image diffs
+			}
 			add(new BookmarkablePageLink<Void>("patchLink", PatchPage.class, WicketUtils.newBlobDiffParameter(repositoryName, baseObjectId, objectId, blobPath)));
 		}
 
