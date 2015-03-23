@@ -121,6 +121,10 @@ limitations under the License.
              	relocate both parboiled and pegdown below to ensure that gitblit uses
              	the 1.4.2 pegdown version, not the pegdown 1.2.1 bundled with Gerrit.
              	See below.
+             	
+             	When we switch to Gerrit 2.11, pegdown and parboiled can be removed completely,
+             	including the sources in our own bundle, and relocating them can also be removed.
+             	Gerrit 2.11 includes pegdown 1.4.2 and parboiled 1.1.7.
                -->
               <exclude>org.parboiled:parboiled-java:*</exclude>
               <exclude>com.google.gerrit:*</exclude>
