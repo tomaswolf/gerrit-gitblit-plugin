@@ -5,11 +5,15 @@ forked originally from [master revision 28d2c98](https://gerrit.googlesource.com
 
 It integrates [GitBlit](https://github.com/gitblit/gitblit) as a repository browser into [Gerrit](https://code.google.com/p/gerrit/) as a Gerrit plugin.
 
-Pre-built jars (Java 7) are available as **[releases](https://github.com/tomaswolf/gerrit-gitblit-plugin/releases)**.
+Pre-built jars (Java 7) are available as **[releases](https://github.com/tomaswolf/gerrit-gitblit-plugin/releases)**. Pick one with a version number
+matching your Gerrit version. Version numbering for this plugin is the Gerrit API version it was built for, followed by the collapsed GitBlit version,
+followed by the plugin version.So "v2.9.1.162.2" is version 2 of this plugin, integrating GitBlit 1.6.2 into Gerrit 2.9.1. Since the Gerrit API should
+be [stable](https://gerrit-documentation.storage.googleapis.com/Documentation/2.10.1/dev-plugins.html#API) across minor version number increments, a
+plugin built against 2.9.1 also works with Gerrit 2.9, and one built against 2.10.1 should also work with 2.10.
 
 ## Motivation
 
-The basic reason for doing this was to adapt the official plugin to work with a modern Gerrit (v2.9.1) and a modern GitBlit (v1.6.x).
+The basic reason for doing this was to adapt the official plugin to work with a modern Gerrit (v2.9 or newer) and a modern GitBlit (v1.6.x).
 
 The official plugin is a bit dated by now. Luca described his integration in a [slideshow](http://www.slideshare.net/lucamilanesio/gitblit-plugin-for-gerrit-code-review).
 Basically, this Gerrit-GitBlit plugin depends on a hacked version of Apache Wicket (classloading in UI), and on a hacked version
@@ -171,7 +175,7 @@ If you want to lock the GitBlit plugin to allow only logged-in users to browse, 
   *TODO 1*: I should give it a try and see if there any problems, and if so, if they can be worked around relatively easily in a self-contained
   way in the plugin itself. Even nicer: could GitBlit be made (easily!) to use Gerrit's Lucene index?
   
-* I run this plugin in a firewalled private network, and it seems to me that the authentication stuff is good enough. I do _not_ know
+* I run this plugin (v2.9.1.162.2) in a firewalled private network, and it seems to me that the authentication stuff is good enough. I do _not_ know
   whether it would be good enough for running this on a public network, or whether I goofed somewhere big time. I'm no web security
   expert and cannot make any guarantees. I strongly suspect that the RSS feed does not honour ref-level visibility restrictions; it only
   honours repository-level visibility.
@@ -195,3 +199,11 @@ Install that in Gerrit as `gitblit.jar`. It should end up in `$GERRIT_SITE/plugi
 Since I do not know and do not use [buck](http://facebook.github.io/buck/), I have removed the two `BUCK` files. This is a pure maven project.
 If you need the BUCK files for some reason, [check them out](https://gerrit.googlesource.com/plugins/gitblit/+/1c2f070def1d37b28bde5a8a9eee8e26b9a9560c)
 from the official plugin and adapt them to match the `pom.xml`.
+
+# Alternatives
+
+Some time after I had released my first version of this plugin, Luca Milanesio has updated the [official plugin](https://gerrit.googlesource.com/plugins/gitblit/)
+to work again with the latest Gerrit releases. Internally, it still uses a specially hacked Apache Wicket and Rome, and it's based on an as
+yet unreleased GitBlit version (James' [development branch](https://github.com/gitblit/gitblit/tree/develop) that should one day become
+GitBlit 1.7.0). You can find that "official plugin" on the [Gerrit CI server](https://ci.gerritforge.com/job/Plugin_gitblit_stable-2.10/).
+I have never used it, so I have no idea how well it works.
