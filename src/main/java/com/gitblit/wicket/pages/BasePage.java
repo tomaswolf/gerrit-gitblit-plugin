@@ -309,6 +309,8 @@ public abstract class BasePage extends SessionPage {
 			case REWIND:
 				map.put(type, MessageFormat.format(getString("gb.rewindPermission"), type.code));
 				break;
+			default:
+				break;
 			}
 		}
 		return map;

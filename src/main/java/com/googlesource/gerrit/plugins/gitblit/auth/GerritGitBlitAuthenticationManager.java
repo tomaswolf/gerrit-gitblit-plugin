@@ -35,20 +35,20 @@ import com.gitblit.utils.StringUtils;
 import com.google.common.base.Strings;
 import com.google.gerrit.extensions.annotations.PluginCanonicalWebUrl;
 import com.google.gerrit.extensions.annotations.PluginName;
+import com.google.gerrit.extensions.registration.DynamicItem;
 import com.google.gerrit.httpd.WebSession;
 import com.google.gerrit.server.account.AccountException;
 import com.google.gerrit.server.account.AccountManager;
 import com.google.gerrit.server.account.AuthRequest;
 import com.google.gerrit.server.account.AuthResult;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 public class GerritGitBlitAuthenticationManager implements IAuthenticationManager {
 
 	private static final Logger log = LoggerFactory.getLogger(GerritGitBlitAuthenticationManager.class);
 
 	private final AccountManager gerritAccountManager;
-	private final Provider<WebSession> gerritSession;
+	private final DynamicItem<WebSession> gerritSession;
 	private final GerritGitBlitUserManager userManager;
 	private final IStoredSettings settings;
 
@@ -58,8 +58,9 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 	private final String hostRelativePluginPath;
 
 	@Inject
-	public GerritGitBlitAuthenticationManager(final AccountManager gerritAccountManager, final Provider<WebSession> gerritSession,
-			final GerritGitBlitUserManager userManager, final IStoredSettings settings, @PluginName String pluginName, @PluginCanonicalWebUrl String pluginUrl) {
+	public GerritGitBlitAuthenticationManager(final AccountManager gerritAccountManager, final DynamicItem<WebSession> gerritSession,
+			final GerritGitBlitUserManager userManager, final IStoredSettings settings, @PluginName String pluginName,
+			@PluginCanonicalWebUrl String pluginUrl) {
 		this.gerritAccountManager = gerritAccountManager;
 		this.gerritSession = gerritSession;
 		this.userManager = userManager;

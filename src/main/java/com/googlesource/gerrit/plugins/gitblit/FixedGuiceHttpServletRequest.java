@@ -23,7 +23,9 @@ import javax.servlet.http.HttpServletRequestWrapper;
 /**
  * See Guice bug #745: https://github.com/google/guice/issues/745
  * 
- * XXX: remove for Gerrit versions using a Guice version >= 4.0-beta5 (that would mean, when we switch to Gerrit 2.10).
+ * XXX: remove for Gerrit versions using a Guice version > 4.0-beta5. (Note that 4.0-beta5 does *not* yet contain the fix!!) I had thought it did
+ * because in Gerrit, they had already prepared for this change when they switched to 4.0-beta5, but actually the fix was done on 2014-10-09, while
+ * 4.0-beta5 was released 2014-09-24. Missed it by a few weeks.
  */
 public class FixedGuiceHttpServletRequest extends HttpServletRequestWrapper {
 

@@ -23,19 +23,19 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.gitblit.models.UserModel;
 import com.gitblit.servlet.PagesFilter;
+import com.google.gerrit.extensions.registration.DynamicItem;
 import com.google.gerrit.httpd.WebSession;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.gitblit.auth.GerritAuthenticationFilter;
 
 @Singleton
 public class WrappedPagesFilter extends PagesFilter {
 	private final GerritAuthenticationFilter gerritAuthFilter;
-	private final Provider<WebSession> webSession;
+	private final DynamicItem<WebSession> webSession;
 
 	@Inject
-	public WrappedPagesFilter(final Provider<WebSession> webSession, final GerritAuthenticationFilter gerritAuthFilter) {
+	public WrappedPagesFilter(final DynamicItem<WebSession> webSession, final GerritAuthenticationFilter gerritAuthFilter) {
 		super();
 
 		this.webSession = webSession;
@@ -63,8 +63,9 @@ public class WrappedPagesFilter extends PagesFilter {
 	}
 
 	/**
-	 * Super class uses httpRequest.getServletPath() in getFullUrl(), but that returns an empty string. Apparently one doesn't have that path yet in a filter?
-	 * Instead of trying to figure out how to determine this path here from the FilterConfig, I've taken the easy route and have hard-coded it.
+	 * Super class uses httpRequest.getServletPath() in getFullUrl(), but that returns an empty string. Apparently one doesn't have that path yet in a
+	 * filter? Instead of trying to figure out how to determine this path here from the FilterConfig, I've taken the easy route and have hard-coded
+	 * it.
 	 * <p>
 	 * {@link GitBlitServletModule} uses this constant to define the paths for the filter and the servlet.
 	 * </p>

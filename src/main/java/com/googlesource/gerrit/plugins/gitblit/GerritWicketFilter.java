@@ -36,9 +36,9 @@ import org.slf4j.LoggerFactory;
 
 import com.gitblit.Constants;
 import com.gitblit.dagger.DaggerContext;
+import com.google.gerrit.extensions.registration.DynamicItem;
 import com.google.gerrit.httpd.WebSession;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.gitblit.app.GerritGitBlit;
 import com.googlesource.gerrit.plugins.gitblit.app.GerritGitBlitContext;
@@ -49,7 +49,7 @@ import com.googlesource.gerrit.plugins.gitblit.auth.GerritAuthenticationFilter;
 public class GerritWicketFilter extends WicketFilter {
 	private static final Logger log = LoggerFactory.getLogger(GerritWicketFilter.class);
 
-	private final Provider<WebSession> webSession;
+	private final DynamicItem<WebSession> webSession;
 	@SuppressWarnings("unused")
 	// We need Guice to create the GerritGitBlit instance
 	private final GerritGitBlit gitBlit;
@@ -60,7 +60,7 @@ public class GerritWicketFilter extends WicketFilter {
 	private String pluginInstanceKey;
 
 	@Inject
-	public GerritWicketFilter(final Provider<WebSession> webSession, final GerritGitBlit gitBlit, final GerritGitBlitContext context,
+	public GerritWicketFilter(final DynamicItem<WebSession> webSession, final GerritGitBlit gitBlit, final GerritGitBlitContext context,
 			final GerritAuthenticationFilter gerritAuthFilter, final GerritGitBlitWebApp webApp) {
 		this.webSession = webSession;
 		this.gitBlit = gitBlit;

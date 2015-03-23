@@ -48,7 +48,7 @@ import com.googlesource.gerrit.plugins.gitblit.dagger.GerritDaggerModule;
 import com.googlesource.gerrit.plugins.gitblit.dagger.PublicKeyManagerProvider;
 import com.googlesource.gerrit.plugins.gitblit.dagger.WrappedFederationManager;
 import com.googlesource.gerrit.plugins.gitblit.dagger.WrappedNotificationManager;
-import com.googlesource.gerrit.plugins.gitblit.dagger.WrappedPluginManager;
+import com.googlesource.gerrit.plugins.gitblit.dagger.NullPluginManager;
 import com.googlesource.gerrit.plugins.gitblit.dagger.WrappedProjectManager;
 
 public class GitBlitServletModule extends ServletModule {
@@ -79,7 +79,7 @@ public class GitBlitServletModule extends ServletModule {
 
 		// Unchanged but wrapped things (dagger-guice bridge)
 
-		bind(IPluginManager.class).to(WrappedPluginManager.class);
+		bind(IPluginManager.class).to(NullPluginManager.class);
 		bind(INotificationManager.class).to(WrappedNotificationManager.class);
 		bind(IPublicKeyManager.class).toProvider(PublicKeyManagerProvider.class);
 		bind(IProjectManager.class).to(WrappedProjectManager.class);

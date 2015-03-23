@@ -27,9 +27,9 @@ import com.gitblit.models.RepositoryModel;
 import com.gitblit.models.UserModel;
 import com.gitblit.servlet.GerritGitBlitAuthenticatedRequest;
 import com.gitblit.servlet.SyndicationFilter;
+import com.google.gerrit.extensions.registration.DynamicItem;
 import com.google.gerrit.httpd.WebSession;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.gitblit.auth.GerritAuthenticationFilter;
 
@@ -38,12 +38,13 @@ public class WrappedSyndicationFilter extends SyndicationFilter {
 
 	private final GerritAuthenticationFilter gerritAuthFilter;
 
-	private final Provider<WebSession> webSession;
+	private final DynamicItem<WebSession> webSession;
 
 	private final IRepositoryManager repositoryManager;
 
 	@Inject
-	public WrappedSyndicationFilter(final Provider<WebSession> webSession, GerritAuthenticationFilter gerritAuthFilter, IRepositoryManager repositoryManager) {
+	public WrappedSyndicationFilter(final DynamicItem<WebSession> webSession, GerritAuthenticationFilter gerritAuthFilter,
+			IRepositoryManager repositoryManager) {
 		super();
 		this.webSession = webSession;
 		this.gerritAuthFilter = gerritAuthFilter;
@@ -121,8 +122,9 @@ public class WrappedSyndicationFilter extends SyndicationFilter {
 	}
 
 	/**
-	 * Super class uses httpRequest.getServletPath() in getFullUrl(), but that returns an empty string. Apparently one doesn't have that path yet in a filter?
-	 * Instead of trying to figure out how to determine this path here from the FilterConfig, I've taken the easy route and have hard-coded it.
+	 * Super class uses httpRequest.getServletPath() in getFullUrl(), but that returns an empty string. Apparently one doesn't have that path yet in a
+	 * filter? Instead of trying to figure out how to determine this path here from the FilterConfig, I've taken the easy route and have hard-coded
+	 * it.
 	 * <p>
 	 * {@link GitBlitServletModule} uses this constant to define the paths for the filter and the servlet.
 	 * </p>

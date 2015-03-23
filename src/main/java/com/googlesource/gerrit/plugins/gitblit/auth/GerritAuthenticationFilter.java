@@ -30,9 +30,9 @@ import org.apache.commons.codec.binary.Base64;
 import com.gitblit.manager.IAuthenticationManager;
 import com.gitblit.models.UserModel;
 import com.google.common.base.Objects;
+import com.google.gerrit.extensions.registration.DynamicItem;
 import com.google.gerrit.httpd.WebSession;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -56,8 +56,8 @@ public class GerritAuthenticationFilter {
 		return authenticationManager.authenticate(httpRequest);
 	}
 
-	public boolean doFilter(final Provider<WebSession> webSession, ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
-			ServletException {
+	public boolean doFilter(final DynamicItem<WebSession> webSession, ServletRequest request, ServletResponse response, FilterChain chain)
+			throws IOException, ServletException {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		String hdr = httpRequest.getHeader("Authorization");
 		if (hdr != null) {
@@ -69,13 +69,14 @@ public class GerritAuthenticationFilter {
 		}
 	}
 
-	public boolean filterSessionAuth(final Provider<WebSession> webSession, HttpServletRequest request) {
+	public boolean filterSessionAuth(final DynamicItem<WebSession> webSession, HttpServletRequest request) {
 		request.setAttribute("gerrit-username", webSession.get().getCurrentUser().getUserName());
 		request.setAttribute("gerrit-token", webSession.get().getSessionId());
 		return true;
 	}
 
-	public boolean filterBasicAuth(HttpServletRequest request, HttpServletResponse response, String hdr) throws IOException, UnsupportedEncodingException {
+	public boolean filterBasicAuth(HttpServletRequest request, HttpServletResponse response, String hdr) throws IOException,
+			UnsupportedEncodingException {
 		if (!hdr.startsWith(LIT_BASIC)) {
 			response.setHeader("WWW-Authenticate", "Basic realm=\"Gerrit Code Review\"");
 			response.sendError(SC_UNAUTHORIZED);

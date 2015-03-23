@@ -48,9 +48,9 @@ import com.gitblit.wicket.CacheControl;
 import com.gitblit.wicket.GitBlitWebApp;
 import com.gitblit.wicket.GitBlitWebSession;
 import com.gitblit.wicket.GitblitParamUrlCodingStrategy;
+import com.google.gerrit.extensions.registration.DynamicItem;
 import com.google.gerrit.httpd.WebSession;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -59,7 +59,7 @@ public class GerritGitBlitWebApp extends GitBlitWebApp {
 
 	private static final String INSTANCE_ATTRIBUTE = "GerritGitBlitPluginInstance";
 
-	private final Provider<WebSession> gerritSesssion;
+	private final DynamicItem<WebSession> gerritSesssion;
 
 	// We have to re-implement this bit from the super class because we have to override mount below because the XSS filtering in the
 	// GitblitParamUrlCodingStrategy is wrong (it triggers on perfectly harmless UTF-8 characters like à). Luckily this cacheablePages
@@ -71,10 +71,11 @@ public class GerritGitBlitWebApp extends GitBlitWebApp {
 
 	@Inject
 	public GerritGitBlitWebApp(IRuntimeManager runtimeManager, IPluginManager pluginManager, INotificationManager notificationManager,
-			IUserManager userManager, IAuthenticationManager authenticationManager, IPublicKeyManager publicKeyManager, IRepositoryManager repositoryManager,
-			IProjectManager projectManager, IFederationManager federationManager, IGitblit gitblit, Provider<WebSession> gerritSession) {
-		super(runtimeManager, pluginManager, notificationManager, userManager, authenticationManager, publicKeyManager, repositoryManager, projectManager,
-				federationManager, gitblit);
+			IUserManager userManager, IAuthenticationManager authenticationManager, IPublicKeyManager publicKeyManager,
+			IRepositoryManager repositoryManager, IProjectManager projectManager, IFederationManager federationManager, IGitblit gitblit,
+			DynamicItem<WebSession> gerritSession) {
+		super(runtimeManager, pluginManager, notificationManager, userManager, authenticationManager, publicKeyManager, repositoryManager,
+				projectManager, federationManager, gitblit);
 		this.gerritSesssion = gerritSession;
 		// We need this, otherwise the flotr2 library adds again links that are not recoded for static access.
 		setHeaderResponseDecorator(new IHeaderResponseDecorator() {
