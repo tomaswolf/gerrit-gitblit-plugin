@@ -36,8 +36,8 @@ public class PluginActivator implements LifecycleListener {
 		this.pluginName = pluginName;
 		this.filter = filter;
 		// Just some string that is unique per plugin instance. This is used ultimately in
-		// GerritGitBlitWebApp.newRequestCycleProcessor to expunge stale Java objects attached to
-		// HTTP session by Wicket. (They become "stale" in a plugin reload, because they will have
+		// GerritGitBlitWebApp.newRequestCycleProcessor to expunge stale Java objects attached to the
+		// HTTP session by Wicket. They become "stale" in a plugin reload, because they will have
 		// been loaded by the class loader of the unloaded plugin instance, but then are accessed
 		// by the new plugin instance, which has a new classloader. The result is funny
 		// ClassCastExceptions telling you that "GitBlitWebSession cannot be cast to Session" even
@@ -61,17 +61,17 @@ public class PluginActivator implements LifecycleListener {
 		// we must be sure that this data survives in proper form. The main problem here is that the HTTP Session is
 		// kept across the plugin reload, and Wicket stores stuff keyed by sessionId. The call below ultimately will
 		// serialize Wicket's per-session page state to disk, where it will be found again when the new plugin instance
-		// starts up. Since the data is serialized and deserialized, this works even if the Class instances change.
+		// starts up. Since the data is serialized and deserialized, this works even if the class instances change.
 		filter.destroy();
 		// Note that Wicket also stores some unserialized Java objects directly in the HTPP Session. That causes
 		// ClassCastExceptions if the newly started plugin instance then tries to retrieve them, because they have
 		// been loaded by a different classloader (the one of the previous plugin instance). There's two problems
 		// with that:
 		// - we don't have access to any session here, and I have not found any way to enumerate all sessions known
-		//   to Wicket.
+		// to Wicket.
 		// - even if we somehow could access these sessions, I've not found any clean way to tell Wicket that it
-		//   should serialize its Java objects attached to that session, and de-serialize them again when the new
-		//   plugin instance has started and comes across such a HTTP session again.
+		// should serialize its Java objects attached to that session, and de-serialize them again when the new
+		// plugin instance has started and comes across such a HTTP session again.
 		// Therefore, we have to deal either in the GerritWicketFilter or in the request cycle processor with possibly
 		// stale orphaned Java objects attached to the HTTP session. See GerritGitBlitWebApp.newRequestCycleProcessor.
 		log.info("Filter destroyed {}", pluginName);

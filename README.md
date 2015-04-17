@@ -13,7 +13,7 @@ plugin built against 2.9.1 also works with Gerrit 2.9, and one built against 2.1
 
 ## Motivation
 
-The basic reason for doing this was to adapt the official plugin to work with a modern Gerrit (v2.9 or newer) and a modern GitBlit (v1.6.x).
+The basic reason for doing this was to adapt the official plugin to work with a modern Gerrit (v2.9 or newer) and a modern GitBlit (v1.6.2).
 
 The official plugin is a bit dated by now. Luca described his integration in a [slideshow](http://www.slideshare.net/lucamilanesio/gitblit-plugin-for-gerrit-code-review).
 Basically, this Gerrit-GitBlit plugin depends on a hacked version of Apache Wicket (classloading in UI), and on a hacked version
@@ -58,8 +58,9 @@ some servlets and setting them up through Guice, one has to do quite a bit more 
 * I've fixed the "missing branch graphs": [Gerrit bug 2942](https://code.google.com/p/gerrit/issues/detail?id=2942)
 * I've made the RSS feed work.
 * I've given GitBlit its own base directory (at Gerrit's `$GERRIT_SITE/etc/gitblit`) to avoid that it creates subdirectories
-  in the git repository directory that don't have anything to do with git repositories (specifically, a tickets and a plugins
-  directory -- off-topic thought: what happens if you add GitBlit plugins to this Gerrit plugin?).
+  in the git repository directory that don't have anything to do with git repositories.
+* I've disabled GitBlit's own plugin mechanism. Two layers of plugins is too confusing, might not work as expected anyway, and in all
+  likelihood is not needed since GitBlit is used only as a repository viewer in this plugin.
 * The dependency on GitBlit has been changed from Luca's special GitBlit version to the standard GitBlit 1.6.x distribution.
 * The dependencies for Apache Wicket and Apache Rome have been changed to the standard distributions.
 * The dependency on the Gerrit API has been changed from 2.9-SNAPSHOT to the official 2.9.1 release.
@@ -160,7 +161,7 @@ The GitBlit `${basePath}` is in Gerrit's `$GERRIT_SITE/etc` directory at `$GERRI
 
 Note that the loading order of GitBlit configurations is different from Luca's original plugin. The original plugin read _either_ the user-supplied
 file _or_ the built-in configuration, which meant if you wanted to customize GitBlit, you had to include the contents of the built-in config in your
-own file. That is no longer necessary with _this_ plugin.
+own file. That is no longer necessary with _this_ plugin; the user-supplied configuration augments the built-in one.
 
 To see the built-in configuration, access it at _\<Your_Gerrit_URL>_/plugins/gitblit/static/gitblit.properties.
 
@@ -202,8 +203,14 @@ from the official plugin and adapt them to match the `pom.xml`.
 
 # Alternatives
 
-Some time after I had released my first version of this plugin, Luca Milanesio has updated the [official plugin](https://gerrit.googlesource.com/plugins/gitblit/)
-to work again with the latest Gerrit releases. Internally, it still uses a specially hacked Apache Wicket and Rome, and it's based on an as
+Some time after I had released my first version of this plugin, Luca Milanesio had updated the [official plugin](https://gerrit.googlesource.com/plugins/gitblit/)
+to work again with Gerrit development version 2.11-rc0. Internally, it still uses a specially hacked Apache Wicket and Rome, and it's based on an as
 yet unreleased GitBlit version (James' [development branch](https://github.com/gitblit/gitblit/tree/develop) that should one day become
-GitBlit 1.7.0). You can find that "official plugin" on the [Gerrit CI server](https://ci.gerritforge.com/job/Plugin_gitblit_stable-2.10/).
+GitBlit 1.7.0). You can find that "official plugin" on the [Gerrit CI server](https://ci.gerritforge.com/job/Plugin_gitblit_stable-2.11/).
 I have never used it, so I have no idea how well it works.
+
+The official versions of this plugin in the Gerrit repo for Gerrit versions smaller than 2.11 are all based on the old GitBlit 1.4.0 and all exhibit the
+problems mentioned above.
+
+Because it is my policy not to use unreleased software (release candidates, snapshots), there is currently no version of this plugin here for Gerrit 2.11.
+I'll update this plugin once that Gerrit version will be out officially.
