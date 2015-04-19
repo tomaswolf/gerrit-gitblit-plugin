@@ -14,10 +14,10 @@
 package com.googlesource.gerrit.plugins.gitblit;
 
 import com.google.gerrit.extensions.annotations.PluginName;
-import com.google.gerrit.pgm.init.InitStep;
-import com.google.gerrit.pgm.init.Section;
-import com.google.gerrit.pgm.init.Section.Factory;
-import com.google.gerrit.pgm.util.ConsoleUI;
+import com.google.gerrit.pgm.init.api.ConsoleUI;
+import com.google.gerrit.pgm.init.api.InitStep;
+import com.google.gerrit.pgm.init.api.Section;
+import com.google.gerrit.pgm.init.api.Section.Factory;
 import com.google.inject.Inject;
 
 public class GitBlitInitStep implements InitStep {

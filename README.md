@@ -63,7 +63,7 @@ some servlets and setting them up through Guice, one has to do quite a bit more 
   likelihood is not needed since GitBlit is used only as a repository viewer in this plugin.
 * The dependency on GitBlit has been changed from Luca's special GitBlit version to the standard GitBlit 1.6.x distribution.
 * The dependencies for Apache Wicket and Apache Rome have been changed to the standard distributions.
-* The dependency on the Gerrit API has been changed from 2.9-SNAPSHOT to the official 2.9.1 release.
+* The dependency on the Gerrit API has been changed from a snapshot version to the latest official release.
 * Removed all the transitive dependencies from the `pom.xml`.
 * The whole authentication/user model logic had to be refactored due to GitBlit changes.
 * GitBlit 1.6.x still uses the [dagger injection framework](http://square.github.io/dagger/) (though it doesn't make much use of it).
@@ -82,25 +82,8 @@ Additional modifications were due to changes in GitBlit:
   requests to Google anymore. But to get that to work in the plugin, some more URL rewriting was necessary to make the flotr2 static
   resources be served from within the plugin jar.
 * GitBlit 1.6.x switched to the [pegdown](https://github.com/sirthias/pegdown) [markdown](https://en.wikipedia.org/wiki/Markdown)
-  parser.
-  
-The last point proved to be rather nasty. Gerrit itself uses and includes pegdown and exposes it in the Gerrit API. However,
-Gerrit has pegdown 1.2.1, while GitBlit uses pegdown 1.4.2. Gerrit plugins inherit a standard "parent-first" Java class loader
-(with the parent being the Gerrit API), which means that GitBlit will always use the pegdown 1.2.1 from the Gerrit API, not
-the pegdown 1.4.2 it includes itself. That causes exceptions at runtime because GitBlit makes use of features that don't exist
-in pegdown 1.2.1 yet.
-
-I was able to work around this by relocating GitBlit's pegdown in the shaded jar that is built for the plugin, only to discover
-that I also needed to relocate the [parboiled](https://github.com/sirthias/parboiled) library it's built on. At that point I
-ran into a [bug in parboiled](https://github.com/sirthias/parboiled/issues/80).
-
-> Off-topic: I'm rather puzzled by the approach taken by pegdown/parboiled. It creates a parser at runtime by dynamically creating bytecode.
-  Maybe I'm missing something, but that smells fishy to me. Makes me think of the good ol' times(??) when self-modifying code was considered clever.
-  Why can't one generate this parser at compile time in source form, avoiding the runtime overhead and facilitating debugging?
-
-To work around that, I had to include the sources of [parboiled-java](https://github.com/sirthias/parboiled/tree/master/parboiled-java/src/main/java/org/parboiled)
-and [fix that bug](https://github.com/sirthias/parboiled/pull/82/files) myself. If and when Gerrit ever upgrades to
-pegdown 1.4.2, it should be possible to remove this work-around (and the parboiled-java sources from this project).
+  parser. That caused me some headache because Gerrit versions smaller than 2.11 include a version of pegdown that is too old for
+  GitBlit.
 
 # Installation
 
@@ -204,13 +187,10 @@ from the official plugin and adapt them to match the `pom.xml`.
 # Alternatives
 
 Some time after I had released my first version of this plugin, Luca Milanesio had updated the [official plugin](https://gerrit.googlesource.com/plugins/gitblit/)
-to work again with Gerrit development version 2.11-rc0. Internally, it still uses a specially hacked Apache Wicket and Rome, and it's based on an as
+to work again with Gerrit release 2.11. Internally, it still uses a specially hacked Apache Wicket and Rome, and it's based on an as
 yet unreleased GitBlit version (James' [development branch](https://github.com/gitblit/gitblit/tree/develop) that should one day become
 GitBlit 1.7.0). You can find that "official plugin" on the [Gerrit CI server](https://ci.gerritforge.com/job/Plugin_gitblit_stable-2.11/).
 I have never used it, so I have no idea how well it works.
 
 The official versions of this plugin in the Gerrit repo for Gerrit versions smaller than 2.11 are all based on the old GitBlit 1.4.0 and all exhibit the
 problems mentioned above.
-
-Because it is my policy not to use unreleased software (release candidates, snapshots), there is currently no version of this plugin here for Gerrit 2.11.
-I'll update this plugin once that Gerrit version will be out officially.

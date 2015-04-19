@@ -31,8 +31,8 @@ import org.eclipse.jgit.util.IO;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
-import com.google.gerrit.server.MimeUtilFileTypeRegistry;
 import com.google.gerrit.server.config.SitePaths;
+import com.google.gerrit.server.mime.MimeUtilFileTypeRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -44,8 +44,8 @@ public class StaticResourcesServlet extends HttpServlet {
 	private static final long serialVersionUID = 5262736289985705065L;
 
 	/**
-	 * The resource must either be in one of the allowed subdirectories, or must match the filename pattern. If neither is true, we return a 404. There's a
-	 * whole lot of other stuff there that we don't want to expose.
+	 * The resource must either be in one of the allowed subdirectories, or must match the filename pattern. If neither is true, we return a 404.
+	 * There's a whole lot of other stuff there that we don't want to expose.
 	 */
 	private static final Set<String> ALLOWED_SUBDIRECTORIES = ImmutableSet.of("bootstrap", "flotr2", "fontawesome");
 	private static final Pattern ALLOWED_FILE_NAMES = Pattern.compile("^(?:gitblit\\.properties|.*\\.(?:png|css|js|swf))$");

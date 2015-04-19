@@ -57,8 +57,8 @@ public class DiffUtils {
 	public interface BinaryDiffHandler {
 
 		/**
-		 * Renders a binary diff. The result must be valid HTML, it will be inserted into an HTML table cell. May return {@code null} if the default behavior
-		 * (which is typically just a textual note "Bnary files differ") is desired.
+		 * Renders a binary diff. The result must be valid HTML, it will be inserted into an HTML table cell. May return {@code null} if the default
+		 * behavior (which is typically just a textual note "Bnary files differ") is desired.
 		 * 
 		 * @param diffEntry
 		 *            current diff entry
@@ -202,8 +202,8 @@ public class DiffUtils {
 	 * @param commit
 	 * @param outputType
 	 * @param handler
-	 *            to use for rendering binary diffs if {@code outputType} is {@link DiffOutputType#HTML HTML}. May be {@code null}, resulting in the default
-	 *            behavior.
+	 *            to use for rendering binary diffs if {@code outputType} is {@link DiffOutputType#HTML HTML}. May be {@code null}, resulting in the
+	 *            default behavior.
 	 * @return the diff
 	 */
 	public static DiffOutput getCommitDiff(Repository repository, RevCommit commit, DiffOutputType outputType, BinaryDiffHandler handler) {
@@ -231,8 +231,8 @@ public class DiffUtils {
 	 * @param path
 	 * @param outputType
 	 * @param handler
-	 *            to use for rendering binary diffs if {@code outputType} is {@link DiffOutputType#HTML HTML}. May be {@code null}, resulting in the default
-	 *            behavior.
+	 *            to use for rendering binary diffs if {@code outputType} is {@link DiffOutputType#HTML HTML}. May be {@code null}, resulting in the
+	 *            default behavior.
 	 * @return the diff
 	 */
 	public static DiffOutput getDiff(Repository repository, RevCommit commit, String path, DiffOutputType outputType, BinaryDiffHandler handler) {
@@ -260,11 +260,12 @@ public class DiffUtils {
 	 * @param commit
 	 * @param outputType
 	 * @param handler
-	 *            to use for rendering binary diffs if {@code outputType} is {@link DiffOutputType#HTML HTML}. May be {@code null}, resulting in the default
-	 *            behavior.
+	 *            to use for rendering binary diffs if {@code outputType} is {@link DiffOutputType#HTML HTML}. May be {@code null}, resulting in the
+	 *            default behavior.
 	 * @return the diff
 	 */
-	public static DiffOutput getDiff(Repository repository, RevCommit baseCommit, RevCommit commit, DiffOutputType outputType, BinaryDiffHandler handler) {
+	public static DiffOutput getDiff(Repository repository, RevCommit baseCommit, RevCommit commit, DiffOutputType outputType,
+			BinaryDiffHandler handler) {
 		return getDiff(repository, baseCommit, commit, null, outputType, handler);
 	}
 
@@ -295,8 +296,8 @@ public class DiffUtils {
 	 *            if the path is specified, the diff is restricted to that file or folder. if unspecified, the diff is for the entire commit.
 	 * @param outputType
 	 * @param handler
-	 *            to use for rendering binary diffs if {@code outputType} is {@link DiffOutputType#HTML HTML}. May be {@code null}, resulting in the default
-	 *            behavior.
+	 *            to use for rendering binary diffs if {@code outputType} is {@link DiffOutputType#HTML HTML}. May be {@code null}, resulting in the
+	 *            default behavior.
 	 * @return the diff
 	 */
 	public static DiffOutput getDiff(Repository repository, RevCommit baseCommit, RevCommit commit, String path, DiffOutputType outputType,
@@ -313,6 +314,7 @@ public class DiffUtils {
 				if (commit.getParentCount() > 0) {
 					final RevWalk rw = new RevWalk(repository);
 					baseCommit = rw.parseCommit(commit.getParent(0).getId());
+					rw.close();
 					rw.dispose();
 					baseTree = baseCommit.getTree();
 				} else {
@@ -357,6 +359,7 @@ public class DiffUtils {
 			} else {
 				diff = os.toString();
 			}
+			df.close();
 		} catch (Throwable t) {
 			LOGGER.error("failed to generate commit diff!", t);
 		}
@@ -372,8 +375,8 @@ public class DiffUtils {
 	 *            if base commit is unspecified, the patch is generated against the primary parent of the specified commit.
 	 * @param commit
 	 * @param path
-	 *            if path is specified, the patch is generated only for the specified file or folder. if unspecified, the patch is generated for the entire diff
-	 *            between the two commits.
+	 *            if path is specified, the patch is generated only for the specified file or folder. if unspecified, the patch is generated for the
+	 *            entire diff between the two commits.
 	 * @return patch as a string
 	 */
 	public static String getCommitPatch(Repository repository, RevCommit baseCommit, RevCommit commit, String path) {
@@ -392,6 +395,8 @@ public class DiffUtils {
 				if (commit.getParentCount() > 0) {
 					final RevWalk rw = new RevWalk(repository);
 					RevCommit parent = rw.parseCommit(commit.getParent(0).getId());
+					rw.close();
+					rw.dispose();
 					baseTree = parent.getTree();
 				} else {
 					// FIXME initial commit. no parent?!
@@ -414,6 +419,7 @@ public class DiffUtils {
 			}
 			diff = df.getPatch(commit);
 			df.flush();
+			df.close();
 		} catch (Throwable t) {
 			LOGGER.error("failed to generate commit diff!", t);
 		}
@@ -428,8 +434,8 @@ public class DiffUtils {
 	 *            if base commit is unspecified, the diffstat is generated against the primary parent of the specified tip.
 	 * @param tip
 	 * @param path
-	 *            if path is specified, the diffstat is generated only for the specified file or folder. if unspecified, the diffstat is generated for the
-	 *            entire diff between the two commits.
+	 *            if path is specified, the diffstat is generated only for the specified file or folder. if unspecified, the diffstat is generated for
+	 *            the entire diff between the two commits.
 	 * @return patch as a string
 	 */
 	public static DiffStat getDiffStat(Repository repository, String base, String tip) {
@@ -445,6 +451,7 @@ public class DiffUtils {
 		} catch (Exception e) {
 			LOGGER.error("failed to generate diffstat!", e);
 		} finally {
+			revWalk.close();
 			revWalk.dispose();
 		}
 		return null;
@@ -462,8 +469,8 @@ public class DiffUtils {
 	 *            if base commit is unspecified, the diffstat is generated against the primary parent of the specified commit.
 	 * @param commit
 	 * @param path
-	 *            if path is specified, the diffstat is generated only for the specified file or folder. if unspecified, the diffstat is generated for the
-	 *            entire diff between the two commits.
+	 *            if path is specified, the diffstat is generated only for the specified file or folder. if unspecified, the diffstat is generated for
+	 *            the entire diff between the two commits.
 	 * @return patch as a string
 	 */
 	public static DiffStat getDiffStat(Repository repository, RevCommit baseCommit, RevCommit commit, String path) {
@@ -481,6 +488,8 @@ public class DiffUtils {
 				if (commit.getParentCount() > 0) {
 					final RevWalk rw = new RevWalk(repository);
 					RevCommit parent = rw.parseCommit(commit.getParent(0).getId());
+					rw.close();
+					rw.dispose();
 					baseTree = parent.getTree();
 				} else {
 					// FIXME initial commit. no parent?!
@@ -503,6 +512,7 @@ public class DiffUtils {
 			}
 			stat = df.getDiffStat();
 			df.flush();
+			df.close();
 		} catch (Throwable t) {
 			LOGGER.error("failed to generate commit diff!", t);
 		}
