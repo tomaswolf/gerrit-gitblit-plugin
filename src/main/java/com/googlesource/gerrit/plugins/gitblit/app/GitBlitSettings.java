@@ -34,6 +34,7 @@ import com.gitblit.Keys;
 import com.gitblit.utils.StringUtils;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
+import com.google.gerrit.extensions.annotations.PluginData;
 import com.google.gerrit.server.config.GerritServerConfig;
 import com.google.gerrit.server.config.SitePaths;
 import com.google.gerrit.server.git.LocalDiskRepositoryManager;
@@ -49,7 +50,6 @@ public class GitBlitSettings extends IStoredSettings {
 	private static final String OVERRIDABLE_DEFAULT_PROPERTIES = "/gitblit-plugin-default.properties";
 	private static final String GERRIT_GITBLIT_PROPERTIES = "/gitblit.properties";
 	private static final String GERRIT_GITBLIT_PROPERTY_SOURCE_KEY = "gerrit_gitblit.property_source";
-	private static final String GITBLIT_DIR = "gitblit";
 
 	private static final String INCLUDE_KEY = "include"; // Keys.include doesn't exist for GitBlit < 1.7.0
 
@@ -58,13 +58,14 @@ public class GitBlitSettings extends IStoredSettings {
 	private final Properties properties = new Properties();
 
 	@Inject
-	public GitBlitSettings(final LocalDiskRepositoryManager repoManager, final @GerritServerConfig Config config, final SitePaths sitePaths) throws IOException {
+	public GitBlitSettings(LocalDiskRepositoryManager repoManager, @GerritServerConfig Config config, SitePaths sitePaths, @PluginData File homeDir)
+			throws IOException {
 		super(GitBlitSettings.class);
 		// Give GitBlit its own baseDir, otherwise it'll create subfolders in the git repo directory.
 		// Note that if you enable Lucene indexing for GitBlit, it will anyway create a subdirectory
 		// in that directory called "lucene". See com.gitblit.service.LuceneService. But at least we
 		// can keep GitBlit's plugins and tickets directories out of the way.
-		this.homeDir = ensureBaseDir(sitePaths.etc_dir);
+		this.homeDir = homeDir;
 		load(properties, sitePaths.etc_dir, new GitBlitUrlsConfig(config), repoManager.getBasePath());
 	}
 
@@ -80,25 +81,8 @@ public class GitBlitSettings extends IStoredSettings {
 	}
 
 	/**
-	 * Returns either a {@link #GITBLIT_DIR} subdirectory of {@code basePath} or {@code basePath} itself if such a directory doesn't exist and cannot be
-	 * created.
-	 * 
-	 * @param basePath
-	 *            to use for GitBlit's base path
-	 * @return the directory to use as GitBlit's base path.
-	 */
-	protected File ensureBaseDir(final File basePath) {
-		File dir = new File(basePath, GITBLIT_DIR);
-		if (dir.isDirectory() || !dir.exists() && dir.mkdir()) {
-			return dir;
-		} else {
-			return basePath;
-		}
-	}
-
-	/**
-	 * Loads the properties from the given {@link InputStream} using the UTF-8 character encoding. The stream is closed in all cases. A no-op if the stream is
-	 * {@code null}.
+	 * Loads the properties from the given {@link InputStream} using the UTF-8 character encoding. The stream is closed in all cases. A no-op if the
+	 * stream is {@code null}.
 	 * 
 	 * @param properties
 	 *            to load; must not be {@code null}
@@ -156,8 +140,8 @@ public class GitBlitSettings extends IStoredSettings {
 	 * @param parent
 	 *            parent file the properties were loaded from
 	 * @param alreadySeen
-	 *            set of files already visited in the current include chain; used to detect cycles and avoid endless recursion and stack overflow. Must contain
-	 *            {@code parent}.
+	 *            set of files already visited in the current include chain; used to detect cycles and avoid endless recursion and stack overflow.
+	 *            Must contain {@code parent}.
 	 */
 	protected void loadIncludedSettings(final Properties properties, final File parent, final Set<File> alreadySeen) {
 		Object includes = properties.remove(INCLUDE_KEY);
@@ -194,14 +178,15 @@ public class GitBlitSettings extends IStoredSettings {
 					alreadySeen.remove(file);
 				}
 			} catch (IOException ex) {
-				log.warn("Cannot load included settings '{}' from {}: {}", new Object[] { fileName, alreadySeen.toString(), ex.getLocalizedMessage() });
+				log.warn("Cannot load included settings '{}' from {}: {}",
+						new Object[] { fileName, alreadySeen.toString(), ex.getLocalizedMessage() });
 			}
 		}
 	}
 
 	/**
-	 * Loads the properties from the user-supplied gitblit.properties in $GERRIT_SITE/etc, if it exists, and then overwrites with the built-in properties to
-	 * ensure that GitBlit is set up as a viewer only and uses Gerrit's git repositories.
+	 * Loads the properties from the user-supplied gitblit.properties in $GERRIT_SITE/etc, if it exists, and then overwrites with the built-in
+	 * properties to ensure that GitBlit is set up as a viewer only and uses Gerrit's git repositories.
 	 * 
 	 * @param properties
 	 *            to load; must not be {@code null}
