@@ -42,7 +42,7 @@ public class GitBlitInitStep implements InitStep {
 		ui.message("\n");
 		ui.header("GitBlit Integration");
 
-		if (ui.yesno(true, "Do you want to use GitBlit as your GitWeb viewer ?")) {
+		if (ui.yesno(true, "Do you want to use GitBlit as your GitWeb viewer?")) {
 			configureGitBlit();
 		}
 		// If we don't use GitBlit here, we leave a potential [plugin "gitblit"] section in the config. It won't hurt,
@@ -53,13 +53,13 @@ public class GitBlitInitStep implements InitStep {
 	private void configureGitBlit() {
 		Section gitWeb = sections.get("gitweb", null);
 		gitWeb.set("type", "custom");
-		gitWeb.set("url", "plugins/");
-		gitWeb.set("project", pluginName + "/summary/?r=${project}");
-		gitWeb.set("revision", pluginName + "/commit/?r=${project}&h=${commit}");
-		gitWeb.set("branch", pluginName + "/log/?r=${project}&h=${branch}");
-		gitWeb.set("filehistory", pluginName + "/history/?f=${file}&r=${project}&h=${branch}");
-		gitWeb.set("file", pluginName + "/blob/?r=${project}&h=${commit}&f=${file}");
-		gitWeb.set("roottree", pluginName + "/tree/?r=${project}&h=${commit}");
+		gitWeb.set("url", "plugins/" + pluginName + '/');
+		gitWeb.set("project", "summary/?r=${project}");
+		gitWeb.set("revision", "commit/?r=${project}&h=${commit}");
+		gitWeb.set("branch", "log/?r=${project}&h=${branch}");
+		gitWeb.set("filehistory", "history/?f=${file}&r=${project}&h=${branch}");
+		gitWeb.set("file", "blob/?r=${project}&h=${commit}&f=${file}");
+		gitWeb.set("roottree", "tree/?r=${project}&h=${commit}");
 		gitWeb.string("Link name", "linkname", "GitBlit");
 		Section pluginCfg = sections.get("plugin", pluginName);
 		// These values are displayed in the UI.
