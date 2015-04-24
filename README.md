@@ -51,7 +51,7 @@ itself offers such a component, creating one would just create another specially
 
 A lot.
 
-Well, maybe not that much. But GitBlit has changed quite bit since 1.4.0; it's internal structure is different, and thus the
+Well, maybe not that much. But GitBlit has changed quite bit since 1.4.0; its internal structure is different, and thus the
 Guice injection setup must be much more complete. Whereas the original plugin was able to get this to work mostly with just wrapping
 some servlets and setting them up through Guice, one has to do quite a bit more with GitBlit 1.6.x.
 
