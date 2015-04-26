@@ -110,8 +110,8 @@ is that HotSpot 8.0 stores the class metadata no longer in the Java heap but in 
 
 # Configuration
 
-See the built-in [documentation](https://github.com/tomaswolf/gerrit-gitblit-plugin/blob/master/Documentation/index.md), which since
-version v2.11.162.2 is after installation also available as _\<Your_Gerrit_URL>_/plugins/gitblit/Documentation/ or through the
+See the built-in [documentation](https://github.com/tomaswolf/gerrit-gitblit-plugin/blob/master/src/main/resources/Documentation/index.md),
+which since version v2.11.162.2 is after installation also available as _\<Your_Gerrit_URL>_/plugins/gitblit/Documentation/ or through the
 "GitBlit&rarr;Documentation" menu item.
 
 # Caveats and To-dos
