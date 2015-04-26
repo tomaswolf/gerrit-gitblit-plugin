@@ -46,7 +46,8 @@ public class GerritGitBlitUserModel extends UserModel {
 		this.isAuthenticated = false;
 	}
 
-	public GerritGitBlitUserModel(String username, final ProjectControl.GenericFactory projectControlFactory, final Provider<? extends CurrentUser> userProvider) {
+	public GerritGitBlitUserModel(String username, final ProjectControl.GenericFactory projectControlFactory,
+			final Provider<? extends CurrentUser> userProvider) {
 		super(username);
 		this.username = username;
 		this.isAuthenticated = true;
@@ -61,7 +62,6 @@ public class GerritGitBlitUserModel extends UserModel {
 			if (control == null) {
 				return false;
 			}
-			// This is from the original "official" plugin. But is it correct? Isn't CLONE "receive" pack and PUSH "upload" pack?
 			switch (ifRestriction) {
 			case VIEW:
 				return control.isVisible();

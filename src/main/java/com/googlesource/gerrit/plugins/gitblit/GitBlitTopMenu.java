@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.collect.Lists;
-import com.google.gerrit.extensions.annotations.Listen;
 import com.google.gerrit.extensions.annotations.PluginCanonicalWebUrl;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.client.GerritTopMenu;
@@ -28,7 +27,6 @@ import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-@Listen
 public class GitBlitTopMenu implements TopMenu {
 
 	// Not configurable to avoid mis-configurations clashing with predefined top menus.
@@ -50,7 +48,11 @@ public class GitBlitTopMenu implements TopMenu {
 		// end up as text nodes in the DOM, even if they contain potentially malicious code. So if somebody sets these values to some HTML snippet,
 		// he'll simply end up with a funny looking menu item, but he can't inject things here.
 		MenuItem repositories = new MenuItem(cfg.getString("repositories", "Repositories"), gitBlitBaseUrl + "repositories/", "");
-		restrictedMenuEntries = new MenuEntry(GITBLIT_TOPMENU_NAME, Arrays.asList(repositories));
+		// GitBlit handles its own "/" url, so Gerrit won't produce any link, not even on the "plugins" page, that would display the documentation.
+		// I've considered simply redirecting "/" to "/Documentation/" since GitBlit's "/" screen is very similar to its "/activity/" screen, but
+		// decided finally to provide an explicit documentation submenu instead.
+		MenuItem documentation = new MenuItem(cfg.getString("documentation", "Documentation"), gitBlitBaseUrl + "Documentation/", "");
+		restrictedMenuEntries = new MenuEntry(GITBLIT_TOPMENU_NAME, Arrays.asList(repositories, documentation));
 		List<MenuItem> fullMenuItems = Lists.newArrayList();
 		fullMenuItems.add(repositories);
 		fullMenuItems.add(new MenuItem(cfg.getString("activity", "Activity"), gitBlitBaseUrl + "activity/", ""));
@@ -58,6 +60,7 @@ public class GitBlitTopMenu implements TopMenu {
 		if (search != null && !search.isEmpty()) {
 			fullMenuItems.add(new MenuItem(search, gitBlitBaseUrl + "lucene/", ""));
 		}
+		fullMenuItems.add(documentation);
 		fullMenuEntries = new MenuEntry(GITBLIT_TOPMENU_NAME, fullMenuItems);
 		// Actually, I'd like to give the project "browse" link only if the user has the right to see the contents of the repository. But how would
 		// I know in getEntries() below which is the "current" project? Since I don't know how to do that, we show that link always, based on the

@@ -65,6 +65,7 @@ public class GitBlitInitStep implements InitStep {
 		// These values are displayed in the UI.
 		pluginCfg.string("\"Repositories\" submenu title", "repositories", "Repositories", true);
 		pluginCfg.string("\"Activity\" submenu title", "activity", "Activity", true);
+		pluginCfg.string("\"Documentation\" submenu title", "documentation", "Documentation", true);
 		String originalValue = pluginCfg.get("search");
 		if (originalValue == null) {
 			pluginCfg.string("\"Search\" submenu title (makes only sense to set if some projects are indexed in GitBlit)", "search", "", true);

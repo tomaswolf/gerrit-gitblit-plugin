@@ -97,7 +97,7 @@ ssh YOUR_GERRIT_URL gerrit plugin install - -n gitblit < gitblit-plugin.VERSION.
 ssh YOUR_GERRIT_URL gerrit plugin reload gitblit
 ``` 
 
-Note: this is a fairly large plugin, adding many classes to the JVM Gerrit runs in. Depending on what kind of JVM you're using, I
+This is a fairly large plugin, adding many classes to the JVM Gerrit runs in. Depending on what kind of JVM you're using, I
 cannot exclude the possibility that adding GitBlit to Gerrit might lead to "java.lang.OutOfMemoryError: PermGen space". If you
 ever observe this, increase the "PermGen" memory for Gerrit. For the Oracle HotSpot JVM < 8.0, you'd do that by adding the option 
 `container.javaOptions = -XX:MaxPermSize=320m` (or whatever size you deem appropriate) to `gerrit.config`. Possibly you
@@ -110,47 +110,9 @@ is that HotSpot 8.0 stores the class metadata no longer in the Java heap but in 
 
 # Configuration
 
-There's two different configurations: one for Gerrit so it knows how to generate links that will be processed by the plugin, and
-an optional GitBlit configuration for the plugin itself.
-
-## Gerrit configuration
-
-In Gerrit's `gerrit.config`, define the `[gitweb]` section as follows (assuming the plugin was installed as `gitblit.jar`):
-
-```
-[gitweb]
-        type = custom
-        url = plugins/
-        linkname = browse
-        project = gitblit/summary/?r=${project}
-        revision = gitblit/commit/?r=${project}&h=${commit}
-        branch = gitblit/log/?r=${project}&h=${branch}
-        filehistory = gitblit/history/?f=${file}&r=${project}&h=${branch}
-        file = gitblit/blob/?r=${project}&h=${commit}&f=${file}
-        roottree = gitblit/tree/?r=${project}&h=${commit}
-```
-
-This is normally done automatically if you add the plugin and run through `java -jar gerrit.war init -d site_path`, but you can also
-add this manually to Gerrit's config file. The `linkname` can be adapted to your taste.
-
-## GitBlit configuration
-
-The plugin includes a minimal default configuration to make GitBlit act only as a repository viewer. You can augment that with further
-customizations in a normal [`gitblit.properties`](http://gitblit.com/properties.html) file located in Gerrit's `$GERRIT_SITE/etc` directory.
-The built-in configuration, which ensures that GitBlit is configured as a viewer only, always takes precedence. Also, the `git.repositoriesFolder`
-property is always set to Gerrit's git directory at `$GERRIT_SITE/git`.
-
-The GitBlit `${basePath}` is in Gerrit's `$GERRIT_SITE/etc` directory at `$GERRIT_SITE/etc/gitblit/`.
-
-Note that the loading order of GitBlit configurations is different from Luca's original plugin. The original plugin read _either_ the user-supplied
-file _or_ the built-in configuration, which meant if you wanted to customize GitBlit, you had to include the contents of the built-in config in your
-own file. That is no longer necessary with _this_ plugin; the user-supplied configuration augments the built-in one.
-
-To see the built-in configuration, access it at _\<Your_Gerrit_URL>_/plugins/gitblit/static/gitblit.properties.
-
-By default, the built-in configuration does allow anonymous browsing, subject to the repository and ref-level access restrictions defined in Gerrit.
-If you want to lock the GitBlit plugin to allow only logged-in users to browse, set in `$GERRIT_SITE/etc/gitblit.properties` the key
-`web.authenticateViewPages = true`. This is the only key of the built-in configuration that you _can_ override. 
+See the built-in [documentation](https://github.com/tomaswolf/gerrit-gitblit-plugin/blob/master/Documentation/index.md), which since
+version v2.11.162.2 is after installation also available as _\<Your_Gerrit_URL>_/plugins/gitblit/Documentation/ or through the
+"GitBlit&rarr;Documentation" menu item.
 
 # Caveats and To-dos
 
@@ -174,7 +136,7 @@ If you want to lock the GitBlit plugin to allow only logged-in users to browse, 
 
 # Building
 
-I use Eclipse for development (currently Kepler) with m2e and m2e-apt installed. Make sure m2e-apt is enabled for the project.
+I use Eclipse for development with m2e and m2e-apt installed. Make sure m2e-apt is enabled for the project.
 
 To build, run the maven target "package", for instance from the Eclipse IDE right-click the pom.xml file, select "Maven build..." from the
 context menu, enter "package" as target and click "Run". This produces a file "gitblit-plugin-_VERSION_.jar" in the target directory.
