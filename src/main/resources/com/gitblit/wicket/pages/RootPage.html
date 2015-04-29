@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"  
+      xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd"  
+      xml:lang="en"  
+      lang="en"> 
+<body>
+<wicket:extend>
+	<div class="navbar navbar-fixed-top">
+		<div class="navbar-inner">
+			<div class="container">
+				<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            			<span class="icon-bar"></span>
+            			<span class="icon-bar"></span>
+            			<span class="icon-bar"></span>
+          		</a>
+				<a class="brand" wicket:id="rootLink">
+					<img src="logo.png" style="max-height:45px; max-width:120px" class="logo"/>
+				</a>
+				
+				<div class="nav-collapse">
+					<div wicket:id="navPanel"></div>
+					<ul class="nav pull-right">
+					 	<span wicket:id="userPanel"></span>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+				
+	<!-- subclass content -->
+	<div class="container">
+		<div style="text-align:center" wicket:id="feedback">[Feedback Panel]</div>
+	</div>
+	
+	<wicket:child/>
+	
+	<wicket:fragment wicket:id="loginFormFragment">
+		<li>
+			<form class="pull-right" wicket:id="loginForm">
+				<span class="form-search">
+					<input wicket:id="username" class="input-small" type="text" />
+					<input wicket:id="password" class="input-small" type="password" />
+					<button class="btn" type="submit"><wicket:message key="gb.login"></wicket:message></button>
+				</span>
+			</form>
+		</li>
+	</wicket:fragment>
+	
+	<!-- user fragment -->
+	<wicket:fragment wicket:id="userMenuFragment">
+		<li class="dropdown">
+			<a data-toggle="dropdown" class="dropdown-toggle" style="text-decoration: none;" href="#"><span wicket:id="username"></span> <b class="caret"></b></a>
+        	<ul class="dropdown-menu">
+            	<span wicket:id="standardMenu"></span>
+            	<span wicket:id="adminMenu"></span>
+            	<span wicket:id="extensionsMenu"></span>
+        		<li><a wicket:id="logout"><wicket:message key="gb.logout"></wicket:message></a></li>
+			</ul>
+		</li>
+	</wicket:fragment>
+
+	<wicket:fragment wicket:id="submenuFragment">
+		<li style="color:#ccc;padding-left:15px;font-weight:bold;"><span wicket:id="submenuTitle"></span></li>
+		<li wicket:id="submenuItem"><span wicket:id="submenuLink"></span></li>
+	</wicket:fragment>
+	
+</wicket:extend>
+</body>
+</html>
