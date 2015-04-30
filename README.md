@@ -11,24 +11,29 @@ followed by the plugin version.So "v2.9.1.162.2" is version 2 of this plugin, in
 be [stable](https://gerrit-documentation.storage.googleapis.com/Documentation/2.10.1/dev-plugins.html#API) across minor version number increments, a
 plugin built against 2.9.1 also works with Gerrit 2.9, and one built against 2.10.1 should also work with 2.10.
 
+> If your running Gerrit 2.11 or newer, you might want to check whether the official plugin fulfills your needs. (To find a pre-built official plugin,
+> go to the [Gerrit CI server](https://ci.gerritforge.com/), find the "Plugin-gitblit" job matching your Gerrit version, click the link, and download
+> the jar from "Last Successful Artifacts".)
+
 ## Motivation
 
 The basic reason for doing this was to adapt the official plugin to work with a modern Gerrit (v2.9 or newer) and a modern GitBlit (v1.6.2).
+This was done at a time when Gerrit 2.9 and 2.10 were the current Gerrit releases, and the official plugin just didn't work well.
 
-The official plugin is a bit dated by now. Luca described his integration in a [slideshow](http://www.slideshare.net/lucamilanesio/gitblit-plugin-for-gerrit-code-review).
-Basically, this Gerrit-GitBlit plugin depends on a hacked version of Apache Wicket (classloading in UI), and on a hacked version
-of Apache Rome (classloading in RSS feeder). Additionally, it only works with a specially hacked version of GitBlit 1.4.0. In
-particular, Luca moved all the static resources in GitBlit into a "/static" subdirectory so that they'd be accessible by the
+The official plugin was a bit dated by then. Luca described his integration in a [slideshow](http://www.slideshare.net/lucamilanesio/gitblit-plugin-for-gerrit-code-review).
+Basically, this Gerrit-GitBlit plugin depended on a hacked version of Apache Wicket (classloading in UI), and on a hacked version
+of Apache Rome (classloading in RSS feeder). Additionally, it only worked with a specially hacked version of GitBlit 1.4.0. In
+particular, Luca had moved all the static resources in GitBlit into a "/static" subdirectory so that they'd be accessible by the
 standard Gerrit plugin mechanism, which does handle this directory specially.
 
-This works more or less, but has a number of problems:
+This worked more or less, but had a number of problems:
 
-* The official plugin doesn't produce branch graphs. That's [Gerrit bug 2942](https://code.google.com/p/gerrit/issues/detail?id=2942).
-* It somehow doesn't serve the Flash copy-paste helper.
-* GitBlit 1.4.0 produces diagrams and graphs using the Google charts API, making requests to Google.
+* The official plugin didn't produce branch graphs. That's [Gerrit bug 2942](https://code.google.com/p/gerrit/issues/detail?id=2942).
+* It somehow didn't serve the Flash copy-paste helper.
+* GitBlit 1.4.0 produced diagrams and graphs using the Google charts API, making requests to Google.
 * RSS feeds didn't work for me.
-* The official plugin sets the base path for GitBlit to Gerrit's git directory. It should point somewhere else.
-* Using a specially hacked GitBlit jar hosted at an apparently non-browseable Maven repository at GerritForge is a lock-in that
+* The official plugin set the base path for GitBlit to Gerrit's git directory. It should point somewhere else.
+* Using a specially hacked GitBlit jar hosted at an apparently non-browseable Maven repository at GerritForge was a lock-in that
   I wanted to avoid. It means there's no reasonably easy path to get bug fixes in GitBlit since this fork of GitBlit was produced.
   I wanted to have a Gerrit-GitBlit plugin working with the latest standard official release of GitBlit from
   the standard official [GitBlit maven repo](http://gitblit.github.io/gitblit-maven/).
@@ -57,8 +62,8 @@ some servlets and setting them up through Guice, one has to do quite a bit more 
 
 * I've fixed the "missing branch graphs": [Gerrit bug 2942](https://code.google.com/p/gerrit/issues/detail?id=2942)
 * I've made the RSS feed work.
-* I've given GitBlit its own base directory (at Gerrit's `$GERRIT_SITE/etc/gitblit`) to avoid that it creates subdirectories
-  in the git repository directory that don't have anything to do with git repositories.
+* I've given GitBlit its own base directory to avoid that it creates subdirectories in the git repository directory that don't have
+  anything to do with git repositories.
 * I've disabled GitBlit's own plugin mechanism. Two layers of plugins is too confusing, might not work as expected anyway, and in all
   likelihood is not needed since GitBlit is used only as a repository viewer in this plugin.
 * The dependency on GitBlit has been changed from Luca's special GitBlit version to the standard GitBlit 1.6.x distribution.
@@ -149,7 +154,7 @@ from the official plugin and adapt them to match the `pom.xml`.
 # Alternatives
 
 Some time after I had released my first version of this plugin, Luca Milanesio had updated the [official plugin](https://gerrit.googlesource.com/plugins/gitblit/)
-to work again with Gerrit release 2.11. Internally, it still uses a specially hacked Apache Wicket and Rome, and it's based on an as
+to work again with Gerrit release 2.11. Internally, it still uses a specially hacked Apache Wicket, and it's based on an as
 yet unreleased GitBlit version (James' [development branch](https://github.com/gitblit/gitblit/tree/develop) that should one day become
 GitBlit 1.7.0). You can find that "official plugin" on the [Gerrit CI server](https://ci.gerritforge.com/job/Plugin_gitblit_stable-2.11/).
 I have never used it, so I have no idea how well it works.
