@@ -11,7 +11,7 @@ followed by the plugin version.So "v2.9.1.162.2" is version 2 of this plugin, in
 be [stable](https://gerrit-documentation.storage.googleapis.com/Documentation/2.10.1/dev-plugins.html#API) across minor version number increments, a
 plugin built against 2.9.1 also works with Gerrit 2.9, and one built against 2.10.1 should also work with 2.10.
 
-> If your running Gerrit 2.11 or newer, you might want to check whether the official plugin fulfills your needs. (To find a pre-built official plugin,
+> If you're running Gerrit 2.11 or newer, you might want to check whether the official plugin fulfills your needs. (To find a pre-built official plugin,
 > go to the [Gerrit CI server](https://ci.gerritforge.com/), find the "Plugin-gitblit" job matching your Gerrit version, click the link, and download
 > the jar from "Last Successful Artifacts".)
 
