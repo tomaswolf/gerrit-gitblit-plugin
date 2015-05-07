@@ -66,7 +66,7 @@ public class GitBlitTopMenu implements TopMenu {
 		// I know in getEntries() below which is the "current" project? Since I don't know how to do that, we show that link always, based on the
 		// assumption that if a user can see a project at all, he can also see its contents. If not, gitblit will tell him so...
 		extraProjectEntries = new MenuEntry(GerritTopMenu.PROJECTS, Arrays.asList(new MenuItem(cfg.getString("browse", "Browse"), gitBlitBaseUrl
-				+ "summary?r=${projectName}", "")));
+				+ "summary/?r=${projectName}", "")));
 	}
 
 	@Override
