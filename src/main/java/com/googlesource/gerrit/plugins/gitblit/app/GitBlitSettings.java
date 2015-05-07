@@ -33,6 +33,7 @@ import com.gitblit.IStoredSettings;
 import com.gitblit.Keys;
 import com.gitblit.utils.StringUtils;
 import com.google.common.base.Charsets;
+import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import com.google.gerrit.extensions.annotations.PluginData;
 import com.google.gerrit.server.config.GerritServerConfig;
@@ -52,6 +53,7 @@ public class GitBlitSettings extends IStoredSettings {
 	private static final String GERRIT_GITBLIT_PROPERTY_SOURCE_KEY = "gerrit_gitblit.property_source";
 
 	private static final String INCLUDE_KEY = "include"; // Keys.include doesn't exist for GitBlit < 1.7.0
+	private static final String GERRIT_LOGIN_URL = "gerrit.loginUrl";
 
 	private final File homeDir;
 
@@ -240,6 +242,12 @@ public class GitBlitSettings extends IStoredSettings {
 			properties.put(Keys.web.otherUrls, gerritDefaultUrls + ' ' + properties.get(Keys.web.otherUrls));
 		} else {
 			properties.put(Keys.web.otherUrls, gerritDefaultUrls);
+		}
+		String loginUrl = config.getLoginUrl();
+		if (!Strings.isNullOrEmpty(loginUrl)) {
+			properties.put(GERRIT_LOGIN_URL, loginUrl);
+		} else {
+			properties.remove(GERRIT_LOGIN_URL);
 		}
 	}
 

@@ -68,6 +68,7 @@ import com.gitblit.models.NavLink.PageNavLink;
 import com.gitblit.models.RepositoryModel;
 import com.gitblit.models.TeamModel;
 import com.gitblit.models.UserModel;
+import com.gitblit.utils.HtmlBuilder;
 import com.gitblit.utils.ModelUtils;
 import com.gitblit.utils.StringUtils;
 import com.gitblit.wicket.GitBlitWebSession;
@@ -76,6 +77,7 @@ import com.gitblit.wicket.WicketUtils;
 import com.gitblit.wicket.panels.GravatarImage;
 import com.gitblit.wicket.panels.LinkPanel;
 import com.gitblit.wicket.panels.NavigationPanel;
+import com.google.common.base.Strings;
 
 /**
  * Root page is a topbar, navigable page like Repositories, Users, or Federation.
@@ -172,8 +174,20 @@ public abstract class RootPage extends BasePage {
 				UserMenu userFragment = new UserMenu("userPanel", "userMenuFragment", RootPage.this);
 				add(userFragment);
 			} else {
-				LoginForm loginForm = new LoginForm("userPanel", "loginFormFragment", RootPage.this);
-				add(loginForm);
+				String loginUrl = app().settings().getString("gerrit.loginUrl", null);
+				if (Strings.isNullOrEmpty(loginUrl)) {
+					LoginForm loginForm = new LoginForm("userPanel", "loginFormFragment", RootPage.this);
+					add(loginForm);
+				} else {
+					// Just create a "Log in..." link; the user will be directed to Gerrit's login mechanism. Needed if
+					// Gerrit uses an external authentication mechanism such as OpenID or OAuth. We replace the whole span
+					// by our own HTML; the <li> ensures (a) that the result is well-formed HTML (there's a <ul> around the
+					// "userPanel" span...) and (b) that the link gets the normal CSS for GitBlit top links and thus aligns
+					// correctly and has the right color scheme.
+					HtmlBuilder builder = new HtmlBuilder("li");
+					builder.root().appendElement("a").attr("href", loginUrl).appendText("Log in...");
+					add(new Label("userPanel", builder.toString()).setEscapeModelStrings(false).setRenderBodyOnly(true));
+				}
 			}
 		} else {
 			add(new Label("userPanel").setVisible(false));

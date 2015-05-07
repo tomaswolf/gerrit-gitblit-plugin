@@ -24,6 +24,9 @@ import org.eclipse.jgit.lib.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.gerrit.reviewdb.client.AuthType;
+
 public class GitBlitUrlsConfig {
 	private static final int SSH_DEF_PORT = 22;
 	private static final String GITBLIT_REPO = "{0}";
@@ -33,6 +36,7 @@ public class GitBlitUrlsConfig {
 	private final String canonicalWebUrlString;
 	private final String sshdListenAddressString;
 	private final String httpdListenUrlString;
+	private final String loginUrl;
 	private final List<String> downloadSchemes;
 
 	public GitBlitUrlsConfig(Config config) {
@@ -40,6 +44,28 @@ public class GitBlitUrlsConfig {
 		sshdListenAddressString = config.getString("sshd", null, "listenAddress");
 		httpdListenUrlString = config.getString("httpd", null, "listenUrl");
 		downloadSchemes = Arrays.asList(config.getStringList("download", null, "scheme"));
+		AuthType gerritAuthType = null;
+		try {
+			gerritAuthType = config.getEnum("auth", null, "type", AuthType.DEVELOPMENT_BECOME_ANY_ACCOUNT);
+		} catch (IllegalArgumentException ex) {
+			// Swallow; handled below.
+		}
+		String loginVia = null;
+		if (!ImmutableSet.of(AuthType.LDAP, AuthType.LDAP_BIND).contains(gerritAuthType)) {
+			loginVia = canonicalWebUrlString + (canonicalWebUrlString.endsWith("/") ? "" : "/") + "login/";
+		}
+		loginUrl = loginVia;
+	}
+
+	/**
+	 * Gets the login Url to use for GitBlit. If non-null, the plugin will only display a "Log in" link going to this Url instead of GitBlit's normal
+	 * username-password login form. This makes it possible to use the plugin with an external authentication provider as configured for Gerrit.
+	 * 
+	 * @return the login Url to use, if any, or {@code null} if GitBlit's normal login form shall be used (for instance, if Gerrit uses LDAP for
+	 *         authentication).
+	 */
+	public String getLoginUrl() {
+		return loginUrl;
 	}
 
 	public String getGitSshUrl() {
