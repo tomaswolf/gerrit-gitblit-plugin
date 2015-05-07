@@ -53,7 +53,7 @@ The first four are sub-menu items of the "GitBlit" top menu, the last one is a n
 for Gerrit's "current" project (since v2.11.162.2).
 
 The "search" sub-menu item is by default not set and will thus not be shown. Setting it makes only sense if you enable GitBlit indexing on some of
-your projects.
+your projects. See the [GitBlit documentation](http://gitblit.com/setup_lucene.html) for more information on that.
  
 ## GitBlit configuration
 
