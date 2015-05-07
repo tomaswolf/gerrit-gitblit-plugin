@@ -219,6 +219,8 @@ limitations under the License.
                     <exclude>com/gitblit/utils/GitBlitDiffFormatter.class</exclude> <!-- Diff improvements -->
                     <exclude>com/gitblit/utils/DiffUtils.class</exclude>
                     <exclude>com/gitblit/utils/DiffUtils$*.class</exclude>
+                    <exclude>com/gitblit/wicket/pages/RootPage.class</exclude><!--  Login link -->
+                    <exclude>com/gitblit/wicket/pages/RootPage$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/BasePage.class</exclude><!--  Support for bottom scripts -->
                     <exclude>com/gitblit/wicket/pages/BasePage$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/BlobPage.class</exclude><!--  Bug fix -->
