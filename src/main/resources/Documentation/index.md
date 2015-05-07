@@ -9,10 +9,9 @@ with full SSO through Gerrit.
 
 For a list of contributors, see at [GitHub](https://github.com/tomaswolf/gerrit-gitblit-plugin/graphs/contributors).
 
-This is a privately maintained fork from [GitHub](https://github.com/tomaswolf/gerrit-gitblit-plugin) of the official Gerrit-Gitblit plugin.
-Please report any issues with this plugin at the [GitHub issue tracker](https://github.com/tomaswolf/gerrit-gitblit-plugin/issues).
+This is a privately maintained fork of the official Gerrit-Gitblit plugin. Please report any issues with this plugin at the [GitHub issue tracker](https://github.com/tomaswolf/gerrit-gitblit-plugin/issues).
 
-For the official plugin, see the repository at [Google Code](https://gerrit.googlesource.com/plugins/gitblit/+/master).
+> For the official plugin, see the repository at [Google Code](https://gerrit.googlesource.com/plugins/gitblit/+/master).
 
 # Configuration
 
@@ -72,9 +71,9 @@ If you want to lock the GitBlit plugin to allow only logged-in users to browse, 
 GitBlit's ticket service, fan-out service, and its plugin mechanism are disabled in this plugin, as is ssh access through GitBlit since Gerrit
 already provides that.
 
-The GitBlit `${basePath}` is the plugin's data directory provided by Gerrit at `$GERRIT_SITE/data/@PLUGIN@/`.
+The GitBlit `${baseFolder}` is the plugin's data directory provided by Gerrit at `$GERRIT_SITE/data/@PLUGIN@/`.
 
-> Up to and including v2.11.162.1 of this plugin, GitBlit's `${basePath}` was at `$GERRIT_SITE/etc/@PLUGIN@/`. If you upgraded from that or an earlier
+> Up to and including v2.11.162.1 of this plugin, GitBlit's `${baseFolder}` was at `$GERRIT_SITE/etc/@PLUGIN@/`. If you upgraded from that or an earlier
 > version and do have data in `$GERRIT_SITE/etc/@PLUGIN@/`, move it over to the new place. The directory `$GERRIT_SITE/etc/@PLUGIN@/` can then be removed.
 
 # Issue tracking
