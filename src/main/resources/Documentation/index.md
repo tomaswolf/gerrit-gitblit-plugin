@@ -9,6 +9,11 @@ with full SSO through Gerrit.
 
 For a list of contributors, see at [GitHub](https://github.com/tomaswolf/gerrit-gitblit-plugin/graphs/contributors).
 
+This is a privately maintained fork from [GitHub](https://github.com/tomaswolf/gerrit-gitblit-plugin) of the official Gerrit-Gitblit plugin.
+Please report any issues with this plugin at the [GitHub issue tracker](https://github.com/tomaswolf/gerrit-gitblit-plugin/issues).
+
+For the official plugin, see the repository at [Google Code](https://gerrit.googlesource.com/plugins/gitblit/+/master).
+
 # Configuration
 
 There are two different configurations: one for Gerrit so it knows how to generate links that will be processed by the plugin, and
@@ -63,6 +68,9 @@ To see the built-in configuration, access it at [`gitblit.properties`](@URL@plug
 By default, the built-in configuration does allow anonymous browsing, subject to the repository and ref-level access restrictions defined in Gerrit.
 If you want to lock the GitBlit plugin to allow only logged-in users to browse, set in `$GERRIT_SITE/etc/gitblit.properties` the key
 `web.authenticateViewPages = true`. This is the only key of the built-in configuration that you _can_ override. 
+
+GitBlit's ticket service, fan-out service, and its plugin mechanism are disabled in this plugin, as is ssh access through GitBlit since Gerrit
+already provides that.
 
 The GitBlit `${basePath}` is the plugin's data directory provided by Gerrit at `$GERRIT_SITE/data/@PLUGIN@/`.
 
