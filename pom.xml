@@ -235,16 +235,6 @@ limitations under the License.
                 <filter>
                   <artifact>*:*</artifact>
                   <excludes>
-                    <!--
-                       Do not include wicket.properties. Otherwise, listeners get registered eagerly up front, and
-                       even twice. Looks like a bug in wicket. See org.apache.wicket.Initializer (which is set up in
-                       this file; wicket reads the class name from it and then loads the class in
-                       org.apache.wicket.Application.initializeComponents()). However, the initializer then performs
-                       this no longer needed eager listener interface registration. See
-                       org.apache.wicket.RequestListenerInterface.registerRequestListenerInterface() and the constructor,
-                       which already registers the interface.
-                      -->
-                    <exclude>wicket.properties</exclude>
                     <!-- No signatures; we'd end up with the wrong ones anyway. -->
                     <exclude>META-INF/*.SF</exclude>
                     <exclude>META-INF/*.DSA</exclude>
