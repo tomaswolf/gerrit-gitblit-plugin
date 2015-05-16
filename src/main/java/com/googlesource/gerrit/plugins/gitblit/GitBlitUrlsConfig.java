@@ -68,6 +68,15 @@ public class GitBlitUrlsConfig {
 		return loginUrl;
 	}
 
+	/**
+	 * Gets Gerrit's canonical web URL.
+	 * 
+	 * @return the Url
+	 */
+	public String getCanonicalWebUrl() {
+		return canonicalWebUrlString;
+	}
+
 	public String getGitSshUrl() {
 		if (sshdListenAddressString == null) {
 			return "";

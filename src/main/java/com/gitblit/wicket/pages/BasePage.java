@@ -252,6 +252,9 @@ public abstract class BasePage extends SessionPage {
 		WicketUtils.setHtmlTooltip(rootLink, app().settings().getString(Keys.web.siteName, Constants.NAME));
 		add(rootLink);
 
+		String gerritLinkUrl = app().settings().getString("gerrit.canonicalWebUrl", "");
+		add(new ExternalLink("gerritLink", gerritLinkUrl));
+
 		// Feedback panel for info, warning, and non-fatal error messages
 		add(new FeedbackPanel("feedback"));
 		add(new Label("gbVersion", "v" + Constants.getVersion()));

@@ -54,6 +54,7 @@ public class GitBlitSettings extends IStoredSettings {
 
 	private static final String INCLUDE_KEY = "include"; // Keys.include doesn't exist for GitBlit < 1.7.0
 	private static final String GERRIT_LOGIN_URL = "gerrit.loginUrl";
+	private static final String GERRIT_CANONICAL_WEB_URL = "gerrit.canonicalWebUrl";
 
 	private final File homeDir;
 
@@ -248,6 +249,10 @@ public class GitBlitSettings extends IStoredSettings {
 			properties.put(GERRIT_LOGIN_URL, loginUrl);
 		} else {
 			properties.remove(GERRIT_LOGIN_URL);
+		}
+		String canonicalWebUrl = config.getCanonicalWebUrl();
+		if (!Strings.isNullOrEmpty(canonicalWebUrl)) {
+			properties.put(GERRIT_CANONICAL_WEB_URL, canonicalWebUrl);
 		}
 	}
 
