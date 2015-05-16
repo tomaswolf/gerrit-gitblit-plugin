@@ -42,6 +42,15 @@ public class GitBlitUrlsConfig {
 		downloadSchemes = Arrays.asList(config.getStringList("download", null, "scheme"));
 	}
 
+	/**
+	 * Gets Gerrit's canonical web URL.
+	 * 
+	 * @return the Url
+	 */
+	public String getCanonicalWebUrl() {
+		return canonicalWebUrlString;
+	}
+
 	public String getGitSshUrl() {
 		if (sshdListenAddressString == null) {
 			return "";
