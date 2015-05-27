@@ -143,9 +143,7 @@ public class StaticResourcesServlet extends HttpServlet {
 			contentType = "text/css";
 		} else {
 			MimeType mimeType = mimeDetector.getMimeType(fileName, bytes);
-			if (mimeType != null) {
-				contentType = mimeType.toString();
-			}
+			contentType = mimeType != null ? mimeType.toString() : "application/octet-stream";
 		}
 		response.setContentType(contentType);
 		long lastModified = getLastModified(request);
