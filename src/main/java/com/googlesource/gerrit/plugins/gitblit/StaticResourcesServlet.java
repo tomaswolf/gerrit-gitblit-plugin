@@ -135,14 +135,16 @@ public class StaticResourcesServlet extends HttpServlet {
 			// Should not occur since we don't catch the possible IOException above. Nevertheless, let's be paranoid.
 			bytes = new byte[0];
 		}
-		MimeType mimeType = mimeDetector.getMimeType(fileName, bytes);
-		String contentType = mimeType != null ? mimeType.toString() : "application/octet-stream";
-		if ("application/octet-stream".equals(contentType)) {
-			// Gerrit's httpd daemon does this for js.
-			if (fileName.toLowerCase().endsWith(".js")) {
-				contentType = "application/javascript";
-			} else if (fileName.toLowerCase().endsWith(".css")) {
-				contentType = "text/css";
+		String contentType = null;
+		// Compare https://gerrit-review.googlesource.com/#/c/67000/
+		if (fileName.toLowerCase().endsWith(".js")) {
+			contentType = "application/javascript";
+		} else if (fileName.toLowerCase().endsWith(".css")) {
+			contentType = "text/css";
+		} else {
+			MimeType mimeType = mimeDetector.getMimeType(fileName, bytes);
+			if (mimeType != null) {
+				contentType = mimeType.toString();
 			}
 		}
 		response.setContentType(contentType);
