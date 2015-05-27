@@ -74,17 +74,19 @@
 			if (json.data && json.data.length > 0) {
 				// An array of objects.
 				for (var k=0; k < json.data.length; k++) {
-					var tag = json.data[k].tag_name;
-					var splitTag = split(tag);
-					if (splitTag.gerrit == currentTag.gerrit && (splitTag.gitblit > currentTag.gitblit || splitTag.gitblit == currentTag.gitblit && splitTag.plugin > currentTag.plugin)) {
-						var newLk = document.createElement('a');
-						newLk.href = json.data[k].html_url;
-						newLk.appendChild(document.createTextNode("A newer version " + tag + " is available."));
-						parent.insertBefore(newLk, lk);
-						parent.removeChild(lk);
-						delete window.pluginVersionCheck;
-						lk = null;
-						return;
+					if (!json.data[k].draft && !json.data[k].prerelease) {
+						var tag = json.data[k].tag_name;
+						var splitTag = split(tag);
+						if (splitTag.gerrit == currentTag.gerrit && (splitTag.gitblit > currentTag.gitblit || splitTag.gitblit == currentTag.gitblit && splitTag.plugin > currentTag.plugin)) {
+							var newLk = document.createElement('a');
+							newLk.href = json.data[k].html_url;
+							newLk.appendChild(document.createTextNode("A newer version " + tag + " is available."));
+							parent.insertBefore(newLk, lk);
+							parent.removeChild(lk);
+							delete window.pluginVersionCheck;
+							lk = null;
+							return;
+						}
 					}
 				}
 			}
