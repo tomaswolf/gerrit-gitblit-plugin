@@ -237,6 +237,27 @@ limitations under the License.
                     <exclude>com/gitblit/wicket/pages/BlobDiffPage.class</exclude>
                     <exclude>com/gitblit/wicket/pages/BlobDiffPage$*.class</exclude>
                     <exclude>gitblit.css</exclude><!-- Diff improvements -->
+                    <!-- JGit 4 compatibility: GitBlit 1.6.2 was built with JGit 3.5.1 and uses some methods that got removed in JGit 4. -->
+                    <exclude>com/gitblit/utils/CompressionUtils.class</exclude>
+                    <exclude>com/gitblit/utils/CompressionUtils$*.class</exclude>
+                    <exclude>com/gitblit/utils/JGitUtils.class</exclude>
+                    <exclude>com/gitblit/utils/JGitUtils$*.class</exclude>
+                    <exclude>com/gitblit/utils/RefLogUtils.class</exclude>
+                    <exclude>com/gitblit/utils/RefLogUtils$*.class</exclude>
+                    <exclude>com/gitblit/wicket/pages/NewRepositoryPage.class</exclude>
+                    <exclude>com/gitblit/wicket/pages/NewRepositoryPage$*.class</exclude>
+                    <exclude>com/gitblit/wicket/panels/HistoryPanel.class</exclude>
+                    <exclude>com/gitblit/wicket/panels/HistoryPanel$*.class</exclude>
+                    <exclude>com/gitblit/tickets/BranchTicketService.class</exclude>
+                    <exclude>com/gitblit/tickets/BranchTicketService$*.class</exclude>
+                    <exclude>com/gitblit/servlet/RawServlet.class</exclude>
+                    <exclude>com/gitblit/servlet/RawServlet$*.class</exclude>
+                    <exclude>com/gitblit/service/LuceneService.class</exclude>
+                    <exclude>com/gitblit/service/LuceneService$*.class</exclude>
+                    <exclude>com/gitblit/git/PatchsetReceivePack.class</exclude>
+                    <exclude>com/gitblit/git/PatchsetReceivePack$*.class</exclude>
+                    <exclude>com/syntevo/bugtraq/BugtraqConfig.class</exclude>
+                    <exclude>com/syntevo/bugtraq/BugtraqConfig$*.class</exclude>
                   </excludes>
                 </filter>
                 <filter>
