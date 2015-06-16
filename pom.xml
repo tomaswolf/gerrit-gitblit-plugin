@@ -253,6 +253,15 @@ limitations under the License.
                     <exclude>com/gitblit/git/PatchsetReceivePack$*.class</exclude>
                     <exclude>com/syntevo/bugtraq/BugtraqConfig.class</exclude>
                     <exclude>com/syntevo/bugtraq/BugtraqConfig$*.class</exclude>
+                    <!-- Remove direct dependencies on parboiled. -->
+                    <exclude>com/gitblit/wicket/panels/BooleanChoiceOption.class</exclude>
+                    <exclude>com/gitblit/wicket/panels/BooleanChoiceOption$*.class</exclude>
+                    <exclude>com/gitblit/wicket/panels/BooleanOption.class</exclude>
+                    <exclude>com/gitblit/wicket/panels/BooleanOption$*.class</exclude>
+                    <exclude>com/gitblit/wicket/panels/ChoiceOption.class</exclude>
+                    <exclude>com/gitblit/wicket/panels/ChoiceOption$*.class</exclude>
+                    <exclude>com/gitblit/wicket/SafeTextModel.class</exclude>
+                    <exclude>com/gitblit/wicket/SafeTextModel$*.class</exclude>                    
                   </excludes>
                 </filter>
                 <filter>
