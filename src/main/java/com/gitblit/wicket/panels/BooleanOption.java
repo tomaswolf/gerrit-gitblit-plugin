@@ -18,16 +18,15 @@ package com.gitblit.wicket.panels;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.model.IModel;
-import org.parboiled.common.StringUtils;
+import org.apache.wicket.util.string.Strings;
 
 /**
  * A re-usable checkbox option panel.
- *
- * [x] title
- *     description
- *
+ * 
+ * [x] title description
+ * 
  * @author James Moger
- *
+ * 
  */
 public class BooleanOption extends BasePanel {
 
@@ -36,14 +35,14 @@ public class BooleanOption extends BasePanel {
 	public BooleanOption(String wicketId, String title, String description, IModel<Boolean> model) {
 		super(wicketId);
 		add(new Label("name", title));
-		add(new Label("description", description).setVisible(!StringUtils.isEmpty(description)));
+		add(new Label("description", description).setVisible(!Strings.isEmpty(description)));
 		add(new CheckBox("checkbox", model));
 	}
 
 	public BooleanOption(String wicketId, String title, String description, CheckBox checkbox) {
 		super(wicketId);
 		add(new Label("name", title));
-		add(new Label("description", description).setVisible(!StringUtils.isEmpty(description)));
+		add(new Label("description", description).setVisible(!Strings.isEmpty(description)));
 		add(checkbox.setMarkupId("checkbox"));
 	}
 

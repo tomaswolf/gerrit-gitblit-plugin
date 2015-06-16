@@ -3,7 +3,7 @@ package com.gitblit.wicket;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.lang.Objects;
-import org.parboiled.common.StringUtils;
+import org.apache.wicket.util.string.Strings;
 import org.slf4j.LoggerFactory;
 
 public class SafeTextModel implements IModel<String> {
@@ -49,7 +49,7 @@ public class SafeTextModel implements IModel<String> {
 
 	@Override
 	public String getObject() {
-		if (StringUtils.isEmpty(value)) {
+		if (Strings.isEmpty(value)) {
 			return value;
 		}
 		String safeValue;
@@ -62,8 +62,7 @@ public class SafeTextModel implements IModel<String> {
 			break;
 		}
 		if (!value.equals(safeValue)) {
-			LoggerFactory.getLogger(getClass()).warn("XSS filter trigggered on suspicious form field value {}",
-					value);
+			LoggerFactory.getLogger(getClass()).warn("XSS filter trigggered on suspicious form field value {}", value);
 		}
 		return safeValue;
 	}
@@ -74,23 +73,19 @@ public class SafeTextModel implements IModel<String> {
 	}
 
 	@Override
-	public int hashCode()
-	{
+	public int hashCode() {
 		return Objects.hashCode(value);
 	}
 
 	@Override
-	public boolean equals(Object obj)
-	{
-		if (this == obj)
-		{
+	public boolean equals(Object obj) {
+		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof Model<?>))
-		{
+		if (!(obj instanceof Model<?>)) {
 			return false;
 		}
-		Model<?> that = (Model<?>)obj;
+		Model<?> that = (Model<?>) obj;
 		return Objects.equal(value, that.getObject());
 	}
 }

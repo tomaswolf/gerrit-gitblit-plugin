@@ -23,17 +23,15 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.model.IModel;
-import org.parboiled.common.StringUtils;
+import org.apache.wicket.util.string.Strings;
 
 /**
  * A re-usable conditional choice option panel.
- *
- * [x] title
- *     description
- *     [choices]
- *
+ * 
+ * [x] title description [choices]
+ * 
  * @author James Moger
- *
+ * 
  */
 public class BooleanChoiceOption<T> extends BasePanel {
 
@@ -42,10 +40,11 @@ public class BooleanChoiceOption<T> extends BasePanel {
 	final CheckBox checkbox;
 	final DropDownChoice<T> choice;
 
-	public BooleanChoiceOption(String wicketId, String title, String description, IModel<Boolean> checkboxModel, IModel<T> choiceModel, List<T> choices) {
+	public BooleanChoiceOption(String wicketId, String title, String description, IModel<Boolean> checkboxModel, IModel<T> choiceModel,
+			List<T> choices) {
 		super(wicketId);
 		add(new Label("name", title));
-		add(new Label("description", description).setVisible(!StringUtils.isEmpty(description)));
+		add(new Label("description", description).setVisible(!Strings.isEmpty(description)));
 
 		this.checkbox = new CheckBox("checkbox", checkboxModel);
 		checkbox.setOutputMarkupId(true);

@@ -20,17 +20,15 @@ import java.util.List;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.model.IModel;
-import org.parboiled.common.StringUtils;
+import org.apache.wicket.util.string.Strings;
 
 /**
  * A re-usable choice option panel.
- *
- * title
- *     description
- *     [choices]
- *
+ * 
+ * title description [choices]
+ * 
  * @author James Moger
- *
+ * 
  */
 public class ChoiceOption<T> extends BasePanel {
 
@@ -39,14 +37,14 @@ public class ChoiceOption<T> extends BasePanel {
 	public ChoiceOption(String wicketId, String title, String description, IModel<T> model, List<T> choices) {
 		super(wicketId);
 		add(new Label("name", title));
-		add(new Label("description", description).setVisible(!StringUtils.isEmpty(description)));
+		add(new Label("description", description).setVisible(!Strings.isEmpty(description)));
 		add(new DropDownChoice<>("choice", model, choices).setEnabled(choices.size() > 0));
 	}
 
 	public ChoiceOption(String wicketId, String title, String description, DropDownChoice<?> choice) {
 		super(wicketId);
 		add(new Label("name", title));
-		add(new Label("description", description).setVisible(!StringUtils.isEmpty(description)));
+		add(new Label("description", description).setVisible(!Strings.isEmpty(description)));
 		add(choice.setMarkupId("choice").setEnabled(choice.getChoices().size() > 0));
 	}
 }
