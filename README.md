@@ -7,9 +7,7 @@ It integrates [GitBlit](https://github.com/gitblit/gitblit) as a repository brow
 
 Pre-built jars (Java 7) are available as **[releases](https://github.com/tomaswolf/gerrit-gitblit-plugin/releases)**. Pick one with a version number
 matching your Gerrit version. Version numbering for this plugin is the Gerrit API version it was built for, followed by the collapsed GitBlit version,
-followed by the plugin version.So "v2.9.1.162.2" is version 2 of this plugin, integrating GitBlit 1.6.2 into Gerrit 2.9.1. Since the Gerrit API should
-be [stable](https://gerrit-documentation.storage.googleapis.com/Documentation/2.10.1/dev-plugins.html#API) across minor version number increments, a
-plugin built against 2.9.1 also works with Gerrit 2.9, and one built against 2.10.1 should also work with 2.10.
+followed by the plugin version.So "v2.9.1.162.2" is version 2 of this plugin, integrating GitBlit 1.6.2 into Gerrit 2.9.1.
 
 > If you're running Gerrit 2.11 or newer, you might want to check whether the official plugin fulfills your needs. (To find a pre-built official plugin,
 > go to the [Gerrit CI server](https://ci.gerritforge.com/), find the "Plugin-gitblit" job matching your Gerrit version, click the link, and download
@@ -90,6 +88,8 @@ Additional modifications were due to changes in GitBlit:
   parser. That caused me some headache because Gerrit versions smaller than 2.11 include a version of pegdown that is too old for
   GitBlit.
 
+As of Gerrit 2.11.1, the plugin also replaces some classes from GitBlit to make GitBlit work with the JGit 4.0 provided by Gerrit.
+
 # Installation
 
 Download the [latest release](https://github.com/tomaswolf/gerrit-gitblit-plugin/releases) for your Gerrit version and install
@@ -126,7 +126,7 @@ which since version v2.11.162.2 is after installation also available as _\<Your_
   *TODO 1*: I should give it a try and see if there any problems, and if so, if they can be worked around relatively easily in a self-contained
   way in the plugin itself. Even nicer: could GitBlit be made (easily!) to use Gerrit's Lucene index?
   
-* I run this plugin (v2.9.1.162.2) in a firewalled private network, and it seems to me that the authentication stuff is good enough. I do _not_ know
+* I run this plugin in a firewalled private network, and it seems to me that the authentication stuff is good enough. I do _not_ know
   whether it would be good enough for running this on a public network, or whether I goofed somewhere big time. I'm no web security
   expert and cannot make any guarantees. I strongly suspect that the RSS feed does not honour ref-level visibility restrictions; it only
   honours repository-level visibility.
@@ -154,10 +154,14 @@ from the official plugin and adapt them to match the `pom.xml`.
 # Alternatives
 
 Some time after I had released my first version of this plugin, Luca Milanesio had updated the [official plugin](https://gerrit.googlesource.com/plugins/gitblit/)
-to work again with Gerrit release 2.11. Internally, it still uses a specially hacked Apache Wicket, and it's based on an as
+to work again with Gerrit release 2.11. Internally it's based on an as
 yet unreleased GitBlit version (James' [development branch](https://github.com/gitblit/gitblit/tree/develop) that should one day become
 GitBlit 1.7.0). You can find that "official plugin" on the [Gerrit CI server](https://ci.gerritforge.com/job/Plugin_gitblit_stable-2.11/).
 I have never used it, so I have no idea how well it works.
+
+In early May 2015, some of my changes here were merged back into the official plugin, but there are still functional differences, mainly
+related to plugin reloading, raw file serving, handling of non-logged-in users, and how `gitblit.properties` is loaded and what default
+settings are provided by the plugin.
 
 The official versions of this plugin in the Gerrit repo for Gerrit versions smaller than 2.11 are all based on the old GitBlit 1.4.0 and all exhibit the
 problems mentioned above.
