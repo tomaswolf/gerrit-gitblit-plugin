@@ -27,11 +27,13 @@ import com.gitblit.manager.IRuntimeManager;
 import com.gitblit.manager.IUserManager;
 import com.gitblit.models.TeamModel;
 import com.gitblit.models.UserModel;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.extensions.registration.DynamicItem;
 import com.google.gerrit.httpd.WebSession;
 import com.google.gerrit.server.AnonymousUser;
 import com.google.gerrit.server.CurrentUser;
+import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.project.ProjectControl;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -85,6 +87,30 @@ public class GerritGitBlitUserManager implements IUserManager {
 			return new GerritGitBlitUserModel(projectControl, anonymousUser);
 		}
 		return new GerritGitBlitUserModel(username, projectControl, userProvider);
+	}
+
+	/**
+	 * GitBlit assumes all users (or user accounts) have a username (account name or login name). Gerrit allows users (accounts) to not have a
+	 * username, for instance if the account is created or logged in via Google OAuth. I such cases, we have to fake a username for GitBlit.
+	 * 
+	 * @return a GitBlit {@link UserModel} for an unnamed Gerrit account.
+	 */
+	public UserModel getUnnamedGerritUser() {
+		CurrentUser user = userProvider.get();
+		if (!user.isIdentifiedUser()) {
+			log.warn("\"Logged-in\" user according to session is anonymous.");
+			return new GerritGitBlitUserModel(projectControl, anonymousUser);
+		}
+		IdentifiedUser loggedInUser = (IdentifiedUser) user;
+		// We know that this user has no username. Synthesize one for GitBlit.
+		String fakeUserName = loggedInUser.getAccount().getPreferredEmail();
+		if (Strings.isNullOrEmpty(fakeUserName)) {
+			fakeUserName = loggedInUser.getAccount().getFullName();
+			if (Strings.isNullOrEmpty(fakeUserName)) {
+				fakeUserName = "external" + loggedInUser.getAccountId().toString();
+			}
+		}
+		return new GerritGitBlitUserModel(fakeUserName, projectControl, userProvider);
 	}
 
 	@Override

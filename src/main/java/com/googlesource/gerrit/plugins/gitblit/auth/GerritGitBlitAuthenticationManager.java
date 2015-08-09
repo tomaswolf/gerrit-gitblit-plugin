@@ -139,14 +139,24 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 
 		if (!session.isSignedIn()) {
 			log.warn("Gerrit session {} is not signed-in", session.getSessionId());
+			// XXX: maybe better return the anonymous user?
+			// return userManager.getUserModel((String) null);
 			return null;
 		}
 
-		if (!session.getCurrentUser().getUserName().equals(username)) {
-			log.warn("Gerrit session {} is not assigned to user {}", session.getSessionId(), username);
-			return null;
+		String userName = session.getCurrentUser().getUserName();
+		// Gerrit users not necessarily have a username. Google OAuth returns users without user names.
+		UserModel user;
+		if (Strings.isNullOrEmpty(userName)) {
+			user = userManager.getUnnamedGerritUser();
+		} else {
+			if (!userName.equals(username)) {
+				log.warn("Gerrit session {} is not assigned to user {}", session.getSessionId(), username);
+				return null;
+			}
+			user = userManager.getUserModel(userName);
 		}
-		return loggedIn(httpRequest, userManager.getUserModel(username), token, null);
+		return loggedIn(httpRequest, user, token, null);
 	}
 
 	@Override
