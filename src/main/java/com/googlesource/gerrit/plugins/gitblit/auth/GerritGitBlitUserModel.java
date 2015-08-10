@@ -42,8 +42,11 @@ public class GerritGitBlitUserModel extends UserModel {
 	private transient final Provider<? extends CurrentUser> userProvider;
 
 	public GerritGitBlitUserModel(final ProjectControl.GenericFactory projectControlFactory, final Provider<? extends CurrentUser> userProvider) {
-		this(ANONYMOUS_USER, projectControlFactory, userProvider);
+		super(ANONYMOUS_USER);
 		this.isAuthenticated = false;
+		this.projectControlFactory = projectControlFactory;
+		this.userProvider = userProvider;
+		this.displayName = this.username;
 	}
 
 	public GerritGitBlitUserModel(String username, final ProjectControl.GenericFactory projectControlFactory,
@@ -53,6 +56,14 @@ public class GerritGitBlitUserModel extends UserModel {
 		this.isAuthenticated = true;
 		this.projectControlFactory = projectControlFactory;
 		this.userProvider = userProvider;
+		CurrentUser user = userProvider.get();
+		if (user != null && user.isIdentifiedUser()) {
+			this.displayName = ((IdentifiedUser) user).getAccount().getFullName();
+			if (Strings.isNullOrEmpty(this.displayName)) {
+				this.displayName = this.username;
+			}
+			this.emailAddress = ((IdentifiedUser) user).getAccount().getPreferredEmail();
+		}
 	}
 
 	@Override
@@ -99,18 +110,6 @@ public class GerritGitBlitUserModel extends UserModel {
 			// Silently ignore and return false below.
 		}
 		return false;
-	}
-
-	@Override
-	public String getDisplayName() {
-		if (!ANONYMOUS_USER.equals(username) && Strings.isNullOrEmpty(displayName)) {
-			CurrentUser user = userProvider.get();
-			if (user != null && user.isIdentifiedUser()) {
-				displayName = ((IdentifiedUser) user).getAccount().getFullName();
-				return displayName;
-			}
-		}
-		return super.getDisplayName();
 	}
 
 }
