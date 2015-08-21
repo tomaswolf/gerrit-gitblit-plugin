@@ -45,9 +45,6 @@ public class WrappedPagesFilter extends PagesFilter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		if (gerritAuthFilter.doFilter(webSession, request, response, chain)) {
-			if (request instanceof HttpServletRequest) {
-				request = new FixedGuiceHttpServletRequest((HttpServletRequest) request);
-			}
 			super.doFilter(request, response, chain);
 		}
 	}

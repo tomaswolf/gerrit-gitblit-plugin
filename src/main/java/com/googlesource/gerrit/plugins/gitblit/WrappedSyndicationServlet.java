@@ -33,11 +33,6 @@ public class WrappedSyndicationServlet extends SyndicationServlet {
 	}
 
 	@Override
-	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		super.service(new FixedGuiceHttpServletRequest(request), response);
-	}
-
-	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 		// Set thread context class loader for Rome, which is used internally
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
