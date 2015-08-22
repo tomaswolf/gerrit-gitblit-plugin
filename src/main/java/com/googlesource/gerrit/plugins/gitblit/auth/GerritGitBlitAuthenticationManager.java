@@ -41,6 +41,8 @@ import com.google.gerrit.server.account.AccountException;
 import com.google.gerrit.server.account.AccountManager;
 import com.google.gerrit.server.account.AuthRequest;
 import com.google.gerrit.server.account.AuthResult;
+import com.google.gerrit.server.config.AuthConfig;
+import com.google.gerrit.server.config.CanonicalWebUrl;
 import com.google.inject.Inject;
 
 public class GerritGitBlitAuthenticationManager implements IAuthenticationManager {
@@ -51,6 +53,8 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 	private final DynamicItem<WebSession> gerritSession;
 	private final GerritGitBlitUserManager userManager;
 	private final IStoredSettings settings;
+	private final String gerritUrl;
+	private final String externalLogoutUrl;
 
 	/**
 	 * Path part of the canonical plugin URL.
@@ -60,11 +64,13 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 	@Inject
 	public GerritGitBlitAuthenticationManager(final AccountManager gerritAccountManager, final DynamicItem<WebSession> gerritSession,
 			final GerritGitBlitUserManager userManager, final IStoredSettings settings, @PluginName String pluginName,
-			@PluginCanonicalWebUrl String pluginUrl) {
+			@PluginCanonicalWebUrl String pluginUrl, @CanonicalWebUrl String canonicalGerritUrl, AuthConfig authConfig) {
 		this.gerritAccountManager = gerritAccountManager;
 		this.gerritSession = gerritSession;
 		this.userManager = userManager;
 		this.settings = settings;
+		this.gerritUrl = canonicalGerritUrl;
+		this.externalLogoutUrl = authConfig.getLogoutURL();
 		this.hostRelativePluginPath = extractPluginPath(pluginUrl, pluginName);
 	}
 
@@ -255,6 +261,25 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 	public void logout(HttpServletRequest request, HttpServletResponse response, UserModel user) {
 		gerritSession.get().logout();
 		setCookie(request, response, null);
+	}
+
+	/**
+	 * Logs out the user in GitBlit. Returns a URL to redirect to for Gerrit logout.
+	 * 
+	 * @return a URL to redirect to, or {@code null} if none.
+	 */
+	public String logoutAndRedirect(HttpServletRequest request, HttpServletResponse response, UserModel user) {
+		if (!Strings.isNullOrEmpty(gerritUrl)) {
+			setCookie(request, response, null);
+			// This redirect invokes the normal Gerrit logout process, regardless of what authentication mechanism is configured,
+			// so logout should work properly also for OAuth, OpenID, and also respect auth.logoutUrl.
+			return gerritUrl + (gerritUrl.endsWith("/") ? "" : "/") + "logout";
+		}
+		log.warn("gerrit.config should define gerrit.canonicalWebUrl");
+		// Try to log out ourselves. We have no access to the OAuth/OpenId sessions, so we can't do anything for those.
+		// See {@link com.google.gerrit.httpd.HttpLogoutServlet}.
+		logout(request, response, user);
+		return externalLogoutUrl;
 	}
 
 	@Override
