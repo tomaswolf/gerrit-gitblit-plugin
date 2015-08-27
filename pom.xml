@@ -245,14 +245,16 @@ limitations under the License.
                     <exclude>com/gitblit/Launcher.class</exclude>
                     <exclude>com/gitblit/Launcher$*.class</exclude>
                     <!-- More GitBlit fixes. We supply our own versions of these classes in our own bundle. -->
-                    <exclude>com/gitblit/wicket/pages/RootPage.class</exclude><!--  Login link -->
+                    <exclude>com/gitblit/wicket/pages/RootPage.class</exclude><!-- Login link -->
                     <exclude>com/gitblit/wicket/pages/RootPage$*.class</exclude>
-                    <exclude>com/gitblit/wicket/pages/BasePage.class</exclude><!--  Support for bottom scripts -->
+                    <exclude>com/gitblit/wicket/pages/BasePage.class</exclude><!-- Support for bottom scripts -->
                     <exclude>com/gitblit/wicket/pages/BasePage$*.class</exclude>
-                    <exclude>com/gitblit/wicket/pages/BlobPage.class</exclude><!--  Bug fix -->
+                    <exclude>com/gitblit/wicket/pages/BlobPage.class</exclude><!-- Bug fix -->
                     <exclude>com/gitblit/wicket/pages/BlobPage$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/LogoutPage.class</exclude><!-- Logout via redirect to Gerrit's /logout -->
                     <exclude>com/gitblit/wicket/pages/LogoutPage$*.class</exclude>
+                    <exclude>com/gitblit/utils/MetricUtils.class</exclude><!-- Bug fix -->
+                    <exclude>com/gitblit/utils/MetricUtils$*.class</exclude>
                     <!-- Diff improvements.fixes GitBlit issue 450 and adds improved image diff capabilities. -->
                     <exclude>com/gitblit/utils/GitBlitDiffFormatter.class</exclude>
                     <exclude>com/gitblit/utils/DiffUtils.class</exclude>
