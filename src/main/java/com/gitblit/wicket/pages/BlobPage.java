@@ -71,6 +71,10 @@ public class BlobPage extends RepositoryPage {
 			WicketUtils.setCssClass(c, "plainprint");
 			add(c);
 		} else {
+			// Path might also inadvertently refer to a subtree.
+			if (JGitUtils.isSubtree(getRepository(), getCommit().getTree(), blobPath)) {
+				throw new RedirectException(TreePage.class, WicketUtils.newPathParameter(repositoryName, objectId, blobPath));
+			}
 			// standard blob view
 			String extension = null;
 			if (blobPath.lastIndexOf('.') > -1) {

@@ -98,7 +98,7 @@ the downloaded jar file as `gitblit.jar` in Gerrit.
 If [remote plugin administration](https://gerrit-documentation.storage.googleapis.com/Documentation/2.9.1/config-gerrit.html#plugins)
 is enabled in Gerrit, this can be done for instance by doing (assuming you downloaded `gitblit-plugin.VERSION.jar`)
 ```
-ssh YOUR_GERRIT_URL gerrit plugin install - -n gitblit < gitblit-plugin.VERSION.jar
+ssh YOUR_GERRIT_URL gerrit plugin install - -n gitblit.jar < gitblit-plugin.VERSION.jar
 ssh YOUR_GERRIT_URL gerrit plugin reload gitblit
 ``` 
 

@@ -744,6 +744,52 @@ public class JGitUtils {
 	}
 
 	/**
+	 * Determines whether the path refers to a subTree.
+	 * 
+	 * @param repository
+	 * @param tree
+	 *            if null, the RevTree from HEAD is assumed.
+	 * @param path
+	 * @return {@code true} if the path refers to a subtree, {@code false} otherwise
+	 */
+	public static boolean isSubtree(Repository repository, RevTree tree, final String path) {
+		RevWalk rw = new RevWalk(repository);
+		try (TreeWalk tw = new TreeWalk(repository)) {
+			tw.setFilter(PathFilterGroup.createFromStrings(Collections.singleton(path)));
+			if (tree == null) {
+				ObjectId object = null;
+				try {
+					object = getDefaultBranch(repository);
+					if (object == null) {
+						return false;
+					}
+				} catch (Exception e) {
+					return false;
+				}
+				RevCommit commit = rw.parseCommit(object);
+				tree = commit.getTree();
+			}
+			tw.reset(tree);
+			while (tw.next()) {
+				if (tw.isSubtree()) {
+					if (path.equals(tw.getPathString())) {
+						return true;
+					}
+					tw.enterSubtree();
+					continue;
+				}
+				return false;
+			}
+		} catch (IOException e) {
+			return false;
+		} finally {
+			rw.close();
+			rw.dispose();
+		}
+		return false;
+	}
+
+	/**
 	 * Retrieves the raw byte content of a file in the specified tree.
 	 * 
 	 * @param repository
