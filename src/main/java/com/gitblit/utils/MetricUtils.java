@@ -93,8 +93,7 @@ public class MetricUtils {
 			for (RefModel tag : tags) {
 				tagMap.put(tag.getReferencedObjectId(), tag);
 			}
-			RevWalk revWalk = null;
-			try {
+			try (RevWalk revWalk = new RevWalk(repository)) {
 				// resolve branch
 				ObjectId branchObject;
 				if (StringUtils.isEmpty(objectId)) {
@@ -102,51 +101,47 @@ public class MetricUtils {
 				} else {
 					branchObject = repository.resolve(objectId);
 				}
+				if (branchObject != null) {
+					RevCommit lastCommit = revWalk.parseCommit(branchObject);
+					revWalk.markStart(lastCommit);
 
-				revWalk = new RevWalk(repository);
-				RevCommit lastCommit = revWalk.parseCommit(branchObject);
-				revWalk.markStart(lastCommit);
-
-				DateFormat df;
-				if (StringUtils.isEmpty(dateFormat)) {
-					// dynamically determine date format
-					RevCommit firstCommit = JGitUtils.getFirstCommit(repository, branchObject.getName());
-					int diffDays = (lastCommit.getCommitTime() - firstCommit.getCommitTime()) / (60 * 60 * 24);
-					total.duration = diffDays;
-					if (diffDays <= 365) {
-						// Days
-						df = new SimpleDateFormat("yyyy-MM-dd");
+					DateFormat df;
+					if (StringUtils.isEmpty(dateFormat)) {
+						// dynamically determine date format
+						RevCommit firstCommit = JGitUtils.getFirstCommit(repository, branchObject.getName());
+						int diffDays = (lastCommit.getCommitTime() - firstCommit.getCommitTime()) / (60 * 60 * 24);
+						total.duration = diffDays;
+						if (diffDays <= 365) {
+							// Days
+							df = new SimpleDateFormat("yyyy-MM-dd");
+						} else {
+							// Months
+							df = new SimpleDateFormat("yyyy-MM");
+						}
 					} else {
-						// Months
-						df = new SimpleDateFormat("yyyy-MM");
+						// use specified date format
+						df = new SimpleDateFormat(dateFormat);
 					}
-				} else {
-					// use specified date format
-					df = new SimpleDateFormat(dateFormat);
-				}
-				df.setTimeZone(timezone);
+					df.setTimeZone(timezone);
 
-				Iterable<RevCommit> revlog = revWalk;
-				for (RevCommit rev : revlog) {
-					Date d = JGitUtils.getCommitDate(rev);
-					String p = df.format(d);
-					if (!metricMap.containsKey(p)) {
-						metricMap.put(p, new Metric(p));
-					}
-					Metric m = metricMap.get(p);
-					m.count++;
-					total.count++;
-					if (tagMap.containsKey(rev.getId())) {
-						m.tag++;
-						total.tag++;
+					Iterable<RevCommit> revlog = revWalk;
+					for (RevCommit rev : revlog) {
+						Date d = JGitUtils.getCommitDate(rev);
+						String p = df.format(d);
+						if (!metricMap.containsKey(p)) {
+							metricMap.put(p, new Metric(p));
+						}
+						Metric m = metricMap.get(p);
+						m.count++;
+						total.count++;
+						if (tagMap.containsKey(rev.getId())) {
+							m.tag++;
+							total.tag++;
+						}
 					}
 				}
 			} catch (Throwable t) {
 				error(t, repository, "{0} failed to mine log history for date metrics of {1}", objectId);
-			} finally {
-				if (revWalk != null) {
-					revWalk.dispose();
-				}
 			}
 		}
 		List<String> keys = new ArrayList<String>(metricMap.keySet());
@@ -174,8 +169,7 @@ public class MetricUtils {
 	public static List<Metric> getAuthorMetrics(Repository repository, String objectId, boolean byEmailAddress) {
 		final Map<String, Metric> metricMap = new HashMap<String, Metric>();
 		if (JGitUtils.hasCommits(repository)) {
-			try {
-				RevWalk walk = new RevWalk(repository);
+			try (RevWalk walk = new RevWalk(repository)) {
 				// resolve branch
 				ObjectId branchObject;
 				if (StringUtils.isEmpty(objectId)) {
@@ -183,29 +177,31 @@ public class MetricUtils {
 				} else {
 					branchObject = repository.resolve(objectId);
 				}
-				RevCommit lastCommit = walk.parseCommit(branchObject);
-				walk.markStart(lastCommit);
+				if (branchObject != null) {
+					RevCommit lastCommit = walk.parseCommit(branchObject);
+					walk.markStart(lastCommit);
 
-				Iterable<RevCommit> revlog = walk;
-				for (RevCommit rev : revlog) {
-					String p;
-					if (byEmailAddress) {
-						p = rev.getAuthorIdent().getEmailAddress().toLowerCase();
-						if (StringUtils.isEmpty(p)) {
-							p = rev.getAuthorIdent().getName().toLowerCase();
-						}
-					} else {
-						p = rev.getAuthorIdent().getName().toLowerCase();
-						if (StringUtils.isEmpty(p)) {
+					Iterable<RevCommit> revlog = walk;
+					for (RevCommit rev : revlog) {
+						String p;
+						if (byEmailAddress) {
 							p = rev.getAuthorIdent().getEmailAddress().toLowerCase();
+							if (StringUtils.isEmpty(p)) {
+								p = rev.getAuthorIdent().getName().toLowerCase();
+							}
+						} else {
+							p = rev.getAuthorIdent().getName().toLowerCase();
+							if (StringUtils.isEmpty(p)) {
+								p = rev.getAuthorIdent().getEmailAddress().toLowerCase();
+							}
 						}
+						p = p.replace('\n', ' ').replace('\r', ' ').trim();
+						if (!metricMap.containsKey(p)) {
+							metricMap.put(p, new Metric(p));
+						}
+						Metric m = metricMap.get(p);
+						m.count++;
 					}
-					p = p.replace('\n', ' ').replace('\r', ' ').trim();
-					if (!metricMap.containsKey(p)) {
-						metricMap.put(p, new Metric(p));
-					}
-					Metric m = metricMap.get(p);
-					m.count++;
 				}
 			} catch (Throwable t) {
 				error(t, repository, "{0} failed to mine log history for author metrics of {1}", objectId);
