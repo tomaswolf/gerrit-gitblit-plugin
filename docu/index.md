@@ -24,7 +24,7 @@ In Gerrit's `gerrit.config`, define the `[gitweb]` section as follows:
 
 	[gitweb]
 	        type = custom
-	        url = plugins/@PLUGIN@/
+	        url = plugins/gitblit/
 	        linkname = browse
 	        project = summary/?r=${project}
 	        revision = commit/?r=${project}&h=${commit}
@@ -39,10 +39,10 @@ add this manually to Gerrit's config file. The `linkname` can be adapted to your
 ### Configuring the top menu
 
 This plugin adds a "GitBlit" top menu to Gerrit, and also a new sub-menu item to the "Projects" top menu. Since v2.11.162.2 of this plugin, the link
-texts for all sub-menu items can be configured to your taste in a `[plugin "@PLUGIN@"]` section in your `gerrit.config`. If the section is not present,
+texts for all sub-menu items can be configured to your taste in a `[plugin "gitblit"]` section in your `gerrit.config`. If the section is not present,
 or some values in that section are not defined, the plugin uses built-in default texts. The default configuration would correspond to
 
-	[plugin "@PLUGIN@"]
+	[plugin "gitblit"]
 	        repositories = Repositories
 	        activity = Activity
 	        documentation = Documentation
@@ -62,7 +62,7 @@ customizations in [a normal `gitblit.properties`](http://gitblit.com/properties.
 The built-in configuration, which ensures that GitBlit is configured as a viewer only, always takes precedence. Also, the `git.repositoriesFolder`
 property is always set to Gerrit's git directory at `$GERRIT_SITE/git`.
 
-To see the built-in configuration, access it at [`gitblit.properties`](@URL@plugins/@PLUGIN@/static/gitblit.properties).
+To see the built-in configuration, access it at [`gitblit.properties`](@URL@plugins/gitblit/static/gitblit.properties).
 
 By default, the built-in configuration does allow anonymous browsing, subject to the repository and ref-level access restrictions defined in Gerrit.
 If you want to lock the GitBlit plugin to allow only logged-in users to browse, set in `$GERRIT_SITE/etc/gitblit.properties` the key
@@ -71,10 +71,10 @@ If you want to lock the GitBlit plugin to allow only logged-in users to browse, 
 GitBlit's ticket service, fan-out service, and its plugin mechanism are disabled in this plugin, as is ssh access through GitBlit since Gerrit
 already provides that.
 
-The GitBlit `${baseFolder}` is the plugin's data directory provided by Gerrit at `$GERRIT_SITE/data/@PLUGIN@/`.
+The GitBlit `${baseFolder}` is the plugin's data directory provided by Gerrit at `$GERRIT_SITE/data/gitblit/`.
 
-> Up to and including v2.11.162.1 of this plugin, GitBlit's `${baseFolder}` was at `$GERRIT_SITE/etc/@PLUGIN@/`. If you upgraded from that or an earlier
-> version and do have data in `$GERRIT_SITE/etc/@PLUGIN@/`, move it over to the new place. The directory `$GERRIT_SITE/etc/@PLUGIN@/` can then be removed.
+> Up to and including v2.11.162.1 of this plugin, GitBlit's `${baseFolder}` was at `$GERRIT_SITE/etc/gitblit/`. If you upgraded from that or an earlier
+> version and do have data in `$GERRIT_SITE/etc/gitblit/`, move it over to the new place. The directory `$GERRIT_SITE/etc/gitblit/` can then be removed.
 
 # Issue tracking
 

@@ -117,6 +117,14 @@ limitations under the License.
             </goals>
             <configuration>
               <outputDirectory>docu</outputDirectory>
+              <useDefaultDelimiters>false</useDefaultDelimiters>
+              <delimiters>
+                <delimiter>BUILDREPLACE{*}</delimiter>
+                <delimiter>@</delimiter>
+              </delimiters>
+              <filters>
+                <filters>online-docu.properties</filters>
+              </filters>
               <resources>
                 <resource>
                   <directory>src/main/resources/Documentation</directory>
