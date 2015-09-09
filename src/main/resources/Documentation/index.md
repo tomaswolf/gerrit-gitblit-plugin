@@ -29,8 +29,8 @@ In Gerrit's `gerrit.config`, define the `[gitweb]` section as follows:
 	        project = summary/?r=${project}
 	        revision = commit/?r=${project}&h=${commit}
 	        branch = log/?r=${project}&h=${branch}
-	        filehistory = history/?f=\${file}&r=${project}&h=${branch}
-	        file = blob/?r=${project}&h=${commit}&f=\${file}
+	        filehistory = history/?f=${file}&r=${project}&h=${branch}
+	        file = blob/?r=${project}&h=${commit}&f=${file}
 	        roottree = tree/?r=${project}&h=${commit}
 
 This is normally done automatically if you add the plugin and run through `java -jar gerrit.war init -d site_path`, but you can also
