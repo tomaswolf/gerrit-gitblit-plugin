@@ -62,7 +62,7 @@ customizations in [a normal `gitblit.properties`](http://gitblit.com/properties.
 The built-in configuration, which ensures that GitBlit is configured as a viewer only, always takes precedence. Also, the `git.repositoriesFolder`
 property is always set to Gerrit's git directory at `$GERRIT_SITE/git`.
 
-To see the built-in configuration, access it at [`gitblit.properties`](@URL@plugins/gitblit/static/gitblit.properties).
+To see the built-in configuration, access it at [`gitblit.properties`](../src/main/resources/gitblit.properties).
 
 By default, the built-in configuration does allow anonymous browsing, subject to the repository and ref-level access restrictions defined in Gerrit.
 If you want to lock the GitBlit plugin to allow only logged-in users to browse, set in `$GERRIT_SITE/etc/gitblit.properties` the key

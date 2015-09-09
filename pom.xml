@@ -120,6 +120,7 @@ limitations under the License.
               <useDefaultDelimiters>false</useDefaultDelimiters>
               <delimiters>
                 <delimiter>BUILDREPLACE{*}</delimiter>
+                <delimiter>(@URL@plugins/@PLUGIN@/*/gitblit.properties)</delimiter>
                 <delimiter>@</delimiter>
               </delimiters>
               <filters>
