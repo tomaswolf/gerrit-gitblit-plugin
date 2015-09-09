@@ -104,8 +104,31 @@ limitations under the License.
         <artifactId>maven-resources-plugin</artifactId>
         <version>2.7</version>
         <configuration>
-          <escapeString>\</escapeString>
+          <useDefaultDelimiters>false</useDefaultDelimiters>
+          <delimiters>
+            <delimiter>BUILDREPLACE{*}</delimiter>
+          </delimiters>
         </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>docu</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/main/resources/Documentation</directory>
+                  <filtering>true</filtering>
+                  <includes>
+                    <include>**/*.md</include>
+                  </includes>
+                </resource>
+              </resources>
+			</configuration>   
+	      </execution>     	
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
