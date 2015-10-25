@@ -20,7 +20,7 @@ limitations under the License.
   <artifactId>gitblit-plugin</artifactId>
   <description>GitBlit for Gerrit integrated as a plugin</description>
   <name>Gerrit - GitBlit Plugin</name>
-  <version>2.11.3.162.2-SNAPSHOT</version><!-- Gerrit API version followed by collapsed GitBlit version, followed by plugin version -->
+  <version>2.11.3.162.3-SNAPSHOT</version><!-- Gerrit API version followed by collapsed GitBlit version, followed by plugin version -->
   <licenses>
     <license>
       <name>Apache License 2.0</name>
@@ -295,7 +295,9 @@ limitations under the License.
                     <exclude>com/gitblit/wicket/panels/ChoiceOption.class</exclude>
                     <exclude>com/gitblit/wicket/panels/ChoiceOption$*.class</exclude>
                     <exclude>com/gitblit/wicket/SafeTextModel.class</exclude>
-                    <exclude>com/gitblit/wicket/SafeTextModel$*.class</exclude>                    
+                    <exclude>com/gitblit/wicket/SafeTextModel$*.class</exclude>    
+                    <!-- Newer prettify -->
+                    <exclude>com/gitblit/wicket/pages/prettify/</exclude>
                   </excludes>
                 </filter>
                 <filter>

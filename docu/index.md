@@ -5,7 +5,7 @@ with full SSO through Gerrit.
 
 * License: [Apache Public License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 * [Home page](https://github.com/tomaswolf/gerrit-gitblit-plugin)
-* Installed plugin version: <em id='gerrit-gitblit-current-version'>2.11.3.162.2-SNAPSHOT</em> &mdash; <a id='gerrit-gitblit-version-check' style='display:none;' href='#'>Check for updates</a>
+* Installed plugin version: <em id='gerrit-gitblit-current-version'>2.11.3.162.3-SNAPSHOT</em> &mdash; <a id='gerrit-gitblit-version-check' style='display:none;' href='#'>Check for updates</a>
 
 For a list of contributors, see at [GitHub](https://github.com/tomaswolf/gerrit-gitblit-plugin/graphs/contributors).
 
@@ -82,7 +82,7 @@ Report bugs or make feature requests at the [GitHub issue tracker](https://githu
 
 <hr style="color: #C0C0C0; background-color: #C0C0C0; border-color: #C0C0C0; height: 2px;" />
 <div style="float:right;">
-<a href="https://github.com/tomaswolf/gerrit-gitblit-plugin" target="_blank">GitBlit plugin 2.11.3.162.2-SNAPSHOT</a>
+<a href="https://github.com/tomaswolf/gerrit-gitblit-plugin" target="_blank">GitBlit plugin 2.11.3.162.3-SNAPSHOT</a>
 </div>
 
 <script type="text/javascript" src="version_check.js"></script>
