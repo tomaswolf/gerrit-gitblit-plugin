@@ -22,10 +22,14 @@ import java.util.Map;
 import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.RedirectException;
+import org.apache.wicket.behavior.HeaderContributor;
+import org.apache.wicket.markup.html.IHeaderContributor;
+import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.ExternalLink;
+import org.apache.wicket.markup.html.resources.JavascriptResourceReference;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 
@@ -43,6 +47,46 @@ import com.gitblit.wicket.panels.PathBreadcrumbsPanel;
 
 @CacheControl(LastModified.BOOT)
 public class BlobPage extends RepositoryPage {
+
+	private final static Map<String, String> prettifyExtensions = initPrettify();
+
+	private static void fill(Map<String, String> map, String value, String... keys) {
+		for (String key : keys) {
+			map.put(key, value);
+		}
+	}
+
+	private static Map<String, String> initPrettify() {
+		Map<String, String> map = new HashMap<>();
+		fill(map, "apollo", "apollo", "agc", "aea");
+		fill(map, "basic", "basic", "cbm");
+		fill(map, "clj", "clj");
+		fill(map, "dart", "dart");
+		fill(map, "erlang", "erlang", "erl");
+		fill(map, "go", "go");
+		fill(map, "hs", "hs");
+		fill(map, "lisp", "cl", "el", "lisp", "lsp", "scm", "ss", "rkt");
+		fill(map, "llvm", "llvm", "ll");
+		fill(map, "lua", "lua");
+		fill(map, "matlab", "matlab");
+		fill(map, "ml", "fs", "ml"); //
+		fill(map, "mumps", "mumps");
+		fill(map, "n", "n", "nemerle");
+		fill(map, "pascal", "pascal");
+		fill(map, "proto", "proto");
+		fill(map, "r", "r", "s", "R", "S", "Splus");
+		fill(map, "rd", "Rd", "rd");
+		fill(map, "scala", "scala");
+		fill(map, "sql", "sql");
+		fill(map, "tcl", "tcl");
+		fill(map, "tex", "tex", "latex");
+		fill(map, "vb", "vb", "vbs");
+		fill(map, "vhdl", "vhdl", "vhd");
+		fill(map, "wiki", "wiki.meta");
+		fill(map, "xq", "xq", "xquery");
+		fill(map, "yaml", "yaml", "yml");
+		return map;
+	}
 
 	protected String fileExtension;
 
@@ -138,6 +182,22 @@ public class BlobPage extends RepositoryPage {
 						table = missingBlob(blobPath, commit);
 					} else {
 						table = generateSourceView(source, extension, type == 1);
+						if (type == 1) {
+							String prettifyLabel = prettifyExtensions.get(extension);
+							if (prettifyLabel != null) {
+								final String fileName = "prettify/lang-" + extension + ".js";
+								add(new HeaderContributor(new IHeaderContributor() {
+									private static final long serialVersionUID = 1L;
+
+									@Override
+									public void renderHead(IHeaderResponse response) {
+										response.renderJavascriptReference(new JavascriptResourceReference(BlobPage.this.getClass(), fileName));
+									}
+
+								}));
+							}
+						}
+						addBottomScriptInline("jQuery(prettyPrint);");
 					}
 					add(new Label("blobText", table).setEscapeModelStrings(false));
 					add(new Image("blobImage").setVisible(false));
@@ -151,6 +211,7 @@ public class BlobPage extends RepositoryPage {
 					table = missingBlob(blobPath, commit);
 				} else {
 					table = generateSourceView(source, null, false);
+					addBottomScriptInline("jQuery(prettyPrint);");
 				}
 				add(new Label("blobText", table).setEscapeModelStrings(false));
 				add(new Image("blobImage").setVisible(false));

@@ -296,8 +296,6 @@ limitations under the License.
                     <exclude>com/gitblit/wicket/panels/ChoiceOption$*.class</exclude>
                     <exclude>com/gitblit/wicket/SafeTextModel.class</exclude>
                     <exclude>com/gitblit/wicket/SafeTextModel$*.class</exclude>    
-                    <!-- Newer prettify -->
-                    <exclude>com/gitblit/wicket/pages/prettify/</exclude>
                   </excludes>
                 </filter>
                 <filter>
