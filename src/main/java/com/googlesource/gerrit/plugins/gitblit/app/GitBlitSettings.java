@@ -69,7 +69,7 @@ public class GitBlitSettings extends IStoredSettings {
 		// in that directory called "lucene". See com.gitblit.service.LuceneService. But at least we
 		// can keep GitBlit's plugins and tickets directories out of the way.
 		this.homeDir = homeDir;
-		load(properties, sitePaths.etc_dir, new GitBlitUrlsConfig(config), repoManager.getBasePath());
+		load(properties, sitePaths.etc_dir.toFile(), new GitBlitUrlsConfig(config), repoManager.getBasePath().toFile());
 	}
 
 	@Override

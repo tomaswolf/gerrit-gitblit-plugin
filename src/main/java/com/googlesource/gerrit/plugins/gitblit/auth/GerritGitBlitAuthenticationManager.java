@@ -150,7 +150,7 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 			return null;
 		}
 
-		String userName = session.getCurrentUser().getUserName();
+		String userName = session.getUser().getUserName();
 		// Gerrit users not necessarily have a username. Google OAuth returns users without user names.
 		UserModel user;
 		if (Strings.isNullOrEmpty(userName)) {
@@ -308,7 +308,7 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 	}
 
 	private UserModel loggedIn(HttpServletRequest request, UserModel user, String credentials, AuthResult authentication) {
-		if (authentication != null && !gerritSession.get().getCurrentUser().isIdentifiedUser()) {
+		if (authentication != null && !gerritSession.get().getUser().isIdentifiedUser()) {
 			log.warn("Setting account after log-in for " + user.getName());
 			// We just logged in via Gerrit. However, if somehow somewhere some code called getCurrentUser() on that WebSession object before,
 			// the "current user object" remains stuck on the previous value. Happens for instance in WrappedSyndicationFilter after the 401

@@ -59,7 +59,7 @@ public class StaticResourcesServlet extends HttpServlet {
 	public StaticResourcesServlet(final MimeUtilFileTypeRegistry mimeDetector, final SitePaths sitePaths) {
 		super();
 		this.mimeDetector = mimeDetector;
-		this.gerritPluginDirectory = sitePaths.plugins_dir;
+		this.gerritPluginDirectory = sitePaths.plugins_dir.toFile();
 	}
 
 	@Override

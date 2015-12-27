@@ -58,7 +58,7 @@ public class GerritGitBlitUserManager implements IUserManager {
 		this.userProvider = new Provider<CurrentUser>() {
 			@Override
 			public CurrentUser get() {
-				return gerritSession.get().getCurrentUser();
+				return gerritSession.get().getUser();
 			}
 		};
 		this.anonymousUser = anonymousUser;
