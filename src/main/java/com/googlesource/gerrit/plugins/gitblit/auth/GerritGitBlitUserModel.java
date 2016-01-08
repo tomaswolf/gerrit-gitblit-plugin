@@ -15,15 +15,21 @@ package com.googlesource.gerrit.plugins.gitblit.auth;
 
 import java.io.IOException;
 
+import org.eclipse.jgit.errors.ConfigInvalidException;
+
 import com.gitblit.Constants.AccessPermission;
 import com.gitblit.Constants.AccessRestrictionType;
 import com.gitblit.models.RepositoryModel;
 import com.gitblit.models.UserModel;
 import com.gitblit.utils.StringUtils;
 import com.google.common.base.Strings;
+import com.google.gerrit.extensions.client.DiffPreferencesInfo;
+import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.reviewdb.client.Project.NameKey;
 import com.google.gerrit.server.CurrentUser;
 import com.google.gerrit.server.IdentifiedUser;
+import com.google.gerrit.server.account.AccountResource;
+import com.google.gerrit.server.account.GetDiffPreferences;
 import com.google.gerrit.server.project.NoSuchProjectException;
 import com.google.gerrit.server.project.ProjectControl;
 import com.google.gerrit.server.project.RefControl;
@@ -40,22 +46,26 @@ public class GerritGitBlitUserModel extends UserModel {
 
 	private transient final ProjectControl.GenericFactory projectControlFactory;
 	private transient final Provider<? extends CurrentUser> userProvider;
+	private transient final GetDiffPreferences getDiffPreferences;
 
-	public GerritGitBlitUserModel(final ProjectControl.GenericFactory projectControlFactory, final Provider<? extends CurrentUser> userProvider) {
+	public GerritGitBlitUserModel(final ProjectControl.GenericFactory projectControlFactory, final Provider<? extends CurrentUser> userProvider,
+			final GetDiffPreferences getDiffPreferences) {
 		super(ANONYMOUS_USER);
 		this.isAuthenticated = false;
 		this.projectControlFactory = projectControlFactory;
 		this.userProvider = userProvider;
 		this.displayName = this.username;
+		this.getDiffPreferences = getDiffPreferences;
 	}
 
 	public GerritGitBlitUserModel(String username, final ProjectControl.GenericFactory projectControlFactory,
-			final Provider<? extends CurrentUser> userProvider) {
+			final Provider<? extends CurrentUser> userProvider, final GetDiffPreferences getDiffPreferences) {
 		super(username);
 		this.username = username;
 		this.isAuthenticated = true;
 		this.projectControlFactory = projectControlFactory;
 		this.userProvider = userProvider;
+		this.getDiffPreferences = getDiffPreferences;
 		CurrentUser user = userProvider.get();
 		if (user != null && user.isIdentifiedUser()) {
 			this.displayName = ((IdentifiedUser) user).getAccount().getFullName();
@@ -112,4 +122,26 @@ public class GerritGitBlitUserModel extends UserModel {
 		return false;
 	}
 
+	/**
+	 * Retrieves the Gerrit preference setting for the number of diff context lines. A value < 0 indicates a "full file" context. If the current user
+	 * is not logged in, returns the Gitblit (and JGit) default of 3, otherwise the setting as configured by the user in his Gerrit settings.
+	 * 
+	 * @return the number of context lines to display in a diff, or < 0 if the whole file shall be shown.
+	 */
+	public int diffContext() {
+		CurrentUser user = userProvider.get();
+		if (user != null && user.isIdentifiedUser()) {
+			AccountResource accountRsc = new AccountResource((IdentifiedUser) user);
+			try {
+				DiffPreferencesInfo diffPrefs = getDiffPreferences.apply(accountRsc);
+				if (diffPrefs != null) {
+					return diffPrefs.context;
+				}
+			} catch (AuthException | ConfigInvalidException | IOException e) {
+				// Ignore and return default below.
+			}
+		}
+		// This is the DiffFormatter default, and what Gitblit normally uses. The Gerrit default is 10.
+		return 3;
+	}
 }

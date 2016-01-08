@@ -20,7 +20,7 @@ limitations under the License.
   <artifactId>gitblit-plugin</artifactId>
   <description>GitBlit for Gerrit integrated as a plugin</description>
   <name>Gerrit - GitBlit Plugin</name>
-  <version>2.12.162.1-SNAPSHOT</version><!-- Gerrit API version followed by collapsed GitBlit version, followed by plugin version -->
+  <version>2.12.162.2-SNAPSHOT</version><!-- Gerrit API version followed by collapsed GitBlit version, followed by plugin version -->
   <licenses>
     <license>
       <name>Apache License 2.0</name>

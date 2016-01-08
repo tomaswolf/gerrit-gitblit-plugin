@@ -34,6 +34,7 @@ import com.google.gerrit.httpd.WebSession;
 import com.google.gerrit.server.AnonymousUser;
 import com.google.gerrit.server.CurrentUser;
 import com.google.gerrit.server.IdentifiedUser;
+import com.google.gerrit.server.account.GetDiffPreferences;
 import com.google.gerrit.server.project.ProjectControl;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -51,9 +52,11 @@ public class GerritGitBlitUserManager implements IUserManager {
 
 	private final Provider<AnonymousUser> anonymousUser;
 
+	private final GetDiffPreferences getDiffPreferences;
+
 	@Inject
 	public GerritGitBlitUserManager(final ProjectControl.GenericFactory projectControl, final GitBlitSettings settings,
-			final DynamicItem<WebSession> gerritSession, final Provider<AnonymousUser> anonymousUser) {
+			final DynamicItem<WebSession> gerritSession, final Provider<AnonymousUser> anonymousUser, final GetDiffPreferences getDiffPreferences) {
 		this.projectControl = projectControl;
 		this.userProvider = new Provider<CurrentUser>() {
 			@Override
@@ -62,6 +65,7 @@ public class GerritGitBlitUserManager implements IUserManager {
 			}
 		};
 		this.anonymousUser = anonymousUser;
+		this.getDiffPreferences = getDiffPreferences;
 		if (!settings.getBoolean(Keys.web.authenticateViewPages, false) && !fixAnonymousUser()) {
 			settings.saveSettings(ImmutableMap.of(Keys.web.authenticateViewPages, Boolean.TRUE.toString()));
 		}
@@ -84,9 +88,9 @@ public class GerritGitBlitUserManager implements IUserManager {
 	@Override
 	public UserModel getUserModel(String username) {
 		if (username == null || GerritGitBlitUserModel.ANONYMOUS_USER.equals(username)) {
-			return new GerritGitBlitUserModel(projectControl, anonymousUser);
+			return new GerritGitBlitUserModel(projectControl, anonymousUser, getDiffPreferences);
 		}
-		return new GerritGitBlitUserModel(username, projectControl, userProvider);
+		return new GerritGitBlitUserModel(username, projectControl, userProvider, getDiffPreferences);
 	}
 
 	/**
@@ -99,7 +103,7 @@ public class GerritGitBlitUserManager implements IUserManager {
 		CurrentUser user = userProvider.get();
 		if (!user.isIdentifiedUser()) {
 			log.warn("\"Logged-in\" user according to session is anonymous.");
-			return new GerritGitBlitUserModel(projectControl, anonymousUser);
+			return new GerritGitBlitUserModel(projectControl, anonymousUser, getDiffPreferences);
 		}
 		IdentifiedUser loggedInUser = (IdentifiedUser) user;
 		// We know that this user has no username. Synthesize one for GitBlit.
@@ -110,7 +114,7 @@ public class GerritGitBlitUserManager implements IUserManager {
 				fakeUserName = "external" + loggedInUser.getAccountId().toString();
 			}
 		}
-		return new GerritGitBlitUserModel(fakeUserName, projectControl, userProvider);
+		return new GerritGitBlitUserModel(fakeUserName, projectControl, userProvider, getDiffPreferences);
 	}
 
 	@Override
@@ -251,7 +255,7 @@ public class GerritGitBlitUserManager implements IUserManager {
 					modifiers.setAccessible(true);
 					int modifierFlags = anonymousField.getModifiers();
 					modifiers.set(anonymousField, modifierFlags & ~Modifier.FINAL); // Remove "final" from the "ANONYMOUS" field
-					anonymousField.set(null, new GerritGitBlitUserModel(projectControl, anonymousUser));
+					anonymousField.set(null, new GerritGitBlitUserModel(projectControl, anonymousUser, getDiffPreferences));
 					modifiers.set(anonymousField, modifierFlags); // Make the field "final" again.
 					modifiers.setAccessible(false); // Re-enable Java-language accessibility checks
 				}

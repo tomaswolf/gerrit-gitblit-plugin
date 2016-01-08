@@ -76,13 +76,41 @@ The GitBlit `${baseFolder}` is the plugin's data directory provided by Gerrit at
 > Up to and including v2.11.162.1 of this plugin, GitBlit's `${baseFolder}` was at `$GERRIT_SITE/etc/@PLUGIN@/`. If you upgraded from that or an earlier
 > version and do have data in `$GERRIT_SITE/etc/@PLUGIN@/`, move it over to the new place. The directory `$GERRIT_SITE/etc/@PLUGIN@/` can then be removed.
 
+### GitBlit settings specific to this plugin
+
+<dl>
+	<dt><code>web.maxCommitDiffContext</code> = [1 .. 10]</dt>
+	<dd>
+		<p>
+			<em>Since 2.12.162.2.</em> In a GitBlit <em>commit diff</em>, diffs of all changed files in a commit are shown on one page. This setting
+			defines how many context lines shall be shown shown at most in such diffs. The default is 10, but can be reduced further through this property
+			in your <code>gitblit.properties</code> file.
+		</p>
+		<p>
+			If the Gerrit preference setting for the number of context lines in diffs is lower than this GitBlit setting, the Gerrit setting is taken.
+		</p>
+		<p>
+			For single-file diffs, the plugin respects the Gerrit preference setting of the currently logged-in user for the number of context lines
+			in a diff. For non-logged-in users, the GitBlit default of 3 context lines applies. (The Gerrit default is 10.)
+		</p>
+	</dd>
+</dl>
+	
+
 # Issue tracking
 
 Report bugs or make feature requests at the [GitHub issue tracker](https://github.com/tomaswolf/gerrit-gitblit-plugin/issues).
+
+## Known issues
+
+* For logged-in users, their preference page ("my profile") is accessible but non-functional. Per-user GitBlit preferences cannot be saved. There are no
+  plans to fix this; GitBlit uses a plain file-based mechanism to store such user preferences anyway, which won't scale well for large user bases.
+
+* I have never tried Lucene indexing of repositories through GitBlit. It's functionality I have never needed, and I don't plan to ever do something about
+  it in case it doesn't work.
 
 <hr style="color: #C0C0C0; background-color: #C0C0C0; border-color: #C0C0C0; height: 2px;" />
 <div style="float:right;">
 <a href="https://github.com/tomaswolf/gerrit-gitblit-plugin" target="_blank">GitBlit plugin BUILDREPLACE{pom.version}</a>
 </div>
-
 <script type="text/javascript" src="version_check.js"></script>

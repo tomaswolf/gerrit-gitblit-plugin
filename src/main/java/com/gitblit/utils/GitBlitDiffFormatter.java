@@ -36,9 +36,12 @@ import org.eclipse.jgit.diff.RawText;
 import org.eclipse.jgit.util.RawParseUtils;
 
 import com.gitblit.models.PathModel.PathChangeModel;
+import com.gitblit.models.UserModel;
 import com.gitblit.utils.DiffUtils.BinaryDiffHandler;
 import com.gitblit.utils.DiffUtils.DiffStat;
 import com.gitblit.wicket.GitBlitWebApp;
+import com.gitblit.wicket.GitBlitWebSession;
+import com.googlesource.gerrit.plugins.gitblit.auth.GerritGitBlitUserModel;
 
 /**
  * Generates an html snippet of a diff in Gitblit's style, tracks changed paths, and calculates diff stats.
@@ -63,8 +66,13 @@ public class GitBlitDiffFormatter extends DiffFormatter {
 	private static final String GLOBAL_DIFF_LIMIT_KEY = "web.maxDiffLines";
 
 	/**
-	 * Diffs with more lines are not shown in commitdiffs. (Similar to what GitHub does.) Can be reduced (but not increased) through gitblit.properties key
-	 * {@link #DIFF_LIMIT_PER_FILE_KEY}.
+	 * gitblit.properties key for the number of context lines in a diff for a commitdiff if the Gerrit setting is "full file".
+	 */
+	private static final String COMMIT_DIFF_CONTEXT_MAXIMUM_KEY = "web.maxCommitDiffContext";
+
+	/**
+	 * Diffs with more lines are not shown in commitdiffs. (Similar to what GitHub does.) Can be reduced (but not increased) through
+	 * gitblit.properties key {@link #DIFF_LIMIT_PER_FILE_KEY}.
 	 */
 	private static final int DIFF_LIMIT_PER_FILE = 4000;
 
@@ -73,6 +81,12 @@ public class GitBlitDiffFormatter extends DiffFormatter {
 	 * {@link #GLOBAL_DIFF_LIMIT_KEY}.
 	 */
 	private static final int GLOBAL_DIFF_LIMIT = 20000;
+
+	/**
+	 * Maximum number of diff context lines allowed for commitdiffs. Can be reduced (but not increased) through gitblit.properties key
+	 * {@link #COMMIT_DIFF_CONTEXT_MAXIMUM_KEY}.
+	 */
+	private static final int COMMIT_DIFF_CONTEXT_MAXIMUM = 10;
 
 	private final DiffOutputStream os;
 
@@ -83,9 +97,9 @@ public class GitBlitDiffFormatter extends DiffFormatter {
 	private int left, right;
 
 	/**
-	 * If a single file diff in a commitdiff produces more than this number of lines, we don't display the diff. First, it's too taxing on the browser: it'll
-	 * spend an awful lot of time applying the CSS rules (despite my having optimized them). And second, no human can read a diff with thousands of lines and
-	 * make sense of it.
+	 * If a single file diff in a commitdiff produces more than this number of lines, we don't display the diff. First, it's too taxing on the
+	 * browser: it'll spend an awful lot of time applying the CSS rules (despite my having optimized them). And second, no human can read a diff with
+	 * thousands of lines and make sense of it.
 	 * <p>
 	 * Set to {@link #DIFF_LIMIT_PER_FILE} for commitdiffs, and to -1 (switches off the limit) for single-file diffs.
 	 * </p>
@@ -93,7 +107,8 @@ public class GitBlitDiffFormatter extends DiffFormatter {
 	private final int maxDiffLinesPerFile;
 
 	/**
-	 * Global limit on the number of diff lines. Set to {@link #GLOBAL_DIFF_LIMIT} for commitdiffs, and to -1 (switched off the limit) for single-file diffs.
+	 * Global limit on the number of diff lines. Set to {@link #GLOBAL_DIFF_LIMIT} for commitdiffs, and to -1 (switched off the limit) for single-file
+	 * diffs.
 	 */
 	private final int globalDiffLimit;
 
@@ -122,9 +137,9 @@ public class GitBlitDiffFormatter extends DiffFormatter {
 	private final List<DiffEntry> skipped = new ArrayList<DiffEntry>();
 
 	/**
-	 * A {@link ResettableByteArrayOutputStream} that intercept the "Binary files differ" message produced by the super implementation. Unfortunately the super
-	 * implementation has far too many things private; otherwise we'd just have re-implemented {@link GitBlitDiffFormatter#format(DiffEntry) format(DiffEntry)}
-	 * completely without ever calling the super implementation.
+	 * A {@link ResettableByteArrayOutputStream} that intercept the "Binary files differ" message produced by the super implementation. Unfortunately
+	 * the super implementation has far too many things private; otherwise we'd just have re-implemented
+	 * {@link GitBlitDiffFormatter#format(DiffEntry) format(DiffEntry)} completely without ever calling the super implementation.
 	 */
 	private static class DiffOutputStream extends ResettableByteArrayOutputStream {
 
@@ -162,6 +177,26 @@ public class GitBlitDiffFormatter extends DiffFormatter {
 		// will only tax the browser too much.
 		maxDiffLinesPerFile = path != null ? -1 : getLimit(DIFF_LIMIT_PER_FILE_KEY, 500, DIFF_LIMIT_PER_FILE);
 		globalDiffLimit = path != null ? -1 : getLimit(GLOBAL_DIFF_LIMIT_KEY, 1000, GLOBAL_DIFF_LIMIT);
+		GitBlitWebSession webSession = GitBlitWebSession.get();
+		if (webSession != null) {
+			UserModel user = webSession.getUser();
+			if (user instanceof GerritGitBlitUserModel) {
+				int context = ((GerritGitBlitUserModel) user).diffContext();
+				if (context < 0) {
+					// Full file. Integer.MAX_VALUE may lead to overflows...
+					context = Integer.MAX_VALUE / 2;
+				}
+				if (path == null) {
+					// For a full commitdiff, limit the number of context lines. Otherwise too many files may end up
+					// being shown as "Diff too large".
+					int maxContext = getLimit(COMMIT_DIFF_CONTEXT_MAXIMUM_KEY, 1, COMMIT_DIFF_CONTEXT_MAXIMUM);
+					if (context > maxContext) {
+						context = maxContext;
+					}
+				}
+				setContext(context);
+			}
+		}
 	}
 
 	/**
@@ -240,8 +275,8 @@ public class GitBlitDiffFormatter extends DiffFormatter {
 				path = ent.getNewPath();
 				id = ent.getNewId().name();
 			}
-			StringBuilder sb = new StringBuilder(MessageFormat.format("<div class='header'><div class=\"diffHeader\" id=\"n{0}\"><i class=\"icon-file\"></i> ",
-					id));
+			StringBuilder sb = new StringBuilder(MessageFormat.format(
+					"<div class='header'><div class=\"diffHeader\" id=\"n{0}\"><i class=\"icon-file\"></i> ", id));
 			sb.append(StringUtils.escapeForHtml(path, false)).append("</div></div>");
 			sb.append("<div class=\"diff\"><table cellpadding='0'><tbody>\n");
 			os.write(sb.toString().getBytes());
@@ -275,8 +310,8 @@ public class GitBlitDiffFormatter extends DiffFormatter {
 	}
 
 	/**
-	 * Writes an initial table row containing information about added/removed/renamed/copied files. In case of a deletion, we also suppress generating the diff;
-	 * it's not interesting. (All lines removed.)
+	 * Writes an initial table row containing information about added/removed/renamed/copied files. In case of a deletion, we also suppress generating
+	 * the diff; it's not interesting. (All lines removed.)
 	 */
 	private void handleChange() {
 		// XXX Would be nice if we could generate blob links for the cases handled here. Alas, we lack the repo
@@ -421,7 +456,8 @@ public class GitBlitDiffFormatter extends DiffFormatter {
 				os.write("<td class='diff-cell remove2'>".getBytes());
 				break;
 			default:
-				os.write(("<th class='diff-line' data-lineno='" + (left++) + "'></th><th class='diff-line' data-lineno='" + (right++) + "'></th>").getBytes());
+				os.write(("<th class='diff-line' data-lineno='" + (left++) + "'></th><th class='diff-line' data-lineno='" + (right++) + "'></th>")
+						.getBytes());
 				os.write("<th class='diff-state'></th>".getBytes());
 				os.write("<td class='diff-cell context2'>".getBytes());
 				break;
@@ -505,8 +541,8 @@ public class GitBlitDiffFormatter extends DiffFormatter {
 					sb.append('\n');
 				}
 				if (ChangeType.DELETE.equals(entry.getChangeType())) {
-					sb.append("<span id=\"n" + entry.getOldId().name() + "\">" + StringUtils.escapeForHtml(entry.getOldPath(), false) + ' ' + deletedSuffix
-							+ "</span>");
+					sb.append("<span id=\"n" + entry.getOldId().name() + "\">" + StringUtils.escapeForHtml(entry.getOldPath(), false) + ' '
+							+ deletedSuffix + "</span>");
 				} else {
 					sb.append("<span id=\"n" + entry.getNewId().name() + "\">" + StringUtils.escapeForHtml(entry.getNewPath(), false) + "</span>");
 				}
