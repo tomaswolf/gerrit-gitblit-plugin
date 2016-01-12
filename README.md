@@ -10,7 +10,7 @@ matching your Gerrit version. Version numbering for this plugin is the Gerrit AP
 followed by the plugin version.So "v2.9.1.162.2" is version 2 of this plugin, integrating GitBlit 1.6.2 into Gerrit 2.9.1.
 
 > If you're running Gerrit 2.11 or newer, you might want to check whether the official plugin fulfills your needs. (To find a pre-built official plugin,
-> go to the [Gerrit CI server](https://ci.gerritforge.com/), find the "Plugin-gitblit" job matching your Gerrit version, click the link, and download
+> go to the [Gerrit CI server](https://gerrit-ci.gerritforge.com/), find the "Plugin-gitblit" job matching your Gerrit version, click the link, and download
 > the jar from "Last Successful Artifacts".)
 
 ## Motivation
@@ -156,7 +156,7 @@ from the official plugin and adapt them to match the `pom.xml`.
 Some time after I had released my first version of this plugin, Luca Milanesio had updated the [official plugin](https://gerrit.googlesource.com/plugins/gitblit/)
 to work again with Gerrit release 2.11. Internally it's based on an as
 yet unreleased GitBlit version (James' [development branch](https://github.com/gitblit/gitblit/tree/develop) that should one day become
-GitBlit 1.7.0). You can find that "official plugin" on the [Gerrit CI server](https://ci.gerritforge.com/job/Plugin_gitblit_stable-2.11/).
+GitBlit 1.7.0). You can find that "official plugin" on the [Gerrit CI server](https://gerrit-ci.gerritforge.com/view/Plugins-stable-2.11/job/plugin-gitblit-stable-2.11/).
 I have never used it, so I have no idea how well it works.
 
 In early May 2015, some of my changes here were merged back into the official plugin, but there are still functional differences, mainly
