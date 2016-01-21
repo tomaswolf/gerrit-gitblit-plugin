@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.gitblit.Constants;
 import com.gitblit.Constants.AuthenticationType;
+import com.gitblit.Constants.Role;
 import com.gitblit.IStoredSettings;
 import com.gitblit.Keys;
 import com.gitblit.manager.IAuthenticationManager;
@@ -44,7 +45,9 @@ import com.google.gerrit.server.account.AuthResult;
 import com.google.gerrit.server.config.AuthConfig;
 import com.google.gerrit.server.config.CanonicalWebUrl;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class GerritGitBlitAuthenticationManager implements IAuthenticationManager {
 
 	private static final Logger log = LoggerFactory.getLogger(GerritGitBlitAuthenticationManager.class);
@@ -166,8 +169,15 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 	}
 
 	@Override
-	public UserModel authenticate(String username, char[] password) {
+	public UserModel authenticate(String username, char[] password, String remoteIP) {
 		return authenticateViaGerrit(null, username, new String(password));
+	}
+
+	@Override
+	public UserModel authenticate(String username) {
+		// Only called via Gitblit's SSHD,which we have disabled.
+		log.warn("External authentication in Gitblit not supported");
+		return null;
 	}
 
 	private UserModel authenticateViaGerrit(HttpServletRequest httpRequest, String username, String password) {
@@ -216,7 +226,7 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 			return false;
 		}
 		HttpSession session = request.getSession();
-		AuthenticationType authenticationType = (AuthenticationType) session.getAttribute(Constants.AUTHENTICATION_TYPE);
+		AuthenticationType authenticationType = (AuthenticationType) session.getAttribute(Constants.ATTRIB_AUTHTYPE);
 		return authenticationType != null && authenticationType.isStandard();
 	}
 
@@ -319,9 +329,19 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 			gerritSession.get().setUserAccountId(authentication.getAccountId());
 		}
 		if (request != null) {
-			request.getSession().setAttribute(Constants.AUTHENTICATION_TYPE, AuthenticationType.CREDENTIALS);
+			request.getSession().setAttribute(Constants.ATTRIB_AUTHTYPE, AuthenticationType.CREDENTIALS);
 		}
 		user.cookie = StringUtils.getSHA1(user.getName() + credentials); // Code from GitBlit
 		return user;
+	}
+
+	@Override
+	public boolean supportsRoleChanges(UserModel user, Role role) {
+		return false;
+	}
+
+	@Override
+	public boolean supportsRoleChanges(TeamModel team, Role role) {
+		return false;
 	}
 }

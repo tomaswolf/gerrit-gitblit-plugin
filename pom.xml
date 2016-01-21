@@ -20,7 +20,7 @@ limitations under the License.
   <artifactId>gitblit-plugin</artifactId>
   <description>GitBlit for Gerrit integrated as a plugin</description>
   <name>Gerrit - GitBlit Plugin</name>
-  <version>2.12.162.2-SNAPSHOT</version><!-- Gerrit API version followed by collapsed GitBlit version, followed by plugin version -->
+  <version>2.12.171.0-SNAPSHOT</version><!-- Gerrit API version followed by collapsed GitBlit version, followed by plugin version -->
   <licenses>
     <license>
       <name>Apache License 2.0</name>
@@ -30,9 +30,8 @@ limitations under the License.
   <properties>
     <Gerrit-ApiType>plugin</Gerrit-ApiType>
     <Gerrit-ApiVersion>2.12</Gerrit-ApiVersion>
-    <GitBlit-Version>1.6.2</GitBlit-Version>
-    <Wicket-Version>1.4.21</Wicket-Version>
-    <Dagger-Version>1.1.0</Dagger-Version>
+    <GitBlit-Version>1.7.1</GitBlit-Version>
+    <Wicket-Version>1.4.22</Wicket-Version>
     <Gerrit-ReloadMode>restart</Gerrit-ReloadMode>
     <Gerrit-InitStep>com.googlesource.gerrit.plugins.gitblit.GitBlitInitStep</Gerrit-InitStep>
     <Gerrit-Module>com.googlesource.gerrit.plugins.gitblit.GitBlitModule</Gerrit-Module>
@@ -40,21 +39,6 @@ limitations under the License.
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencies>
-    <!--  We need dagger support (and m2e-apt installed and enabled in Eclipse) for our guice bridge. -->
-    <dependency>
-      <groupId>com.squareup.dagger</groupId>
-      <artifactId>dagger</artifactId>
-      <version>${Dagger-Version}</version>
-      <type>jar</type>
-    </dependency>
-    <dependency>
-      <groupId>com.squareup.dagger</groupId>
-      <artifactId>dagger-compiler</artifactId>
-      <version>${Dagger-Version}</version>
-      <type>jar</type>
-      <scope>compile</scope>
-      <optional>true</optional>
-    </dependency>
     <dependency>
       <groupId>com.google.gerrit</groupId>
       <artifactId>gerrit-plugin-api</artifactId>
@@ -147,15 +131,6 @@ limitations under the License.
           <source>1.7</source>
           <target>1.7</target>
         </configuration>
-        <dependencies>
-		    <dependency>
-		      <groupId>com.squareup.dagger</groupId>
-		      <artifactId>dagger-compiler</artifactId>
-		      <version>1.1.0</version>
-		      <type>jar</type>
-		      <scope>compile</scope>
-		    </dependency>
-	    </dependencies>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -174,16 +149,19 @@ limitations under the License.
               <exclude>org.pegdown:*</exclude><!-- In Gerrit API 2.11 -->
               <exclude>com.google.gerrit:*</exclude>
               <exclude>org.bouncycastle:*</exclude>
+              <exclude>aopalliance:*</exclude>
               <exclude>org.slf4j:*</exclude>
               <exclude>com.google.guava:*</exclude>
+              <exclude>com.google.inject:*</exclude>
+              <exclude>com.google.inject.extensions:*</exclude>
               <exclude>org.eclipse.jgit:*</exclude>
               <exclude>log4j:*</exclude>
               <exclude>com.google.code.gson:*</exclude>
               <exclude>com.googlecode.javaewah:*</exclude>
               <exclude>com.jcraft:*</exclude>
               <exclude>com.intellij:*</exclude><!-- Huh? Compile-time only. -->
-              <exclude>com.squareup.dagger:dagger-compiler</exclude><!--  Should be a compile-time dependency only. -->
               <exclude>javax.servlet:*</exclude>
+              <exclude>javax.inject:*</exclude>
               <exclude>org.eclipse.jetty.aggregate:*</exclude><!-- In Gerrit API. GitBlit 9.2.3.v20140905, Gerrit 9.1.0.v20131115 -->
               <exclude>org.apache.mina:*</exclude><!--  In Gerrit API. GitBlit 2.07, Gerrit 2.0.7 -->
               <exclude>org.apache.sshd:*</exclude><!--  In Gerrit API. GitBlit 0.12.0, Gerrit 0.11.1-atlassian-1 -->
@@ -246,7 +224,7 @@ limitations under the License.
                     <!-- More GitBlit fixes. We supply our own versions of these classes in our own bundle. -->
                     <exclude>com/gitblit/wicket/pages/RootPage.class</exclude><!-- Login link -->
                     <exclude>com/gitblit/wicket/pages/RootPage$*.class</exclude>
-                    <exclude>com/gitblit/wicket/pages/BasePage.class</exclude><!-- Support for bottom scripts -->
+                    <exclude>com/gitblit/wicket/pages/BasePage.class</exclude><!-- Gerrit footer link -->
                     <exclude>com/gitblit/wicket/pages/BasePage$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/BlobPage.class</exclude><!-- Bug fix -->
                     <exclude>com/gitblit/wicket/pages/BlobPage$*.class</exclude>
@@ -254,18 +232,11 @@ limitations under the License.
                     <exclude>com/gitblit/wicket/pages/LogoutPage$*.class</exclude>
                     <exclude>com/gitblit/utils/MetricUtils.class</exclude><!-- Bug fix -->
                     <exclude>com/gitblit/utils/MetricUtils$*.class</exclude>
-                    <!-- Diff improvements.fixes GitBlit issue 450 and adds improved image diff capabilities. -->
-                    <exclude>com/gitblit/utils/GitBlitDiffFormatter.class</exclude>
+                    <exclude>com/gitblit/utils/GitBlitDiffFormatter.class</exclude><!-- Number of diff context lines -->
+                    <exclude>com/gitblit/utils/GitBlitDiffFormatter$*.class</exclude>
+                    <!-- JGit compatibility. -->
                     <exclude>com/gitblit/utils/DiffUtils.class</exclude>
                     <exclude>com/gitblit/utils/DiffUtils$*.class</exclude>
-                    <exclude>com/gitblit/wicket/pages/CommitDiffPage.class</exclude>
-                    <exclude>com/gitblit/wicket/pages/CommitDiffPage$*.class</exclude>
-                    <exclude>com/gitblit/wicket/pages/ComparePage.class</exclude>
-                    <exclude>com/gitblit/wicket/pages/ComparePage$*.class</exclude>
-                    <exclude>com/gitblit/wicket/pages/BlobDiffPage.class</exclude>
-                    <exclude>com/gitblit/wicket/pages/BlobDiffPage$*.class</exclude>
-                    <exclude>gitblit.css</exclude><!-- Diff improvements -->
-                    <!-- JGit 4 compatibility: GitBlit 1.6.2 was built with JGit 3.5.1 and uses some methods that got removed in JGit 4. -->
                     <exclude>com/gitblit/utils/CompressionUtils.class</exclude>
                     <exclude>com/gitblit/utils/CompressionUtils$*.class</exclude>
                     <exclude>com/gitblit/utils/JGitUtils.class</exclude>
@@ -284,8 +255,6 @@ limitations under the License.
                     <exclude>com/gitblit/servlet/RawServlet$*.class</exclude>
                     <exclude>com/gitblit/service/LuceneService.class</exclude>
                     <exclude>com/gitblit/service/LuceneService$*.class</exclude>
-                    <exclude>com/gitblit/git/PatchsetReceivePack.class</exclude>
-                    <exclude>com/gitblit/git/PatchsetReceivePack$*.class</exclude>
                     <exclude>com/syntevo/bugtraq/BugtraqConfig.class</exclude>
                     <exclude>com/syntevo/bugtraq/BugtraqConfig$*.class</exclude>
                     <!-- Remove direct dependencies on parboiled. -->

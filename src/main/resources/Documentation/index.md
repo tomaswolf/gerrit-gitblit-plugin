@@ -69,7 +69,7 @@ If you want to lock the GitBlit plugin to allow only logged-in users to browse, 
 `web.authenticateViewPages = true`. This is the only key of the built-in configuration that you _can_ override. 
 
 GitBlit's ticket service, fan-out service, and its plugin mechanism are disabled in this plugin, as is ssh access through GitBlit since Gerrit
-already provides that.
+already provides that. Also disabled is Gitblit's LFS implementation.
 
 The GitBlit `${baseFolder}` is the plugin's data directory provided by Gerrit at `$GERRIT_SITE/data/@PLUGIN@/`.
 

@@ -15,7 +15,7 @@ followed by the plugin version.So "v2.9.1.162.2" is version 2 of this plugin, in
 
 ## Motivation
 
-The basic reason for doing this was to adapt the official plugin to work with a modern Gerrit (v2.9 or newer) and a modern GitBlit (v1.6.2).
+The basic reason for doing this was to adapt the official plugin to work with a modern Gerrit (v2.9 or newer) and a modern GitBlit (v1.6.2 and later v1.7.1).
 This was done at a time when Gerrit 2.9 and 2.10 were the current Gerrit releases, and the official plugin just didn't work well.
 
 The official plugin was a bit dated by then. Luca described his integration in a [slideshow](http://www.slideshare.net/lucamilanesio/gitblit-plugin-for-gerrit-code-review).
@@ -69,26 +69,18 @@ some servlets and setting them up through Guice, one has to do quite a bit more 
 * The dependency on the Gerrit API has been changed from a snapshot version to the latest official release.
 * Removed all the transitive dependencies from the `pom.xml`.
 * The whole authentication/user model logic had to be refactored due to GitBlit changes.
-* GitBlit 1.6.x still uses the [dagger injection framework](http://square.github.io/dagger/) (though it doesn't make much use of it).
-  To make that work in GitBlit 1.6.x with the Guice-configured Gerrit plugin, it was necessary to add a fully-blown bridge
-  module to make dagger use the Guice injector. (Which also meant I had to install m2e-apt in my Eclipse and enable it, and
-  add the dagger dependencies.)
-
-  > Off-topic: GitBlit 1.7.0 will not use dagger anymore but Guice.
-
+* GitBlit 1.6.x still used the [dagger injection framework](http://square.github.io/dagger/). Since GitBlit 1.7.0 , Guice is used.
 * I've introduced a new servlet to serve those static resources from wherever they are in the original standard GitBlit jar.
   This also serves clippy.swf correctly now.
 
 Additional modifications were due to changes in GitBlit:
 
-* GitBlit 1.6.x uses the [flotr2](https://github.com/HumbleSoftware/Flotr2) library to generate charts and graphs. It doesn't make
+* GitBlit 1.6.x/1.7.x uses the [flotr2](https://github.com/HumbleSoftware/Flotr2) library to generate charts and graphs. It doesn't make
   requests to Google anymore. But to get that to work in the plugin, some more URL rewriting was necessary to make the flotr2 static
   resources be served from within the plugin jar.
 * GitBlit 1.6.x switched to the [pegdown](https://github.com/sirthias/pegdown) [markdown](https://en.wikipedia.org/wiki/Markdown)
   parser. That caused me some headache because Gerrit versions smaller than 2.11 include a version of pegdown that is too old for
   GitBlit.
-
-As of Gerrit 2.11.1, the plugin also replaces some classes from GitBlit to make GitBlit work with the JGit 4.0 provided by Gerrit.
 
 # Installation
 
@@ -121,10 +113,8 @@ which since version v2.11.162.2 is after installation also available as _\<Your_
 
 # Caveats and To-dos
 
-* I have not gotten around to try out Lucene indexing of Gerrit repositories in GitBlit.
-  
-  *TODO 1*: I should give it a try and see if there any problems, and if so, if they can be worked around relatively easily in a self-contained
-  way in the plugin itself. Even nicer: could GitBlit be made (easily!) to use Gerrit's Lucene index?
+* I have not gotten around to try out Lucene indexing of Gerrit repositories in GitBlit. Since this is a feature I don't use, I have no plans
+  to do anything about this in case it doesn't work.
   
 * I run this plugin in a firewalled private network, and it seems to me that the authentication stuff is good enough. I do _not_ know
   whether it would be good enough for running this on a public network, or whether I goofed somewhere big time. I'm no web security
@@ -141,7 +131,8 @@ which since version v2.11.162.2 is after installation also available as _\<Your_
 
 # Building
 
-I use Eclipse for development with m2e and m2e-apt installed. Make sure m2e-apt is enabled for the project.
+I use Eclipse for development with m2e and m2e-apt installed. Make sure m2e-apt is enabled for the project. (It's not really needed to
+build the plugin with Gitblit 1.7.x, since that uses Guice. It's only needed to build versions of the plugin based on Gitblit 1.6.x.)
 
 To build, run the maven target "package", for instance from the Eclipse IDE right-click the pom.xml file, select "Maven build..." from the
 context menu, enter "package" as target and click "Run". This produces a file "gitblit-plugin-_VERSION_.jar" in the target directory.

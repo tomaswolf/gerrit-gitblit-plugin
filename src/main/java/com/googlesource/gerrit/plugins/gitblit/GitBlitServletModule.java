@@ -16,19 +16,39 @@ package com.googlesource.gerrit.plugins.gitblit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gitblit.AvatarGenerator;
+import com.gitblit.GravatarGenerator;
 import com.gitblit.IStoredSettings;
+import com.gitblit.guice.IPublicKeyManagerProvider;
+import com.gitblit.guice.WorkQueueProvider;
+import com.gitblit.manager.FederationManager;
+import com.gitblit.manager.FilestoreManager;
+import com.gitblit.manager.GitblitManager;
 import com.gitblit.manager.IAuthenticationManager;
 import com.gitblit.manager.IFederationManager;
+import com.gitblit.manager.IFilestoreManager;
 import com.gitblit.manager.IGitblit;
 import com.gitblit.manager.INotificationManager;
 import com.gitblit.manager.IPluginManager;
 import com.gitblit.manager.IProjectManager;
 import com.gitblit.manager.IRepositoryManager;
 import com.gitblit.manager.IRuntimeManager;
+import com.gitblit.manager.IServicesManager;
 import com.gitblit.manager.IUserManager;
+import com.gitblit.manager.NotificationManager;
+import com.gitblit.manager.ProjectManager;
+import com.gitblit.manager.ServicesManager;
+import com.gitblit.servlet.BranchGraphServlet;
+import com.gitblit.servlet.DownloadZipServlet;
 import com.gitblit.servlet.GitblitContext;
+import com.gitblit.servlet.LogoServlet;
+import com.gitblit.servlet.PagesServlet;
+import com.gitblit.servlet.PtServlet;
+import com.gitblit.servlet.RawServlet;
+import com.gitblit.tickets.ITicketService;
 import com.gitblit.transport.ssh.IPublicKeyManager;
 import com.gitblit.utils.JSoupXssFilter;
+import com.gitblit.utils.WorkQueue;
 import com.gitblit.utils.XssFilter;
 import com.gitblit.wicket.GitBlitWebApp;
 import com.google.gerrit.extensions.annotations.PluginName;
@@ -36,20 +56,15 @@ import com.google.gerrit.extensions.events.LifecycleListener;
 import com.google.inject.Inject;
 import com.google.inject.internal.UniqueAnnotations;
 import com.google.inject.servlet.ServletModule;
-import com.googlesource.gerrit.plugins.gitblit.app.GerritGitBlit;
 import com.googlesource.gerrit.plugins.gitblit.app.GerritGitBlitContext;
 import com.googlesource.gerrit.plugins.gitblit.app.GerritGitBlitRuntimeManager;
 import com.googlesource.gerrit.plugins.gitblit.app.GerritGitBlitWebApp;
 import com.googlesource.gerrit.plugins.gitblit.app.GitBlitSettings;
+import com.googlesource.gerrit.plugins.gitblit.app.NullPluginManager;
+import com.googlesource.gerrit.plugins.gitblit.app.ReallyNullTicketService;
 import com.googlesource.gerrit.plugins.gitblit.auth.GerritGitBlitAuthenticationManager;
 import com.googlesource.gerrit.plugins.gitblit.auth.GerritGitBlitRepositoryManager;
 import com.googlesource.gerrit.plugins.gitblit.auth.GerritGitBlitUserManager;
-import com.googlesource.gerrit.plugins.gitblit.dagger.GerritDaggerModule;
-import com.googlesource.gerrit.plugins.gitblit.dagger.PublicKeyManagerProvider;
-import com.googlesource.gerrit.plugins.gitblit.dagger.WrappedFederationManager;
-import com.googlesource.gerrit.plugins.gitblit.dagger.WrappedNotificationManager;
-import com.googlesource.gerrit.plugins.gitblit.dagger.NullPluginManager;
-import com.googlesource.gerrit.plugins.gitblit.dagger.WrappedProjectManager;
 
 public class GitBlitServletModule extends ServletModule {
 	private static final Logger log = LoggerFactory.getLogger(GitBlitServletModule.class);
@@ -73,30 +88,39 @@ public class GitBlitServletModule extends ServletModule {
 		bind(IAuthenticationManager.class).to(GerritGitBlitAuthenticationManager.class);
 		bind(IRepositoryManager.class).to(GerritGitBlitRepositoryManager.class);
 		bind(GitblitContext.class).to(GerritGitBlitContext.class);
-		bind(IGitblit.class).to(GerritGitBlit.class);
 		bind(GitBlitWebApp.class).to(GerritGitBlitWebApp.class);
-		bind(GerritDaggerModule.class);
-
-		// Unchanged but wrapped things (dagger-guice bridge)
-
 		bind(IPluginManager.class).to(NullPluginManager.class);
-		bind(INotificationManager.class).to(WrappedNotificationManager.class);
-		bind(IPublicKeyManager.class).toProvider(PublicKeyManagerProvider.class);
-		bind(IProjectManager.class).to(WrappedProjectManager.class);
-		bind(IFederationManager.class).to(WrappedFederationManager.class);
-		bind(XssFilter.class).to(JSoupXssFilter.class);
+		bind(ITicketService.class).to(ReallyNullTicketService.class);
 
-		// Servlets
-		serve('/' + WrappedPagesFilter.SERVLET_RELATIVE_PATH + '*').with(WrappedPagesServlet.class);
-		serve('/' + WrappedRawFilter.SERVLET_RELATIVE_PATH + '*').with(WrappedRawServlet.class);
+		// Gitblit bindings
+		bind(XssFilter.class).to(JSoupXssFilter.class);
+		bind(AvatarGenerator.class).to(GravatarGenerator.class);
+		bind(WorkQueue.class).toProvider(WorkQueueProvider.class);
+
+		bind(IGitblit.class).to(GitblitManager.class);
+
+		// core managers
+		bind(IPluginManager.class).to(NullPluginManager.class);
+		bind(INotificationManager.class).to(NotificationManager.class);
+		bind(IProjectManager.class).to(ProjectManager.class);
+		bind(IFederationManager.class).to(FederationManager.class);
+		bind(IFilestoreManager.class).to(FilestoreManager.class);
+		bind(IPublicKeyManager.class).toProvider(IPublicKeyManagerProvider.class);
+
+		// manager for long-running daemons and services
+		bind(IServicesManager.class).to(ServicesManager.class);
+
+		// Servlets -- note: FilestoreServlet is not configured
+		serve('/' + WrappedPagesFilter.SERVLET_RELATIVE_PATH + '*').with(PagesServlet.class);
+		serve('/' + WrappedRawFilter.SERVLET_RELATIVE_PATH + '*').with(RawServlet.class);
 		serve('/' + WrappedSyndicationFilter.SERVLET_RELATIVE_PATH + '*').with(WrappedSyndicationServlet.class);
-		serve("/zip/*").with(WrappedDownloadZipServlet.class);
-		serve("/logo.png").with(WrappedLogoServlet.class);
-		serve("/static/logo.png").with(WrappedLogoServlet.class);
-		serve("/graph/*").with(WrappedBranchGraphServlet.class);
+		serve("/zip/*").with(DownloadZipServlet.class);
+		serve("/logo.png").with(LogoServlet.class);
+		serve("/static/logo.png").with(LogoServlet.class);
+		serve("/graph/*").with(BranchGraphServlet.class);
 		serve("/static/*").with(StaticResourcesServlet.class);
 		serve("/clippy.swf").with(StaticResourcesServlet.class);
-		serve("/pt").with(WrappedPtServlet.class);
+		serve("/pt").with(PtServlet.class);
 
 		// Filters
 		filter("/*").through(GerritWicketFilter.class);

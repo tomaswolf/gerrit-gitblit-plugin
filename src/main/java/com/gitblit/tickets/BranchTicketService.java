@@ -72,6 +72,8 @@ import com.gitblit.models.TicketModel.Change;
 import com.gitblit.utils.ArrayUtils;
 import com.gitblit.utils.JGitUtils;
 import com.gitblit.utils.StringUtils;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * Implementation of a ticket service based on an orphan branch. All tickets are serialized as a list of JSON changes and persisted in a hashed
@@ -80,6 +82,7 @@ import com.gitblit.utils.StringUtils;
  * @author James Moger
  * 
  */
+@Singleton
 public class BranchTicketService extends ITicketService implements RefsChangedListener {
 
 	public static final String BRANCH = "refs/meta/gitblit/tickets";
@@ -90,6 +93,7 @@ public class BranchTicketService extends ITicketService implements RefsChangedLi
 
 	private final Map<String, AtomicLong> lastAssignedId;
 
+	@Inject
 	public BranchTicketService(IRuntimeManager runtimeManager, IPluginManager pluginManager, INotificationManager notificationManager,
 			IUserManager userManager, IRepositoryManager repositoryManager) {
 

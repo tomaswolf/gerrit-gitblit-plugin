@@ -52,7 +52,7 @@ public class GitBlitSettings extends IStoredSettings {
 	private static final String GERRIT_GITBLIT_PROPERTIES = "/gitblit.properties";
 	private static final String GERRIT_GITBLIT_PROPERTY_SOURCE_KEY = "gerrit_gitblit.property_source";
 
-	private static final String INCLUDE_KEY = "include"; // Keys.include doesn't exist for GitBlit < 1.7.0
+	private static final String INCLUDE_KEY = "include"; // Keys.include doesn't exist
 	private static final String GERRIT_LOGIN_URL = "gerrit.loginUrl";
 	private static final String GERRIT_CANONICAL_WEB_URL = "gerrit.canonicalWebUrl";
 

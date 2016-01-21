@@ -21,6 +21,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import com.gitblit.manager.IAuthenticationManager;
+import com.gitblit.manager.IRepositoryManager;
+import com.gitblit.manager.IRuntimeManager;
 import com.gitblit.models.UserModel;
 import com.gitblit.servlet.RawFilter;
 import com.google.gerrit.extensions.registration.DynamicItem;
@@ -36,8 +39,9 @@ public class WrappedRawFilter extends RawFilter {
 	private final DynamicItem<WebSession> webSession;
 
 	@Inject
-	public WrappedRawFilter(final DynamicItem<WebSession> webSession, final GerritAuthenticationFilter gerritAuthFilter) {
-		super();
+	public WrappedRawFilter(final DynamicItem<WebSession> webSession, final GerritAuthenticationFilter gerritAuthFilter,
+			IRuntimeManager runtimeManager, IAuthenticationManager authenticationManager, IRepositoryManager repositoryManager) {
+		super(runtimeManager, authenticationManager, repositoryManager);
 
 		this.webSession = webSession;
 		this.gerritAuthFilter = gerritAuthFilter;

@@ -34,12 +34,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitblit.Constants;
-import com.gitblit.dagger.DaggerContext;
 import com.google.gerrit.extensions.registration.DynamicItem;
 import com.google.gerrit.httpd.WebSession;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.googlesource.gerrit.plugins.gitblit.app.GerritGitBlit;
 import com.googlesource.gerrit.plugins.gitblit.app.GerritGitBlitContext;
 import com.googlesource.gerrit.plugins.gitblit.app.GerritGitBlitWebApp;
 import com.googlesource.gerrit.plugins.gitblit.auth.GerritAuthenticationFilter;
@@ -49,9 +47,6 @@ public class GerritWicketFilter extends WicketFilter {
 	private static final Logger log = LoggerFactory.getLogger(GerritWicketFilter.class);
 
 	private final DynamicItem<WebSession> webSession;
-	@SuppressWarnings("unused")
-	// We need Guice to create the GerritGitBlit instance
-	private final GerritGitBlit gitBlit;
 	private final GerritAuthenticationFilter gerritAuthFilter;
 	private final GerritGitBlitContext applicationContext;
 	private final GerritGitBlitWebApp webApp;
@@ -59,10 +54,9 @@ public class GerritWicketFilter extends WicketFilter {
 	private String pluginInstanceKey;
 
 	@Inject
-	public GerritWicketFilter(final DynamicItem<WebSession> webSession, final GerritGitBlit gitBlit, final GerritGitBlitContext context,
+	public GerritWicketFilter(final DynamicItem<WebSession> webSession, final GerritGitBlitContext context,
 			final GerritAuthenticationFilter gerritAuthFilter, final GerritGitBlitWebApp webApp) {
 		this.webSession = webSession;
-		this.gitBlit = gitBlit;
 		this.gerritAuthFilter = gerritAuthFilter;
 		this.applicationContext = context;
 		this.webApp = webApp;
@@ -89,24 +83,11 @@ public class GerritWicketFilter extends WicketFilter {
 		log.info(Constants.BORDER);
 		try {
 			ServletContext context = filterConfig.getServletContext();
-			context.removeAttribute(DaggerContext.INJECTOR_NAME); // Just in case something survived here.
 			applicationContext.contextInitialized(new ServletContextEvent(context));
 			super.init(new CustomFilterConfig(filterConfig));
 		} catch (Exception e) {
 			throw new ServletException(e);
 		}
-	}
-
-	@Override
-	public void destroy() {
-		super.destroy();
-		// Simulates a contextDestroyed -- but we don't have access to the ServletContext here. At least let's try
-		// to shut down the plugin properly.
-		//
-		// Normal handling in the GitBlit WAR also removes the dagger injector, which is added to the servlet context.
-		// Our servlet context is managed by Gerrit, and may survive a plugin reload. We remove any leftovers there
-		// in init() above.
-		applicationContext.destroy();
 	}
 
 	@Override

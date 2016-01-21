@@ -86,6 +86,38 @@ public class DiffUtils {
 	}
 
 	/**
+	 * Enumeration for the diff comparator types.
+	 */
+	public static enum DiffComparator {
+		SHOW_WHITESPACE(RawTextComparator.DEFAULT), IGNORE_WHITESPACE(RawTextComparator.WS_IGNORE_ALL), IGNORE_LEADING(
+				RawTextComparator.WS_IGNORE_LEADING), IGNORE_TRAILING(RawTextComparator.WS_IGNORE_TRAILING), IGNORE_CHANGES(
+				RawTextComparator.WS_IGNORE_CHANGE);
+
+		public final RawTextComparator textComparator;
+
+		DiffComparator(RawTextComparator textComparator) {
+			this.textComparator = textComparator;
+		}
+
+		public DiffComparator getOpposite() {
+			return this == SHOW_WHITESPACE ? IGNORE_WHITESPACE : SHOW_WHITESPACE;
+		}
+
+		public String getTranslationKey() {
+			return "gb." + name().toLowerCase();
+		}
+
+		public static DiffComparator forName(String name) {
+			for (DiffComparator type : values()) {
+				if (type.name().equalsIgnoreCase(name)) {
+					return type;
+				}
+			}
+			return null;
+		}
+	}
+
+	/**
 	 * Encapsulates the output of a diff.
 	 */
 	public static class DiffOutput implements Serializable {
@@ -188,11 +220,14 @@ public class DiffUtils {
 	 * 
 	 * @param repository
 	 * @param commit
+	 * @param comparator
 	 * @param outputType
+	 * @param tabLength
 	 * @return the diff
 	 */
-	public static DiffOutput getCommitDiff(Repository repository, RevCommit commit, DiffOutputType outputType) {
-		return getDiff(repository, null, commit, null, outputType, null);
+	public static DiffOutput getCommitDiff(Repository repository, RevCommit commit, DiffComparator comparator, DiffOutputType outputType,
+			int tabLength) {
+		return getDiff(repository, null, commit, null, comparator, outputType, tabLength);
 	}
 
 	/**
@@ -200,14 +235,17 @@ public class DiffUtils {
 	 * 
 	 * @param repository
 	 * @param commit
+	 * @param comparator
 	 * @param outputType
 	 * @param handler
 	 *            to use for rendering binary diffs if {@code outputType} is {@link DiffOutputType#HTML HTML}. May be {@code null}, resulting in the
 	 *            default behavior.
+	 * @param tabLength
 	 * @return the diff
 	 */
-	public static DiffOutput getCommitDiff(Repository repository, RevCommit commit, DiffOutputType outputType, BinaryDiffHandler handler) {
-		return getDiff(repository, null, commit, null, outputType, handler);
+	public static DiffOutput getCommitDiff(Repository repository, RevCommit commit, DiffComparator comparator, DiffOutputType outputType,
+			BinaryDiffHandler handler, int tabLength) {
+		return getDiff(repository, null, commit, null, comparator, outputType, handler, tabLength);
 	}
 
 	/**
@@ -216,11 +254,14 @@ public class DiffUtils {
 	 * @param repository
 	 * @param commit
 	 * @param path
+	 * @param comparator
 	 * @param outputType
+	 * @param tabLength
 	 * @return the diff
 	 */
-	public static DiffOutput getDiff(Repository repository, RevCommit commit, String path, DiffOutputType outputType) {
-		return getDiff(repository, null, commit, path, outputType, null);
+	public static DiffOutput getDiff(Repository repository, RevCommit commit, String path, DiffComparator comparator, DiffOutputType outputType,
+			int tabLength) {
+		return getDiff(repository, null, commit, path, comparator, outputType, tabLength);
 	}
 
 	/**
@@ -229,14 +270,17 @@ public class DiffUtils {
 	 * @param repository
 	 * @param commit
 	 * @param path
+	 * @param comparator
 	 * @param outputType
 	 * @param handler
 	 *            to use for rendering binary diffs if {@code outputType} is {@link DiffOutputType#HTML HTML}. May be {@code null}, resulting in the
 	 *            default behavior.
+	 * @param tabLength
 	 * @return the diff
 	 */
-	public static DiffOutput getDiff(Repository repository, RevCommit commit, String path, DiffOutputType outputType, BinaryDiffHandler handler) {
-		return getDiff(repository, null, commit, path, outputType, handler);
+	public static DiffOutput getDiff(Repository repository, RevCommit commit, String path, DiffComparator comparator, DiffOutputType outputType,
+			BinaryDiffHandler handler, int tabLength) {
+		return getDiff(repository, null, commit, path, comparator, outputType, handler, tabLength);
 	}
 
 	/**
@@ -245,11 +289,15 @@ public class DiffUtils {
 	 * @param repository
 	 * @param baseCommit
 	 * @param commit
+	 * @param comparator
 	 * @param outputType
+	 * @param tabLength
+	 * 
 	 * @return the diff
 	 */
-	public static DiffOutput getDiff(Repository repository, RevCommit baseCommit, RevCommit commit, DiffOutputType outputType) {
-		return getDiff(repository, baseCommit, commit, null, outputType, null);
+	public static DiffOutput getDiff(Repository repository, RevCommit baseCommit, RevCommit commit, DiffComparator comparator,
+			DiffOutputType outputType, int tabLength) {
+		return getDiff(repository, baseCommit, commit, null, comparator, outputType, tabLength);
 	}
 
 	/**
@@ -258,15 +306,17 @@ public class DiffUtils {
 	 * @param repository
 	 * @param baseCommit
 	 * @param commit
+	 * @param comparator
 	 * @param outputType
 	 * @param handler
 	 *            to use for rendering binary diffs if {@code outputType} is {@link DiffOutputType#HTML HTML}. May be {@code null}, resulting in the
 	 *            default behavior.
+	 * @param tabLength
 	 * @return the diff
 	 */
-	public static DiffOutput getDiff(Repository repository, RevCommit baseCommit, RevCommit commit, DiffOutputType outputType,
-			BinaryDiffHandler handler) {
-		return getDiff(repository, baseCommit, commit, null, outputType, handler);
+	public static DiffOutput getDiff(Repository repository, RevCommit baseCommit, RevCommit commit, DiffComparator comparator,
+			DiffOutputType outputType, BinaryDiffHandler handler, int tabLength) {
+		return getDiff(repository, baseCommit, commit, null, comparator, outputType, handler, tabLength);
 	}
 
 	/**
@@ -279,10 +329,13 @@ public class DiffUtils {
 	 * @param path
 	 *            if the path is specified, the diff is restricted to that file or folder. if unspecified, the diff is for the entire commit.
 	 * @param outputType
+	 * @param diffComparator
+	 * @param tabLength
 	 * @return the diff
 	 */
-	public static DiffOutput getDiff(Repository repository, RevCommit baseCommit, RevCommit commit, String path, DiffOutputType outputType) {
-		return getDiff(repository, baseCommit, commit, path, outputType, null);
+	public static DiffOutput getDiff(Repository repository, RevCommit baseCommit, RevCommit commit, String path, DiffComparator diffComparator,
+			DiffOutputType outputType, int tabLength) {
+		return getDiff(repository, baseCommit, commit, path, diffComparator, outputType, null, tabLength);
 	}
 
 	/**
@@ -294,41 +347,25 @@ public class DiffUtils {
 	 * @param commit
 	 * @param path
 	 *            if the path is specified, the diff is restricted to that file or folder. if unspecified, the diff is for the entire commit.
+	 * @param comparator
 	 * @param outputType
 	 * @param handler
 	 *            to use for rendering binary diffs if {@code outputType} is {@link DiffOutputType#HTML HTML}. May be {@code null}, resulting in the
 	 *            default behavior.
+	 * @param tabLength
 	 * @return the diff
 	 */
-	public static DiffOutput getDiff(Repository repository, RevCommit baseCommit, RevCommit commit, String path, DiffOutputType outputType,
-			final BinaryDiffHandler handler) {
+	public static DiffOutput getDiff(Repository repository, RevCommit baseCommit, RevCommit commit, String path, DiffComparator comparator,
+			DiffOutputType outputType, final BinaryDiffHandler handler, int tabLength) {
 		DiffStat stat = null;
 		String diff = null;
 		try {
 			ByteArrayOutputStream os = null;
-			RawTextComparator cmp = RawTextComparator.DEFAULT;
-
-			RevTree commitTree = commit.getTree();
-			RevTree baseTree;
-			if (baseCommit == null) {
-				if (commit.getParentCount() > 0) {
-					final RevWalk rw = new RevWalk(repository);
-					baseCommit = rw.parseCommit(commit.getParent(0).getId());
-					rw.close();
-					rw.dispose();
-					baseTree = baseCommit.getTree();
-				} else {
-					// FIXME initial commit. no parent?!
-					baseTree = commitTree;
-				}
-			} else {
-				baseTree = baseCommit.getTree();
-			}
 
 			DiffFormatter df;
 			switch (outputType) {
 			case HTML:
-				df = new GitBlitDiffFormatter(commit.getName(), path, handler);
+				df = new GitBlitDiffFormatter(commit.getName(), path, handler, tabLength);
 				break;
 			case PLAIN:
 			default:
@@ -337,8 +374,25 @@ public class DiffUtils {
 				break;
 			}
 			df.setRepository(repository);
-			df.setDiffComparator(cmp);
+			df.setDiffComparator((comparator == null ? DiffComparator.SHOW_WHITESPACE : comparator).textComparator);
 			df.setDetectRenames(true);
+
+			RevTree commitTree = commit.getTree();
+			RevTree baseTree;
+			if (baseCommit == null) {
+				if (commit.getParentCount() > 0) {
+					final RevWalk rw = new RevWalk(repository);
+					RevCommit parent = rw.parseCommit(commit.getParent(0).getId());
+					rw.close();
+					rw.dispose();
+					baseTree = parent.getTree();
+				} else {
+					// FIXME initial commit. no parent?!
+					baseTree = commitTree;
+				}
+			} else {
+				baseTree = baseCommit.getTree();
+			}
 
 			List<DiffEntry> diffEntries = df.scan(baseTree, commitTree);
 			if (path != null && path.length() > 0) {

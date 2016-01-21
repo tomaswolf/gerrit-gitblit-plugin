@@ -22,7 +22,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.gitblit.manager.IAuthenticationManager;
+import com.gitblit.manager.IProjectManager;
 import com.gitblit.manager.IRepositoryManager;
+import com.gitblit.manager.IRuntimeManager;
 import com.gitblit.models.RepositoryModel;
 import com.gitblit.models.UserModel;
 import com.gitblit.servlet.GerritGitBlitAuthenticatedRequest;
@@ -44,8 +47,9 @@ public class WrappedSyndicationFilter extends SyndicationFilter {
 
 	@Inject
 	public WrappedSyndicationFilter(final DynamicItem<WebSession> webSession, GerritAuthenticationFilter gerritAuthFilter,
-			IRepositoryManager repositoryManager) {
-		super();
+			IRuntimeManager runtimeManager, IAuthenticationManager authenticationManager, IRepositoryManager repositoryManager,
+			IProjectManager projectManager) {
+		super(runtimeManager, authenticationManager, repositoryManager, projectManager);
 		this.webSession = webSession;
 		this.gerritAuthFilter = gerritAuthFilter;
 		this.repositoryManager = repositoryManager;

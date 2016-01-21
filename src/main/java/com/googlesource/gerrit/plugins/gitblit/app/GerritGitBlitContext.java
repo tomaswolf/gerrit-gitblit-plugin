@@ -13,30 +13,58 @@
 // limitations under the License.
 package com.googlesource.gerrit.plugins.gitblit.app;
 
+import javax.servlet.ServletContext;
+
+import com.gitblit.manager.IAuthenticationManager;
+import com.gitblit.manager.IGitblit;
+import com.gitblit.manager.INotificationManager;
+import com.gitblit.manager.IProjectManager;
+import com.gitblit.manager.IRepositoryManager;
+import com.gitblit.manager.IRuntimeManager;
+import com.gitblit.manager.IUserManager;
 import com.gitblit.servlet.GitblitContext;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.googlesource.gerrit.plugins.gitblit.dagger.GerritDaggerModule;
 
 @Singleton
 public class GerritGitBlitContext extends GitblitContext {
 
-	private final GerritDaggerModule guiceBridge;
+	private final GitBlitSettings settings;
+	private final IRuntimeManager runtime;
+	private final INotificationManager notificationManager;
+	private final IUserManager userManager;
+	private final IAuthenticationManager authenticationManager;
+	private final IRepositoryManager repositoryManager;
+	private final IProjectManager projectManager;
+	private final IGitblit gitblit;
 
 	@Inject
-	public GerritGitBlitContext(final GitBlitSettings settings, final GerritDaggerModule guiceBridge) {
-		// Ensure that GitBlit gets initialized in stand-alone mode. Otherwise it uses dagger to create the various
-		// managers we need, and also assumes it's running from a war or in some other strange setups.
-		super(settings, settings.getBasePath());
-		this.guiceBridge = guiceBridge;
+	GerritGitBlitContext(GitBlitSettings settings, IRuntimeManager runtime, INotificationManager notificationManager, IUserManager userManager,
+			IAuthenticationManager authenticationManager, IRepositoryManager repositoryManager, IProjectManager projectManager, IGitblit gitblit) {
+		this.settings = settings;
+		this.runtime = runtime;
+		this.notificationManager = notificationManager;
+		this.userManager = userManager;
+		this.authenticationManager = authenticationManager;
+		this.repositoryManager = repositoryManager;
+		this.projectManager = projectManager;
+		this.gitblit = gitblit;
 	}
 
 	@Override
-	protected Object[] getModules() {
-		return new Object[] { guiceBridge };
+	protected void startCore(ServletContext context) {
+		// Manually configure IRuntimeManager
+		runtime.setBaseFolder(settings.getBasePath());
+		runtime.getStatus().servletContainer = context.getServerInfo();
+		runtime.start();
+		// Start all other managers
+		startManager(notificationManager);
+		startManager(userManager);
+		startManager(authenticationManager);
+		startManager(repositoryManager);
+		startManager(projectManager);
+		startManager(gitblit);
+		logger.info("All Gitblit managers started.");
 	}
 
-	public void destroy() {
-		super.destroyContext(null);
-	}
 }

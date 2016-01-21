@@ -36,13 +36,16 @@ import org.slf4j.LoggerFactory;
 import com.gitblit.Keys;
 import com.gitblit.manager.IAuthenticationManager;
 import com.gitblit.manager.IFederationManager;
+import com.gitblit.manager.IFilestoreManager;
 import com.gitblit.manager.IGitblit;
 import com.gitblit.manager.INotificationManager;
 import com.gitblit.manager.IPluginManager;
 import com.gitblit.manager.IProjectManager;
 import com.gitblit.manager.IRepositoryManager;
 import com.gitblit.manager.IRuntimeManager;
+import com.gitblit.manager.IServicesManager;
 import com.gitblit.manager.IUserManager;
+import com.gitblit.tickets.ITicketService;
 import com.gitblit.transport.ssh.IPublicKeyManager;
 import com.gitblit.wicket.CacheControl;
 import com.gitblit.wicket.GitBlitWebApp;
@@ -51,6 +54,7 @@ import com.gitblit.wicket.GitblitParamUrlCodingStrategy;
 import com.google.gerrit.extensions.registration.DynamicItem;
 import com.google.gerrit.httpd.WebSession;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -70,12 +74,13 @@ public class GerritGitBlitWebApp extends GitBlitWebApp {
 	private String pluginInstanceKey;
 
 	@Inject
-	public GerritGitBlitWebApp(IRuntimeManager runtimeManager, IPluginManager pluginManager, INotificationManager notificationManager,
-			IUserManager userManager, IAuthenticationManager authenticationManager, IPublicKeyManager publicKeyManager,
-			IRepositoryManager repositoryManager, IProjectManager projectManager, IFederationManager federationManager, IGitblit gitblit,
+	public GerritGitBlitWebApp(Provider<IPublicKeyManager> publicKeyManagerProvider, Provider<ITicketService> ticketServiceProvider,
+			IRuntimeManager runtimeManager, IPluginManager pluginManager, INotificationManager notificationManager, IUserManager userManager,
+			IAuthenticationManager authenticationManager, IRepositoryManager repositoryManager, IProjectManager projectManager,
+			IFederationManager federationManager, IGitblit gitblit, IServicesManager services, IFilestoreManager filestoreManager,
 			DynamicItem<WebSession> gerritSession) {
-		super(runtimeManager, pluginManager, notificationManager, userManager, authenticationManager, publicKeyManager, repositoryManager,
-				projectManager, federationManager, gitblit);
+		super(publicKeyManagerProvider, ticketServiceProvider, runtimeManager, pluginManager, notificationManager, userManager,
+				authenticationManager, repositoryManager, projectManager, federationManager, gitblit, services, filestoreManager);
 		this.gerritSesssion = gerritSession;
 		// We need this, otherwise the flotr2 library adds again links that are not recoded for static access.
 		setHeaderResponseDecorator(new IHeaderResponseDecorator() {

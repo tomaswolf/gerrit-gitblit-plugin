@@ -1,11 +1,11 @@
 # GitBlit plugin
 
-This plugin integrates [GitBlit](https://github.com/gitblit/gitblit) **1.6.2** as a repository browser into [Gerrit](https://code.google.com/p/gerrit/),
+This plugin integrates [GitBlit](https://github.com/gitblit/gitblit) **1.7.1** as a repository browser into [Gerrit](https://code.google.com/p/gerrit/),
 with full SSO through Gerrit.
 
 * License: [Apache Public License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 * [Home page](https://github.com/tomaswolf/gerrit-gitblit-plugin)
-* Installed plugin version: <em id='gerrit-gitblit-current-version'>2.12.162.2-SNAPSHOT</em> &mdash; <a id='gerrit-gitblit-version-check' style='display:none;' href='#'>Check for updates</a>
+* Installed plugin version: <em id='gerrit-gitblit-current-version'>2.12.171.0-SNAPSHOT</em> &mdash; <a id='gerrit-gitblit-version-check' style='display:none;' href='#'>Check for updates</a>
 
 For a list of contributors, see at [GitHub](https://github.com/tomaswolf/gerrit-gitblit-plugin/graphs/contributors).
 
@@ -69,7 +69,7 @@ If you want to lock the GitBlit plugin to allow only logged-in users to browse, 
 `web.authenticateViewPages = true`. This is the only key of the built-in configuration that you _can_ override. 
 
 GitBlit's ticket service, fan-out service, and its plugin mechanism are disabled in this plugin, as is ssh access through GitBlit since Gerrit
-already provides that.
+already provides that. Also disabled is Gitblit's LFS implementation.
 
 The GitBlit `${baseFolder}` is the plugin's data directory provided by Gerrit at `$GERRIT_SITE/data/gitblit/`.
 
@@ -111,6 +111,6 @@ Report bugs or make feature requests at the [GitHub issue tracker](https://githu
 
 <hr style="color: #C0C0C0; background-color: #C0C0C0; border-color: #C0C0C0; height: 2px;" />
 <div style="float:right;">
-<a href="https://github.com/tomaswolf/gerrit-gitblit-plugin" target="_blank">GitBlit plugin 2.12.162.2-SNAPSHOT</a>
+<a href="https://github.com/tomaswolf/gerrit-gitblit-plugin" target="_blank">GitBlit plugin 2.12.171.0-SNAPSHOT</a>
 </div>
 <script type="text/javascript" src="version_check.js"></script>

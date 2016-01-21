@@ -82,6 +82,8 @@ public class GitBlitDiffFormatter extends DiffFormatter {
 	 */
 	private static final int GLOBAL_DIFF_LIMIT = 20000;
 
+	private static final boolean CONVERT_TABS = true;
+
 	/**
 	 * Maximum number of diff context lines allowed for commitdiffs. Can be reduced (but not increased) through gitblit.properties key
 	 * {@link #COMMIT_DIFF_CONTEXT_MAXIMUM_KEY}.
@@ -136,6 +138,8 @@ public class GitBlitDiffFormatter extends DiffFormatter {
 	/** If {@link #truncated}, contains all entries skipped. */
 	private final List<DiffEntry> skipped = new ArrayList<DiffEntry>();
 
+	private final int tabLength;
+
 	/**
 	 * A {@link ResettableByteArrayOutputStream} that intercept the "Binary files differ" message produced by the super implementation. Unfortunately
 	 * the super implementation has far too many things private; otherwise we'd just have re-implemented
@@ -168,11 +172,12 @@ public class GitBlitDiffFormatter extends DiffFormatter {
 
 	}
 
-	public GitBlitDiffFormatter(String commitId, String path, BinaryDiffHandler handler) {
+	public GitBlitDiffFormatter(String commitId, String path, BinaryDiffHandler handler, int tabLength) {
 		super(new DiffOutputStream());
 		this.os = (DiffOutputStream) getOutputStream();
 		this.os.setFormatter(this, handler);
 		this.diffStat = new DiffStat(commitId);
+		this.tabLength = tabLength;
 		// If we have a full commitdiff, install maxima to avoid generating a super-long diff listing that
 		// will only tax the browser too much.
 		maxDiffLinesPerFile = path != null ? -1 : getLimit(DIFF_LIMIT_PER_FILE_KEY, 500, DIFF_LIMIT_PER_FILE);
@@ -481,14 +486,14 @@ public class GitBlitDiffFormatter extends DiffFormatter {
 			// Highlight trailing whitespace on deleted/added lines.
 			Matcher matcher = trailingWhitespace.matcher(line);
 			if (matcher.find()) {
-				StringBuilder result = new StringBuilder(StringUtils.escapeForHtml(line.substring(0, matcher.start()), false));
+				StringBuilder result = new StringBuilder(StringUtils.escapeForHtml(line.substring(0, matcher.start()), CONVERT_TABS, tabLength));
 				result.append("<span class='trailingws-").append(prefix == '+' ? "add" : "sub").append("'>");
 				result.append(StringUtils.escapeForHtml(matcher.group(1), false));
 				result.append("</span>");
 				return result.toString();
 			}
 		}
-		return StringUtils.escapeForHtml(line, false);
+		return StringUtils.escapeForHtml(line, CONVERT_TABS, tabLength);
 	}
 
 	/**
@@ -501,7 +506,7 @@ public class GitBlitDiffFormatter extends DiffFormatter {
 		String[] lines = html.split("\n");
 		StringBuilder sb = new StringBuilder();
 		for (String line : lines) {
-			if (line.startsWith("index")) {
+			if (line.startsWith("index") || line.startsWith("similarity") || line.startsWith("rename from ") || line.startsWith("rename to ")) {
 				// skip index lines
 			} else if (line.startsWith("new file") || line.startsWith("deleted file")) {
 				// skip new file lines
@@ -520,7 +525,7 @@ public class GitBlitDiffFormatter extends DiffFormatter {
 					} else {
 						sb.append("<th class='diff-state diff-state-sub'></th><td class=\"diff-cell remove2\">");
 					}
-					line = StringUtils.escapeForHtml(line.substring(1), false);
+					line = StringUtils.escapeForHtml(line.substring(1), CONVERT_TABS, tabLength);
 				}
 				sb.append(line);
 				if (gitLinkDiff) {

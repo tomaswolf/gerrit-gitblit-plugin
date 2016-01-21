@@ -19,6 +19,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.gitblit.IStoredSettings;
+import com.gitblit.manager.IProjectManager;
+import com.gitblit.manager.IRepositoryManager;
 import com.gitblit.servlet.SyndicationServlet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -28,8 +31,8 @@ import com.google.inject.Singleton;
 public class WrappedSyndicationServlet extends SyndicationServlet {
 
 	@Inject
-	public WrappedSyndicationServlet() {
-		super();
+	public WrappedSyndicationServlet(IStoredSettings settings, IRepositoryManager repositoryManager, IProjectManager projectManager) {
+		super(settings, repositoryManager, projectManager);
 	}
 
 	@Override
