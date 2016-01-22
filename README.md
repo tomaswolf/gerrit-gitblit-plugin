@@ -145,10 +145,9 @@ from the official plugin and adapt them to match the `pom.xml`.
 # Alternatives
 
 Some time after I had released my first version of this plugin, Luca Milanesio had updated the [official plugin](https://gerrit.googlesource.com/plugins/gitblit/)
-to work again with Gerrit release 2.11. Internally it's based on an as
-yet unreleased GitBlit version (James' [development branch](https://github.com/gitblit/gitblit/tree/develop) that should one day become
-GitBlit 1.7.0). You can find that "official plugin" on the [Gerrit CI server](https://gerrit-ci.gerritforge.com/view/Plugins-stable-2.11/job/plugin-gitblit-stable-2.11/).
-I have never used it, so I have no idea how well it works.
+to work again with Gerrit release 2.11. Internally it's based on a custom-built GitBlit version 1.7.x. You can find that "official plugin" on the
+[Gerrit CI server](https://gerrit-ci.gerritforge.com/view/Plugins-stable-2.11/job/plugin-gitblit-stable-2.11/). I have never used it, so I have no
+idea how well it works.
 
 In early May 2015, some of my changes here were merged back into the official plugin, but there are still functional differences, mainly
 related to plugin reloading, raw file serving, handling of non-logged-in users, and how `gitblit.properties` is loaded and what default
