@@ -24,8 +24,6 @@ import org.eclipse.jgit.lib.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Objects;
-
 public class GitBlitUrlsConfig {
 	private static final int SSH_DEF_PORT = 22;
 	private static final String GITBLIT_REPO = "{0}";
@@ -96,7 +94,7 @@ public class GitBlitUrlsConfig {
 			return "";
 		}
 
-		String httpUrl = Objects.firstNonNull(canonicalWebUrlString, httpListenUrl);
+		String httpUrl = canonicalWebUrlString == null ? httpListenUrl : canonicalWebUrlString;
 		httpUrl = httpUrl.replace("://", "://" + GITBLIT_USER + "@");
 		httpUrl += (httpUrl.endsWith("/") ? "" : "/") + GITBLIT_REPO;
 		return httpUrl;

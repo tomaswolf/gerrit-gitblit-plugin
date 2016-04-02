@@ -313,6 +313,7 @@ public class DiffUtils {
 				if (commit.getParentCount() > 0) {
 					final RevWalk rw = new RevWalk(repository);
 					baseCommit = rw.parseCommit(commit.getParent(0).getId());
+					rw.close();
 					rw.dispose();
 					baseTree = baseCommit.getTree();
 				} else {
@@ -357,6 +358,7 @@ public class DiffUtils {
 			} else {
 				diff = os.toString();
 			}
+			df.close();
 		} catch (Throwable t) {
 			LOGGER.error("failed to generate commit diff!", t);
 		}
@@ -392,6 +394,8 @@ public class DiffUtils {
 				if (commit.getParentCount() > 0) {
 					final RevWalk rw = new RevWalk(repository);
 					RevCommit parent = rw.parseCommit(commit.getParent(0).getId());
+					rw.close();
+					rw.dispose();
 					baseTree = parent.getTree();
 				} else {
 					// FIXME initial commit. no parent?!
@@ -414,6 +418,7 @@ public class DiffUtils {
 			}
 			diff = df.getPatch(commit);
 			df.flush();
+			df.close();
 		} catch (Throwable t) {
 			LOGGER.error("failed to generate commit diff!", t);
 		}
@@ -445,6 +450,7 @@ public class DiffUtils {
 		} catch (Exception e) {
 			LOGGER.error("failed to generate diffstat!", e);
 		} finally {
+			revWalk.close();
 			revWalk.dispose();
 		}
 		return null;
@@ -481,6 +487,8 @@ public class DiffUtils {
 				if (commit.getParentCount() > 0) {
 					final RevWalk rw = new RevWalk(repository);
 					RevCommit parent = rw.parseCommit(commit.getParent(0).getId());
+					rw.close();
+					rw.dispose();
 					baseTree = parent.getTree();
 				} else {
 					// FIXME initial commit. no parent?!
@@ -503,6 +511,7 @@ public class DiffUtils {
 			}
 			stat = df.getDiffStat();
 			df.flush();
+			df.close();
 		} catch (Throwable t) {
 			LOGGER.error("failed to generate commit diff!", t);
 		}

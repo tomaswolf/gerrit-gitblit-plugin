@@ -29,7 +29,6 @@ import org.apache.commons.codec.binary.Base64;
 
 import com.gitblit.manager.IAuthenticationManager;
 import com.gitblit.models.UserModel;
-import com.google.common.base.Objects;
 import com.google.gerrit.extensions.registration.DynamicItem;
 import com.google.gerrit.httpd.WebSession;
 import com.google.inject.Inject;
@@ -84,7 +83,11 @@ public class GerritAuthenticationFilter {
 		}
 
 		final byte[] decoded = new Base64().decode(hdr.substring(LIT_BASIC.length()).getBytes());
-		String usernamePassword = new String(decoded, Objects.firstNonNull(request.getCharacterEncoding(), "UTF-8"));
+		String encoding = request.getCharacterEncoding();
+		if (encoding == null) {
+			encoding = "UTF-8";
+		}
+		String usernamePassword = new String(decoded, encoding);
 		int splitPos = usernamePassword.indexOf(':');
 		if (splitPos < 1) {
 			response.setHeader("WWW-Authenticate", "Basic realm=\"Gerrit Code Review\"");
