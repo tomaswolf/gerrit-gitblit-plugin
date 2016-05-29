@@ -20,7 +20,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.SocketAddress;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -39,6 +41,8 @@ import com.google.gerrit.extensions.annotations.PluginData;
 import com.google.gerrit.server.config.GerritServerConfig;
 import com.google.gerrit.server.config.SitePaths;
 import com.google.gerrit.server.git.LocalDiskRepositoryManager;
+import com.google.gerrit.server.ssh.SshAdvertisedAddresses;
+import com.google.gerrit.server.ssh.SshListenAddresses;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.gitblit.GitBlitUrlsConfig;
@@ -61,15 +65,17 @@ public class GitBlitSettings extends IStoredSettings {
 	private final Properties properties = new Properties();
 
 	@Inject
-	public GitBlitSettings(LocalDiskRepositoryManager repoManager, @GerritServerConfig Config config, SitePaths sitePaths, @PluginData File homeDir)
-			throws IOException {
+	public GitBlitSettings(LocalDiskRepositoryManager repoManager, @GerritServerConfig Config config,
+			@SshListenAddresses List<SocketAddress> sshListenAddresses, @SshAdvertisedAddresses List<String> sshAdvertizedAddresses,
+			SitePaths sitePaths, @PluginData File homeDir) throws IOException {
 		super(GitBlitSettings.class);
 		// Give GitBlit its own baseDir, otherwise it'll create subfolders in the git repo directory.
 		// Note that if you enable Lucene indexing for GitBlit, it will anyway create a subdirectory
 		// in that directory called "lucene". See com.gitblit.service.LuceneService. But at least we
 		// can keep GitBlit's plugins and tickets directories out of the way.
 		this.homeDir = homeDir;
-		load(properties, sitePaths.etc_dir.toFile(), new GitBlitUrlsConfig(config), repoManager.getBasePath().toFile());
+		load(properties, sitePaths.etc_dir.toFile(), new GitBlitUrlsConfig(config, sshListenAddresses, sshAdvertizedAddresses), repoManager
+				.getBasePath().toFile());
 	}
 
 	@Override

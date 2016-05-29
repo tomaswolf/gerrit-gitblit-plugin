@@ -14,6 +14,8 @@
 package com.googlesource.gerrit.plugins.gitblit;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
@@ -26,24 +28,24 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.reviewdb.client.AuthType;
+import com.google.gerrit.server.ssh.SshAddressesModule;
 
 public class GitBlitUrlsConfig {
-	private static final int SSH_DEF_PORT = 22;
+	private static final Logger log = LoggerFactory.getLogger(GitBlitUrlsConfig.class);
 	private static final String GITBLIT_REPO = "{0}";
 	private static final String GITBLIT_USER = "{1}";
-	private static final Logger log = LoggerFactory.getLogger(GitBlitUrlsConfig.class);
 
 	private final String canonicalWebUrlString;
-	private final String sshdListenAddressString;
+	private final String sshGitUrl;
 	private final String httpdListenUrlString;
 	private final String loginUrl;
 	private final List<String> downloadSchemes;
 
-	public GitBlitUrlsConfig(Config config) {
+	public GitBlitUrlsConfig(Config config, List<SocketAddress> sshListenAddresses, List<String> sshAdvertizedAddresses) {
 		canonicalWebUrlString = config.getString("gerrit", null, "canonicalWebUrl");
-		sshdListenAddressString = config.getString("sshd", null, "listenAddress");
 		httpdListenUrlString = config.getString("httpd", null, "listenUrl");
 		downloadSchemes = Arrays.asList(config.getStringList("download", null, "scheme"));
+		sshGitUrl = determineGitSshUrl(sshListenAddresses, sshAdvertizedAddresses);
 		AuthType gerritAuthType = null;
 		try {
 			gerritAuthType = config.getEnum("auth", null, "type", AuthType.DEVELOPMENT_BECOME_ANY_ACCOUNT);
@@ -77,32 +79,75 @@ public class GitBlitUrlsConfig {
 		return canonicalWebUrlString;
 	}
 
-	public String getGitSshUrl() {
-		if (sshdListenAddressString == null) {
-			return "";
+	private String determineGitSshUrl(List<SocketAddress> sshListenAddresses, List<String> sshAdvertizedAddresses) {
+		if (sshListenAddresses == null || sshListenAddresses.isEmpty()) {
+			return null;
 		}
 		if (!downloadSchemes.isEmpty() && !downloadSchemes.contains("ssh")) {
-			return "";
+			return null;
 		}
+		String sshUrl = null;
+		for (String candidate : sshAdvertizedAddresses) {
+			sshUrl = getSshUrl(candidate);
+			if (sshUrl != null) {
+				break;
+			}
+		}
+		if (sshUrl == null && !sshListenAddresses.isEmpty()) {
+			SocketAddress s = sshListenAddresses.get(0);
+			if (s instanceof InetSocketAddress) {
+				String host = ((InetSocketAddress) s).getHostString();
+				int port = ((InetSocketAddress) s).getPort();
+				sshUrl = formatUrl(host, port);
+			}
+		}
+		if (sshUrl == null) {
+			log.error("Cannot determine ssh clone URL");
+		}
+		return sshUrl;
+	}
 
-		String[] urlParts = sshdListenAddressString.split(":");
-		if (urlParts.length < 2) {
-			log.error("Invalid SSHD listenUrl: " + sshdListenAddressString);
-			return "";
-		}
+	private String getSshUrl(String candidate) {
+		String[] parts = candidate.split(":");
+		String host;
+		int port = SshAddressesModule.IANA_SSH_PORT;
 		try {
-			String hostname = getHost(urlParts[0]);
-			int port = getPort(urlParts[1]);
-
-			return "ssh://" + GITBLIT_USER + "@" + hostname + (port == SSH_DEF_PORT ? "" : ":" + port) + "/" + GITBLIT_REPO + "";
+			switch (parts.length) {
+			case 1:
+				// No port
+				host = getHost(parts[0]);
+				break;
+			case 2:
+				host = getHost(parts[0]);
+				port = getPort(parts[1]);
+				break;
+			default:
+				log.error("Invalid sshd advertised URL: " + candidate);
+				return null;
+			}
+			return formatUrl(host, port);
 		} catch (UnknownHostException e) {
 			log.error("Cannot detect localhostname");
-			return "";
+		} catch (NumberFormatException ex) {
+			log.error("Invalid port number in sshd address: " + candidate);
 		}
+		return null;
+	}
+
+	private String formatUrl(String host, int port) {
+		return "ssh://" + GITBLIT_USER + '@' + host + (port == SshAddressesModule.IANA_SSH_PORT ? "" : ":" + port) + '/' + GITBLIT_REPO;
+	}
+
+	public String getGitSshUrl() {
+		return sshGitUrl == null ? "" : sshGitUrl;
 	}
 
 	private int getPort(String port) {
-		return Integer.parseInt(port);
+		int portNumber = Integer.parseInt(port);
+		if (portNumber <= 0) {
+			throw new NumberFormatException();
+		}
+		return portNumber;
 	}
 
 	private String getHost(String hostname) throws UnknownHostException {
