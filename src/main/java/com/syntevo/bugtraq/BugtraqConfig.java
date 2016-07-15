@@ -43,6 +43,7 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
@@ -177,7 +178,18 @@ public final class BugtraqConfig {
 			RevWalk rw = new RevWalk(repository);
 			try (TreeWalk tw = new TreeWalk(repository)) {
 				tw.setFilter(PathFilterGroup.createFromStrings(configFileName));
-				ObjectId headId = repository.getRef(Constants.HEAD).getTarget().getObjectId();
+				Ref head = repository.getRef(Constants.HEAD);
+				if (head == null) {
+					return null;
+				}
+				head = head.getTarget();
+				if (head == null) {
+					return null;
+				}
+				ObjectId headId = head.getObjectId();
+				if (headId == null) {
+					return null;
+				}
 				RevCommit commit = rw.parseCommit(headId);
 				RevTree tree = commit.getTree();
 				tw.reset(tree);
