@@ -13,23 +13,33 @@
 // limitations under the License.
 package com.googlesource.gerrit.plugins.gitblit.auth;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.gitblit.Keys;
 import com.gitblit.manager.IPluginManager;
 import com.gitblit.manager.IRuntimeManager;
 import com.gitblit.manager.IUserManager;
 import com.gitblit.manager.RepositoryManager;
 import com.gitblit.models.RepositoryModel;
 import com.gitblit.models.UserModel;
+import com.gitblit.utils.CommitCache;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
 public class GerritGitBlitRepositoryManager extends RepositoryManager {
 
+	private static final Logger log = LoggerFactory.getLogger(GerritGitBlitRepositoryManager.class);
+
+	private final IRuntimeManager runtimeManager;
+
 	private final IUserManager userManager;
 
 	@Inject
 	public GerritGitBlitRepositoryManager(final IRuntimeManager runtimeManager, final IPluginManager pluginManager, final IUserManager userManager) {
 		super(runtimeManager, pluginManager, userManager);
+		this.runtimeManager = runtimeManager;
 		this.userManager = userManager;
 	}
 
@@ -82,5 +92,27 @@ public class GerritGitBlitRepositoryManager extends RepositoryManager {
 	public boolean deleteRepositoryModel(RepositoryModel model) {
 		// Just to be sure. Shouldn't be called anyway.
 		return true;
+	}
+
+	@Override
+	protected void configureCommitCache() {
+		int daysToCache = runtimeManager.getSettings().getInteger(Keys.web.activityCacheDays, 14);
+		if (daysToCache <= 0) {
+			log.info("Commit cache is disabled");
+			return;
+		}
+		CommitCache.instance().setCacheDays(daysToCache);
+		// Run this potentially long-running operation in the background
+		Thread loader = new Thread() {
+			@Override
+			public void run() {
+				log.info("Starting to populate commit cache in background");
+				GerritGitBlitRepositoryManager.super.configureCommitCache();
+				log.info("Done populating commit cache in background");
+			}
+		};
+		loader.setName("CommitCacheLoader");
+		loader.setDaemon(true);
+		loader.start();
 	}
 }
