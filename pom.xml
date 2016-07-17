@@ -234,6 +234,10 @@ limitations under the License.
                     <exclude>com/gitblit/utils/MetricUtils$*.class</exclude>
                     <exclude>com/gitblit/utils/GitBlitDiffFormatter.class</exclude><!-- Number of diff context lines -->
                     <exclude>com/gitblit/utils/GitBlitDiffFormatter$*.class</exclude>
+                    <exclude>com/gitblit/utils/ArrayUtils.class</exclude><!-- Performance fix, c.f. issue #23 -->
+                    <exclude>com/gitblit/utils/ArrayUtils$*.class</exclude>
+                    <exclude>com/gitblit/utils/CommitCache.class</exclude><!-- Performance fix, c.f. issue #23 -->
+                    <exclude>com/gitblit/utils/CommitCache$*.class</exclude>
                     <!-- JGit compatibility. -->
                     <exclude>com/gitblit/utils/DiffUtils.class</exclude>
                     <exclude>com/gitblit/utils/DiffUtils$*.class</exclude>
