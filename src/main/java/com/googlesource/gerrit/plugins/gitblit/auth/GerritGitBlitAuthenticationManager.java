@@ -13,6 +13,7 @@
 // limitations under the License.
 package com.googlesource.gerrit.plugins.gitblit.auth;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.Cookie;
@@ -79,7 +80,7 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 
 	/**
 	 * Determines the path part of the plugin Url. Should work OK even if Gerrit isn't at the root path, for instance at //somehost:someport/gerrit/.
-	 * 
+	 *
 	 * @param pluginUrl
 	 *            as determined by Gerrit's plugin infrastructure
 	 * @param pluginName
@@ -198,7 +199,7 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 			gerritSession.get().login(authResp, false);
 			log.info("Logged in {}", username);
 			return loggedIn(httpRequest, userManager.getUserModel(username), password, authResp);
-		} catch (AccountException e) {
+		} catch (AccountException | IOException e) {
 			log.warn("Authentication failed for user '" + username + '\'', e);
 			return null;
 		}
@@ -275,7 +276,7 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 
 	/**
 	 * Logs out the user in GitBlit. Returns a URL to redirect to for Gerrit logout.
-	 * 
+	 *
 	 * @return a URL to redirect to, or {@code null} if none.
 	 */
 	public String logoutAndRedirect(HttpServletRequest request, HttpServletResponse response, UserModel user) {

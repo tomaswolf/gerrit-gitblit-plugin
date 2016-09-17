@@ -40,7 +40,6 @@ import com.google.common.collect.Sets;
 import com.google.gerrit.extensions.annotations.PluginData;
 import com.google.gerrit.server.config.GerritServerConfig;
 import com.google.gerrit.server.config.SitePaths;
-import com.google.gerrit.server.git.LocalDiskRepositoryManager;
 import com.google.gerrit.server.ssh.SshAdvertisedAddresses;
 import com.google.gerrit.server.ssh.SshListenAddresses;
 import com.google.inject.Inject;
@@ -65,7 +64,7 @@ public class GitBlitSettings extends IStoredSettings {
 	private final Properties properties = new Properties();
 
 	@Inject
-	public GitBlitSettings(LocalDiskRepositoryManager repoManager, @GerritServerConfig Config config,
+	public GitBlitSettings(@GerritServerConfig Config config,
 			@SshListenAddresses List<SocketAddress> sshListenAddresses, @SshAdvertisedAddresses List<String> sshAdvertizedAddresses,
 			SitePaths sitePaths, @PluginData File homeDir) throws IOException {
 		super(GitBlitSettings.class);
@@ -74,8 +73,8 @@ public class GitBlitSettings extends IStoredSettings {
 		// in that directory called "lucene". See com.gitblit.service.LuceneService. But at least we
 		// can keep GitBlit's plugins and tickets directories out of the way.
 		this.homeDir = homeDir;
-		load(properties, sitePaths.etc_dir.toFile(), new GitBlitUrlsConfig(config, sshListenAddresses, sshAdvertizedAddresses), repoManager
-				.getBasePath().toFile());
+		load(properties, sitePaths.etc_dir.toFile(), new GitBlitUrlsConfig(config, sshListenAddresses, sshAdvertizedAddresses),
+				sitePaths.resolve(config.getString("gerrit", null, "basePath")).toFile());
 	}
 
 	@Override
@@ -92,7 +91,7 @@ public class GitBlitSettings extends IStoredSettings {
 	/**
 	 * Loads the properties from the given {@link InputStream} using the UTF-8 character encoding. The stream is closed in all cases. A no-op if the
 	 * stream is {@code null}.
-	 * 
+	 *
 	 * @param properties
 	 *            to load; must not be {@code null}
 	 * @param stream
@@ -110,7 +109,7 @@ public class GitBlitSettings extends IStoredSettings {
 
 	/**
 	 * Tests whether the {@code candidate} {@link File} is in the set {@code alreadySeen} and logs a warning if so.
-	 * 
+	 *
 	 * @param candidate
 	 *            File to test
 	 * @param alreadySeen
@@ -127,7 +126,7 @@ public class GitBlitSettings extends IStoredSettings {
 
 	/**
 	 * Merge the settings from {@code source} into {@code into}, preserving values already present in {@code into}.
-	 * 
+	 *
 	 * @param source
 	 *            {@link Properties} to read entries to merge from
 	 * @param into
@@ -143,7 +142,7 @@ public class GitBlitSettings extends IStoredSettings {
 
 	/**
 	 * GitBlit 1.7.0 has introduced the notion of including properties files. We have to re-build this functionality here.
-	 * 
+	 *
 	 * @param properties
 	 *            to merge the included properties into
 	 * @param parent
@@ -196,7 +195,7 @@ public class GitBlitSettings extends IStoredSettings {
 	/**
 	 * Loads the properties from the user-supplied gitblit.properties in $GERRIT_SITE/etc, if it exists, and then overwrites with the built-in
 	 * properties to ensure that GitBlit is set up as a viewer only and uses Gerrit's git repositories.
-	 * 
+	 *
 	 * @param properties
 	 *            to load; must not be {@code null}
 	 * @param directory
