@@ -1,6 +1,6 @@
 # Gerrit-GitBlit plugin
 
-This is a fork of [Luca Milanesio's](https://github.com/lucamilanesio) ["official" Gerrit-GitBlit plugin](https://gerrit.googlesource.com/plugins/gitblit/),
+This is a fork of the [official Gerrit-GitBlit plugin](https://gerrit.googlesource.com/plugins/gitblit/),
 forked originally from [master revision 28d2c98](https://gerrit.googlesource.com/plugins/gitblit/+/28d2c9823618812acd21ce64f89c7e0ac47ff2a8).
 
 It integrates [GitBlit](https://github.com/gitblit/gitblit) as a repository browser into [Gerrit](https://code.google.com/p/gerrit/) as a Gerrit plugin.
@@ -24,17 +24,8 @@ of Apache Rome (classloading in RSS feeder). Additionally, it only worked with a
 particular, Luca had moved all the static resources in GitBlit into a "/static" subdirectory so that they'd be accessible by the
 standard Gerrit plugin mechanism, which does handle this directory specially.
 
-This worked more or less, but had a number of problems:
-
-* The official plugin didn't produce branch graphs. That's [Gerrit bug 2942](https://code.google.com/p/gerrit/issues/detail?id=2942).
-* It somehow didn't serve the Flash copy-paste helper.
-* GitBlit 1.4.0 produced diagrams and graphs using the Google charts API, making requests to Google.
-* RSS feeds didn't work for me.
+This worked more or less, but still has one problem left:
 * The official plugin set the base path for GitBlit to Gerrit's git directory. It should point somewhere else.
-* Using a specially hacked GitBlit jar hosted at an apparently non-browseable Maven repository at GerritForge was a lock-in that
-  I wanted to avoid. It means there's no reasonably easy path to get bug fixes in GitBlit since this fork of GitBlit was produced.
-  I wanted to have a Gerrit-GitBlit plugin working with the latest standard official release of GitBlit from
-  the standard official [GitBlit maven repo](http://gitblit.github.io/gitblit-maven/).
 
 You might [wonder](https://groups.google.com/forum/#!topic/repo-discuss/yi6IG_Xgekc) whether the whole approach of including
 GitBlit as a Gerrit plugin makes sense at all. The basic problem this plugin tries to overcome is the lack of any decent repository
@@ -81,6 +72,8 @@ Additional modifications were due to changes in GitBlit:
 * GitBlit 1.6.x switched to the [pegdown](https://github.com/sirthias/pegdown) [markdown](https://en.wikipedia.org/wiki/Markdown)
   parser. That caused me some headache because Gerrit versions smaller than 2.11 include a version of pegdown that is too old for
   GitBlit.
+
+The [official version of GitBlit](https://gerrit.googlesource.com/plugins/gitblit/+/refs/heads/master) has now included most of those improvements and run on a plain GitBlit 1.7.1 version.
 
 # Installation
 
@@ -144,14 +137,10 @@ from the official plugin and adapt them to match the `pom.xml`.
 
 # Alternatives
 
-Some time after I had released my first version of this plugin, Luca Milanesio had updated the [official plugin](https://gerrit.googlesource.com/plugins/gitblit/)
-to work again with Gerrit release 2.11. Internally it's based on a custom-built GitBlit version 1.7.x. You can find that "official plugin" on the
-[Gerrit CI server](https://gerrit-ci.gerritforge.com/view/Plugins-stable-2.11/job/plugin-gitblit-stable-2.11/). I have never used it, so I have no
-idea how well it works.
+Some time after I had released my first version of this plugin, Luca Milanesio had updated the [official plugin](https://gerrit.googlesource.com/plugins/gitblit/) thanks to my and the community's contributions,
+to work again with Gerrit release 2.11 and 2.12. Internally it's based on plain GitBlit version 1.7.x. You can find that official plugin on the
+[Gerrit CI server](https://gerrit-ci.gerritforge.com/view/Plugins-stable-2.11/job/plugin-gitblit-stable-2.11/). I have never used it, so I have no idea how well it works.
 
-In early May 2015, some of my changes here were merged back into the official plugin, but there are still functional differences, mainly
+As previously mentioned, in May 2015, some of my changes here were contributed, reviewed and merged back into the official plugin, but there are still functional differences, mainly
 related to plugin reloading, raw file serving, handling of non-logged-in users, and how `gitblit.properties` is loaded and what default
 settings are provided by the plugin.
-
-The official versions of this plugin in the Gerrit repo for Gerrit versions smaller than 2.11 are all based on the old GitBlit 1.4.0 and all exhibit the
-problems mentioned above.
