@@ -232,7 +232,7 @@ limitations under the License.
                     <exclude>com/gitblit/wicket/pages/RootPage$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/BasePage.class</exclude><!-- Gerrit footer link -->
                     <exclude>com/gitblit/wicket/pages/BasePage$*.class</exclude>
-                    <exclude>com/gitblit/wicket/pages/BlobPage.class</exclude><!-- Bug fix -->
+                    <exclude>com/gitblit/wicket/pages/BlobPage.class</exclude><!-- Redirect to tree -->
                     <exclude>com/gitblit/wicket/pages/BlobPage$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/LogoutPage.class</exclude><!-- Logout via redirect to Gerrit's /logout -->
                     <exclude>com/gitblit/wicket/pages/LogoutPage$*.class</exclude>
