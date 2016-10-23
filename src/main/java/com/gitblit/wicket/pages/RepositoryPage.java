@@ -575,7 +575,7 @@ public abstract class RepositoryPage extends RootPage {
 	}
 
 	protected void addRefs(Repository r, RevCommit c) {
-		add(new RefsPanel("refsPanel", repositoryName, c, JGitUtils.getAllRefs(r, getRepositoryModel().showRemoteBranches)));
+		add(new RefsPanel("refsPanel", repositoryName, JGitUtils.getAllRefs(r, getRepositoryModel().showRemoteBranches).get(c.getId())));
 	}
 
 	protected void addFullText(String wicketId, String text) {

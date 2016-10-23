@@ -15,6 +15,7 @@
  */
 package com.gitblit.wicket.panels;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import com.gitblit.Constants;
 import com.gitblit.Keys;
 import com.gitblit.models.RefModel;
+import com.gitblit.models.RepositoryCommit;
 import com.gitblit.utils.JGitUtils;
 import com.gitblit.utils.StringUtils;
 import com.gitblit.wicket.WicketUtils;
@@ -43,7 +45,7 @@ public class SearchPanel extends BasePanel {
 
 	private static final long serialVersionUID = 1L;
 
-	private boolean hasMore;
+	private final boolean hasMore;
 
 	public SearchPanel(String wicketId, final String repositoryName, final String objectId,
 			final String value, Constants.SearchType searchType, Repository r, int limit, int pageOffset,
@@ -78,15 +80,19 @@ public class SearchPanel extends BasePanel {
 		add(new Label("searchString", value));
 		add(new Label("searchType", searchType.toString()));
 
-		ListDataProvider<RevCommit> dp = new ListDataProvider<RevCommit>(commits);
-		DataView<RevCommit> searchView = new DataView<RevCommit>("commit", dp) {
+		final List<RepositoryCommit> repoCommits = new ArrayList<>(commits.size());
+		for (RevCommit c : commits) {
+			repoCommits.add(new RepositoryCommit(repositoryName, "", c));
+		}
+		ListDataProvider<RepositoryCommit> dp = new ListDataProvider<RepositoryCommit>(repoCommits);
+		DataView<RepositoryCommit> searchView = new DataView<RepositoryCommit>("commit", dp) {
 			private static final long serialVersionUID = 1L;
 			int counter;
 
 			@Override
-			public void populateItem(final Item<RevCommit> item) {
-				final RevCommit entry = item.getModelObject();
-				final Date date = JGitUtils.getAuthorDate(entry);
+			public void populateItem(final Item<RepositoryCommit> item) {
+				final RepositoryCommit entry = item.getModelObject();
+				final Date date = entry.getAuthorIdent().getWhen();
 
 				item.add(WicketUtils.createDateLabel("commitDate", date, getTimeZone(), getTimeUtils()));
 
@@ -120,7 +126,7 @@ public class SearchPanel extends BasePanel {
 				}
 				item.add(shortlog);
 
-				item.add(new RefsPanel("commitRefs", repositoryName, entry, allRefs));
+				item.add(new RefsPanel("commitRefs", repositoryName, allRefs.get(entry.getId())));
 
 				item.add(new BookmarkablePageLink<Void>("commit", CommitPage.class, WicketUtils
 						.newObjectParameter(repositoryName, entry.getName())));

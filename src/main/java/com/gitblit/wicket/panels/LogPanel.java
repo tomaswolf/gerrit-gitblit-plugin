@@ -15,6 +15,7 @@
  */
 package com.gitblit.wicket.panels;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import com.gitblit.Constants;
 import com.gitblit.Keys;
 import com.gitblit.models.RefModel;
+import com.gitblit.models.RepositoryCommit;
 import com.gitblit.servlet.BranchGraphServlet;
 import com.gitblit.utils.JGitUtils;
 import com.gitblit.utils.StringUtils;
@@ -50,7 +52,7 @@ public class LogPanel extends BasePanel {
 
 	private static final long serialVersionUID = 1L;
 
-	private boolean hasMore;
+	private final boolean hasMore;
 
 	public LogPanel(String wicketId, final String repositoryName, final String objectId,
 			Repository r, int limit, int pageOffset, boolean showRemoteRefs) {
@@ -101,15 +103,19 @@ public class LogPanel extends BasePanel {
 		}
 
 		final int hashLen = app().settings().getInteger(Keys.web.shortCommitIdLength, 6);
-		ListDataProvider<RevCommit> dp = new ListDataProvider<RevCommit>(commits);
-		DataView<RevCommit> logView = new DataView<RevCommit>("commit", dp) {
+		final List<RepositoryCommit> repoCommits = new ArrayList<>(commits.size());
+		for (RevCommit c : commits) {
+			repoCommits.add(new RepositoryCommit(repositoryName, "", c));
+		}
+		ListDataProvider<RepositoryCommit> dp = new ListDataProvider<RepositoryCommit>(repoCommits);
+		DataView<RepositoryCommit> logView = new DataView<RepositoryCommit>("commit", dp) {
 			private static final long serialVersionUID = 1L;
 			int counter;
 
 			@Override
-			public void populateItem(final Item<RevCommit> item) {
-				final RevCommit entry = item.getModelObject();
-				final Date date = JGitUtils.getAuthorDate(entry);
+			public void populateItem(final Item<RepositoryCommit> item) {
+				final RepositoryCommit entry = item.getModelObject();
+				final Date date = entry.getAuthorIdent().getWhen();
 				final boolean isMerge = entry.getParentCount() > 1;
 
 				item.add(WicketUtils.createDateLabel("commitDate", date, getTimeZone(), getTimeUtils()));
@@ -145,7 +151,7 @@ public class LogPanel extends BasePanel {
 				}
 				item.add(shortlog);
 
-				item.add(new RefsPanel("commitRefs", repositoryName, entry, allRefs));
+				item.add(new RefsPanel("commitRefs", repositoryName, allRefs.get(entry.getId())));
 
 				// commit hash link
 				LinkPanel commitHash = new LinkPanel("hashLink", null, entry.getName().substring(0, hashLen),

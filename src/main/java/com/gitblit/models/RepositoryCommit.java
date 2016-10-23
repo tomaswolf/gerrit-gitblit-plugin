@@ -15,6 +15,9 @@
  */
 package com.gitblit.models;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.Date;
@@ -22,23 +25,26 @@ import java.util.List;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
+
+import com.gitblit.wicket.GitBlitWebApp;
 
 /**
- * Model class to represent a RevCommit, it's source repository, and the branch.
- * This class is used by the activity page.
+ * Model class to represent a RevCommit, it's source repository, and the branch. This class is used by the activity page.
  *
  * @author James Moger
  */
 public class RepositoryCommit implements Serializable, Comparable<RepositoryCommit> {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -2214911650485772022L;
 
-	public final String repository;
+	public String repository;
 
-	public final String branch;
+	public String branch;
 
-	private final RevCommit commit;
+	private RevCommit commit;
 
 	private List<RefModel> refs;
 
@@ -80,7 +86,7 @@ public class RepositoryCommit implements Serializable, Comparable<RepositoryComm
 		return commit.getParentCount();
 	}
 
-	public RevCommit [] getParents() {
+	public RevCommit[] getParents() {
 		return commit.getParents();
 	}
 
@@ -92,10 +98,14 @@ public class RepositoryCommit implements Serializable, Comparable<RepositoryComm
 		return commit.getCommitterIdent();
 	}
 
+	public RevCommit getCommit() {
+		return commit;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof RepositoryCommit) {
-			RepositoryCommit commit = (RepositoryCommit) o;
+			final RepositoryCommit commit = (RepositoryCommit) o;
 			return repository.equals(commit.repository) && getName().equals(commit.getName());
 		}
 		return false;
@@ -123,8 +133,37 @@ public class RepositoryCommit implements Serializable, Comparable<RepositoryComm
 
 	@Override
 	public String toString() {
-		return MessageFormat.format("{0} {1} {2,date,yyyy-MM-dd HH:mm} {3} {4}",
-				getShortName(), branch, getCommitterIdent().getWhen(), getAuthorIdent().getName(),
-				getShortMessage());
+		return MessageFormat.format("{0} {1} {2,date,yyyy-MM-dd HH:mm} {3} {4}", getShortName(), branch, getCommitterIdent().getWhen(),
+				getAuthorIdent().getName(), getShortMessage());
 	}
+
+	// Serialization: do not serialize the JGit RevCommit!
+
+	private void writeObject(ObjectOutputStream output) throws IOException {
+		output.writeObject(repository);
+		output.writeObject(branch);
+		output.writeObject(refs);
+		output.writeObject(commit.getName());
+	}
+
+	@SuppressWarnings("unchecked")
+	private void readObject(ObjectInputStream input) throws IOException {
+		try {
+			repository = (String) input.readObject();
+			branch = (String) input.readObject();
+			refs = (List<RefModel>) input.readObject();
+			final String commitId = (String) input.readObject();
+			// Go find the commit again.
+			final Repository repo = GitBlitWebApp.get().repositories().getRepository(repository);
+			if (repo == null) {
+				throw new IOException("Cannot find repositoy " + repository);
+			}
+			try (RevWalk walk = new RevWalk(repo)) {
+				commit = walk.parseCommit(repo.resolve(commitId));
+			}
+		} catch (final ClassNotFoundException e) {
+			throw new IOException(e);
+		}
+	}
+
 }
