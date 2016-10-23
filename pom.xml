@@ -228,6 +228,10 @@ limitations under the License.
                     <exclude>com/gitblit/Launcher.class</exclude>
                     <exclude>com/gitblit/Launcher$*.class</exclude>
                     <!-- More GitBlit fixes. We supply our own versions of these classes in our own bundle. -->
+                    <exclude>com/gitblit/models/RefModel.class</exclude><!-- StackOverflowError; issue #21 -->
+                    <exclude>com/gitblit/models/RefModel$*.class</exclude>
+                    <exclude>com/gitblit/models/RepositoryCommit.class</exclude><!-- StackOverflowError; issue #21 -->
+                    <exclude>com/gitblit/models/RepositoryCommit$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/RootPage.class</exclude><!-- Login link -->
                     <exclude>com/gitblit/wicket/pages/RootPage$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/BasePage.class</exclude><!-- Gerrit footer link -->
@@ -240,6 +244,12 @@ limitations under the License.
                     <exclude>com/gitblit/wicket/pages/RawPage$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/RepositoryPage.class</exclude><!-- Non-transient logger; issue #21 -->
                     <exclude>com/gitblit/wicket/pages/RepositoryPage$*.class</exclude>
+                    <exclude>com/gitblit/wicket/pages/TicketPage.class</exclude><!-- Non-transient logger & StackOverflowError; issue #21 -->
+                    <exclude>com/gitblit/wicket/pages/TicketPage$*.class</exclude>
+                    <exclude>com/gitblit/wicket/panels/LogPanel.class</exclude><!-- StackOverflowError; issue #21 -->
+                    <exclude>com/gitblit/wicket/panels/LogPanel$*.class</exclude>
+                    <exclude>com/gitblit/wicket/panels/SearchPanel.class</exclude><!-- StackOverflowError; issue #21 -->
+                    <exclude>com/gitblit/wicket/panels/SearchPanel$*.class</exclude>
                     <exclude>com/gitblit/utils/MetricUtils.class</exclude><!-- Bug fix -->
                     <exclude>com/gitblit/utils/MetricUtils$*.class</exclude>
                     <exclude>com/gitblit/utils/GitBlitDiffFormatter.class</exclude><!-- Number of diff context lines -->
@@ -259,7 +269,7 @@ limitations under the License.
                     <exclude>com/gitblit/utils/RefLogUtils$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/NewRepositoryPage.class</exclude>
                     <exclude>com/gitblit/wicket/pages/NewRepositoryPage$*.class</exclude>
-                    <exclude>com/gitblit/wicket/panels/HistoryPanel.class</exclude>
+                    <exclude>com/gitblit/wicket/panels/HistoryPanel.class</exclude><!-- Also StackOverflowError; issue #21 -->
                     <exclude>com/gitblit/wicket/panels/HistoryPanel$*.class</exclude>
                     <exclude>com/gitblit/tickets/BranchTicketService.class</exclude>
                     <exclude>com/gitblit/tickets/BranchTicketService$*.class</exclude>
