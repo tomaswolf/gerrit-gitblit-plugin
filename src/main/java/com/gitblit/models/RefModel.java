@@ -104,7 +104,7 @@ public class RefModel implements Serializable, Comparable<RefModel> {
 		return type;
 	}
 
-	public int getType() {
+	public int getReferencedObjectType() {
 		return type;
 	}
 

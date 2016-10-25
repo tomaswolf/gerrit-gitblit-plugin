@@ -17,7 +17,6 @@ package com.gitblit.models;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.Date;
@@ -44,14 +43,17 @@ public class RepositoryCommit implements Serializable, Comparable<RepositoryComm
 
 	public String branch;
 
-	private RevCommit commit;
+	private final String commitId;
 
 	private List<RefModel> refs;
+
+	private transient RevCommit commit;
 
 	public RepositoryCommit(String repository, String branch, RevCommit commit) {
 		this.repository = repository;
 		this.branch = branch;
 		this.commit = commit;
+		this.commitId = commit.getName();
 	}
 
 	public void setRefs(List<RefModel> refs) {
@@ -137,32 +139,18 @@ public class RepositoryCommit implements Serializable, Comparable<RepositoryComm
 				getAuthorIdent().getName(), getShortMessage());
 	}
 
-	// Serialization: do not serialize the JGit RevCommit!
+	// Serialization: restore the JGit RevCommit on reading
 
-	private void writeObject(ObjectOutputStream output) throws IOException {
-		output.writeObject(repository);
-		output.writeObject(branch);
-		output.writeObject(refs);
-		output.writeObject(commit.getName());
-	}
-
-	@SuppressWarnings("unchecked")
-	private void readObject(ObjectInputStream input) throws IOException {
-		try {
-			repository = (String) input.readObject();
-			branch = (String) input.readObject();
-			refs = (List<RefModel>) input.readObject();
-			final String commitId = (String) input.readObject();
-			// Go find the commit again.
-			final Repository repo = GitBlitWebApp.get().repositories().getRepository(repository);
-			if (repo == null) {
-				throw new IOException("Cannot find repositoy " + repository);
-			}
-			try (RevWalk walk = new RevWalk(repo)) {
-				commit = walk.parseCommit(repo.resolve(commitId));
-			}
-		} catch (final ClassNotFoundException e) {
-			throw new IOException(e);
+	private void readObject(ObjectInputStream input) throws IOException, ClassNotFoundException {
+		// Read in fields and any hidden stuff
+		input.defaultReadObject();
+		// Go find the commit again.
+		final Repository repo = GitBlitWebApp.get().repositories().getRepository(repository);
+		if (repo == null) {
+			throw new IOException("Cannot find repositoy " + repository);
+		}
+		try (RevWalk walk = new RevWalk(repo)) {
+			commit = walk.parseCommit(repo.resolve(commitId));
 		}
 	}
 
