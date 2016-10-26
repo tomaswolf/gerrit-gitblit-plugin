@@ -1,6 +1,6 @@
 # Gerrit-GitBlit plugin
 
-This is a fork of [Luca Milanesio's](https://github.com/lucamilanesio) ["official" Gerrit-GitBlit plugin](https://gerrit.googlesource.com/plugins/gitblit/),
+This is a fork of the [official Gerrit-GitBlit plugin](https://gerrit.googlesource.com/plugins/gitblit/),
 forked originally from [master revision 28d2c98](https://gerrit.googlesource.com/plugins/gitblit/+/28d2c9823618812acd21ce64f89c7e0ac47ff2a8).
 
 It integrates [GitBlit](https://github.com/gitblit/gitblit) as a repository browser into [Gerrit](https://code.google.com/p/gerrit/) as a Gerrit plugin.
@@ -18,20 +18,20 @@ followed by the plugin version.So "v2.9.1.162.2" is version 2 of this plugin, in
 The basic reason for doing this was to adapt the official plugin to work with a modern Gerrit (v2.9 or newer) and a modern GitBlit (v1.6.2 and later v1.7.1).
 This was done at a time when Gerrit 2.9 and 2.10 were the current Gerrit releases, and the official plugin just didn't work well.
 
-The official plugin was a bit dated by then. Luca described his integration in a [slideshow](http://www.slideshare.net/lucamilanesio/gitblit-plugin-for-gerrit-code-review).
+The official plugin was a bit dated by then. Luca Milanesio described the original integration in a [slideshow](http://www.slideshare.net/lucamilanesio/gitblit-plugin-for-gerrit-code-review).
 Basically, this Gerrit-GitBlit plugin depended on a hacked version of Apache Wicket (classloading in UI), and on a hacked version
-of Apache Rome (classloading in RSS feeder). Additionally, it only worked with a specially hacked version of GitBlit 1.4.0. In
+of Apache Rome (classloading in RSS feeder). Additionally, it only worked with a specially built version of GitBlit 1.4.0. In
 particular, Luca had moved all the static resources in GitBlit into a "/static" subdirectory so that they'd be accessible by the
 standard Gerrit plugin mechanism, which does handle this directory specially.
 
 This worked more or less, but had a number of problems:
 
 * The official plugin didn't produce branch graphs. That's [Gerrit bug 2942](https://code.google.com/p/gerrit/issues/detail?id=2942).
-* It somehow didn't serve the Flash copy-paste helper.
+* It somehow didn't serve the Flash copy-paste helper. (clippy.swf)
 * GitBlit 1.4.0 produced diagrams and graphs using the Google charts API, making requests to Google.
 * RSS feeds didn't work for me.
 * The official plugin set the base path for GitBlit to Gerrit's git directory. It should point somewhere else.
-* Using a specially hacked GitBlit jar hosted at an apparently non-browseable Maven repository at GerritForge was a lock-in that
+* Using a specially built GitBlit jar hosted at an apparently non-browseable Maven repository at GerritForge was a lock-in that
   I wanted to avoid. It means there's no reasonably easy path to get bug fixes in GitBlit since this fork of GitBlit was produced.
   I wanted to have a Gerrit-GitBlit plugin working with the latest standard official release of GitBlit from
   the standard official [GitBlit maven repo](http://gitblit.github.io/gitblit-maven/).
@@ -144,10 +144,10 @@ from the official plugin and adapt them to match the `pom.xml`.
 
 # Alternatives
 
-Some time after I had released my first version of this plugin, Luca Milanesio had updated the [official plugin](https://gerrit.googlesource.com/plugins/gitblit/)
-to work again with Gerrit release 2.11. Internally it's based on a custom-built GitBlit version 1.7.x. You can find that "official plugin" on the
-[Gerrit CI server](https://gerrit-ci.gerritforge.com/view/Plugins-stable-2.11/job/plugin-gitblit-stable-2.11/). I have never used it, so I have no
-idea how well it works.
+Some time after I had released my first version of this plugin, the [official plugin](https://gerrit.googlesource.com/plugins/gitblit/)
+was updated to work again with Gerrit release 2.11. Internally it's based on a custom-built GitBlit version 1.7.x. You can find that official plugin
+on the [Gerrit CI server](https://gerrit-ci.gerritforge.com/view/Plugins-stable-2.11/job/plugin-gitblit-stable-2.11/). I have never used it, so I
+have no idea how well it works.
 
 In early May 2015, some of my changes here were merged back into the official plugin, but there are still functional differences, mainly
 related to plugin reloading, raw file serving, handling of non-logged-in users, and how `gitblit.properties` is loaded and what default
