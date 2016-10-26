@@ -46,6 +46,7 @@ import com.gitblit.models.PathModel.PathChangeModel;
 import com.gitblit.models.RefModel;
 import com.gitblit.models.RepositoryCommit;
 import com.gitblit.models.SubmoduleModel;
+import com.gitblit.utils.ArrayUtils;
 import com.gitblit.utils.JGitUtils;
 import com.gitblit.utils.MarkdownUtils;
 import com.gitblit.utils.StringUtils;
@@ -132,7 +133,7 @@ public class HistoryPanel extends BasePanel {
 			hasSubmodule = false;
 		}
 
-		final Map<ObjectId, List<RefModel>> allRefs = JGitUtils.getAllRefs(r, showRemoteRefs);
+		Map<ObjectId, List<RefModel>> allRefs = JGitUtils.getAllRefs(r, showRemoteRefs);
 		List<RevCommit> commits;
 		if (pageResults) {
 			// Paging result set
@@ -147,9 +148,13 @@ public class HistoryPanel extends BasePanel {
 		hasMore = commits.size() >= itemsPerPage;
 
 		final int hashLen = app().settings().getInteger(Keys.web.shortCommitIdLength, 6);
-		final List<RepositoryCommit> repoCommits = new ArrayList<>(commits.size());
+		List<RepositoryCommit> repoCommits = new ArrayList<>(commits.size());
 		for (RevCommit c : commits) {
-			repoCommits.add(new RepositoryCommit(repositoryName, "", c));
+			RepositoryCommit repoCommit = new RepositoryCommit(repositoryName, "", c);
+			if (allRefs.containsKey(c)) {
+				repoCommit.setRefs(allRefs.get(c));
+			}
+			repoCommits.add(repoCommit);
 		}
 		ListDataProvider<RepositoryCommit> dp = new ListDataProvider<RepositoryCommit>(repoCommits);
 		DataView<RepositoryCommit> logView = new DataView<RepositoryCommit>("commit", dp) {
@@ -179,7 +184,7 @@ public class HistoryPanel extends BasePanel {
 
 				String shortMessage = entry.getShortMessage();
 				String trimmedMessage = shortMessage;
-				if (allRefs.containsKey(entry.getId())) {
+				if (!ArrayUtils.isEmpty(entry.getRefs())) {
 					trimmedMessage = StringUtils.trimString(shortMessage, Constants.LEN_SHORTLOG_REFS);
 				} else {
 					trimmedMessage = StringUtils.trimString(shortMessage, Constants.LEN_SHORTLOG);
@@ -191,7 +196,7 @@ public class HistoryPanel extends BasePanel {
 				}
 				item.add(shortlog);
 
-				item.add(new RefsPanel("commitRefs", repositoryName, allRefs.get(entry.getId())));
+				item.add(new RefsPanel("commitRefs", repositoryName, entry.getRefs()));
 
 				if (isTree) {
 					// tree
