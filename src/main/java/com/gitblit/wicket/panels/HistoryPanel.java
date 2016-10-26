@@ -44,7 +44,9 @@ import com.gitblit.Keys;
 import com.gitblit.models.PathModel;
 import com.gitblit.models.PathModel.PathChangeModel;
 import com.gitblit.models.RefModel;
+import com.gitblit.models.RepositoryCommit;
 import com.gitblit.models.SubmoduleModel;
+import com.gitblit.utils.ArrayUtils;
 import com.gitblit.utils.JGitUtils;
 import com.gitblit.utils.MarkdownUtils;
 import com.gitblit.utils.StringUtils;
@@ -131,7 +133,7 @@ public class HistoryPanel extends BasePanel {
 			hasSubmodule = false;
 		}
 
-		final Map<ObjectId, List<RefModel>> allRefs = JGitUtils.getAllRefs(r, showRemoteRefs);
+		Map<ObjectId, List<RefModel>> allRefs = JGitUtils.getAllRefs(r, showRemoteRefs);
 		List<RevCommit> commits;
 		if (pageResults) {
 			// Paging result set
@@ -146,15 +148,23 @@ public class HistoryPanel extends BasePanel {
 		hasMore = commits.size() >= itemsPerPage;
 
 		final int hashLen = app().settings().getInteger(Keys.web.shortCommitIdLength, 6);
-		ListDataProvider<RevCommit> dp = new ListDataProvider<RevCommit>(commits);
-		DataView<RevCommit> logView = new DataView<RevCommit>("commit", dp) {
+		List<RepositoryCommit> repoCommits = new ArrayList<>(commits.size());
+		for (RevCommit c : commits) {
+			RepositoryCommit repoCommit = new RepositoryCommit(repositoryName, "", c);
+			if (allRefs.containsKey(c)) {
+				repoCommit.setRefs(allRefs.get(c));
+			}
+			repoCommits.add(repoCommit);
+		}
+		ListDataProvider<RepositoryCommit> dp = new ListDataProvider<RepositoryCommit>(repoCommits);
+		DataView<RepositoryCommit> logView = new DataView<RepositoryCommit>("commit", dp) {
 			private static final long serialVersionUID = 1L;
 			int counter;
 
 			@Override
-			public void populateItem(final Item<RevCommit> item) {
-				final RevCommit entry = item.getModelObject();
-				final Date date = JGitUtils.getAuthorDate(entry);
+			public void populateItem(final Item<RepositoryCommit> item) {
+				final RepositoryCommit entry = item.getModelObject();
+				Date date = entry.getAuthorIdent().getWhen();
 
 				item.add(WicketUtils.createDateLabel("commitDate", date, getTimeZone(), getTimeUtils()));
 
@@ -174,7 +184,7 @@ public class HistoryPanel extends BasePanel {
 
 				String shortMessage = entry.getShortMessage();
 				String trimmedMessage = shortMessage;
-				if (allRefs.containsKey(entry.getId())) {
+				if (!ArrayUtils.isEmpty(entry.getRefs())) {
 					trimmedMessage = StringUtils.trimString(shortMessage, Constants.LEN_SHORTLOG_REFS);
 				} else {
 					trimmedMessage = StringUtils.trimString(shortMessage, Constants.LEN_SHORTLOG);
@@ -186,7 +196,7 @@ public class HistoryPanel extends BasePanel {
 				}
 				item.add(shortlog);
 
-				item.add(new RefsPanel("commitRefs", repositoryName, entry, allRefs));
+				item.add(new RefsPanel("commitRefs", repositoryName, entry.getRefs()));
 
 				if (isTree) {
 					// tree
@@ -204,7 +214,7 @@ public class HistoryPanel extends BasePanel {
 				} else if (isSubmodule) {
 					// submodule
 					Repository repository = app().repositories().getRepository(repositoryName);
-					String submoduleId = JGitUtils.getSubmoduleCommitId(repository, path, entry);
+					String submoduleId = JGitUtils.getSubmoduleCommitId(repository, path, entry.getCommit());
 					repository.close();
 					if (StringUtils.isEmpty(submoduleId)) {
 						// not a submodule at this commit, just a matching path
