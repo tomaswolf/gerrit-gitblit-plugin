@@ -232,6 +232,8 @@ limitations under the License.
                     <exclude>com/gitblit/models/RefModel$*.class</exclude>
                     <exclude>com/gitblit/models/RepositoryCommit.class</exclude><!-- StackOverflowError; issue #21 -->
                     <exclude>com/gitblit/models/RepositoryCommit$*.class</exclude>
+                    <exclude>com/gitblit/wicket/SessionlessForm.class</exclude><!-- Non-transient logger; issue #21 -->
+                    <exclude>com/gitblit/wicket/SessionlessForm$*.class</exclude>    
                     <exclude>com/gitblit/wicket/pages/RootPage.class</exclude><!-- Login link -->
                     <exclude>com/gitblit/wicket/pages/RootPage$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/BasePage.class</exclude><!-- Gerrit footer link -->
