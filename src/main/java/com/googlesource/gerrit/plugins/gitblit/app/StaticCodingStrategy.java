@@ -31,12 +31,8 @@ public class StaticCodingStrategy extends WebRequestCodingStrategy {
 	public String rewriteStaticRelativeUrl(String url) {
 		// Avoid rewriting of non-static resources
 		String[] urlParts = url.split("/");
-		if (urlParts[urlParts.length - 1].indexOf('.') < 0) {
-			return url;
-		}
-
-		if (isMatchingIgnoreUrlPrefixes(url)) {
-			return url;
+		if (urlParts[urlParts.length - 1].indexOf('.') < 0 || isMatchingIgnoreUrlPrefixes(url)) {
+			return super.rewriteStaticRelativeUrl(url);
 		}
 
 		int depth = ((ServletWebRequest) RequestCycle.get().getRequest()).getDepthRelativeToWicketHandler();
