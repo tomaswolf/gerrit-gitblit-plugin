@@ -234,18 +234,24 @@ limitations under the License.
                     <exclude>com/gitblit/models/RepositoryCommit$*.class</exclude>
                     <exclude>com/gitblit/wicket/SessionlessForm.class</exclude><!-- Non-transient logger; issue #21 -->
                     <exclude>com/gitblit/wicket/SessionlessForm$*.class</exclude>    
-                    <exclude>com/gitblit/wicket/pages/RootPage.class</exclude><!-- Login link -->
-                    <exclude>com/gitblit/wicket/pages/RootPage$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/BasePage.class</exclude><!-- Gerrit footer link -->
                     <exclude>com/gitblit/wicket/pages/BasePage$*.class</exclude>
+                    <exclude>com/gitblit/wicket/pages/BlamePage.class</exclude><!-- Non-transient logger; issue #21 -->
+                    <exclude>com/gitblit/wicket/pages/BlamePage$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/BlobPage.class</exclude><!-- Redirect to tree -->
                     <exclude>com/gitblit/wicket/pages/BlobPage$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/LogoutPage.class</exclude><!-- Logout via redirect to Gerrit's /logout -->
                     <exclude>com/gitblit/wicket/pages/LogoutPage$*.class</exclude>
+                    <exclude>com/gitblit/wicket/pages/MetricsPage.class</exclude><!-- Non-transient logger; issue #21 -->
+                    <exclude>com/gitblit/wicket/pages/MetricsPage$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/RawPage.class</exclude><!-- Non-transient logger; issue #21 -->
                     <exclude>com/gitblit/wicket/pages/RawPage$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/RepositoryPage.class</exclude><!-- Non-transient logger; issue #21 -->
                     <exclude>com/gitblit/wicket/pages/RepositoryPage$*.class</exclude>
+                    <exclude>com/gitblit/wicket/pages/RootPage.class</exclude><!-- Login link -->
+                    <exclude>com/gitblit/wicket/pages/RootPage$*.class</exclude>
+                    <exclude>com/gitblit/wicket/pages/SummaryPage.class</exclude><!-- Non-transient logger; issue #21 -->
+                    <exclude>com/gitblit/wicket/pages/SummaryPage$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/TicketPage.class</exclude><!-- Non-transient logger & StackOverflowError; issue #21 -->
                     <exclude>com/gitblit/wicket/pages/TicketPage$*.class</exclude>
                     <exclude>com/gitblit/wicket/panels/LogPanel.class</exclude><!-- StackOverflowError; issue #21 -->
