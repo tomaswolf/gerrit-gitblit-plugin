@@ -20,16 +20,16 @@ limitations under the License.
   <artifactId>gitblit-plugin</artifactId>
   <description>GitBlit for Gerrit integrated as a plugin</description>
   <name>Gerrit - GitBlit Plugin</name>
-  <version>2.13.171.2-SNAPSHOT</version><!-- Gerrit API version followed by collapsed GitBlit version, followed by plugin version -->
+  <version>2.14.171.0-SNAPSHOT</version><!-- Gerrit API version followed by collapsed GitBlit version, followed by plugin version -->
   <licenses>
     <license>
       <name>Apache License 2.0</name>
       <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
     </license>
-  </licenses>  
+  </licenses>
   <properties>
     <Gerrit-ApiType>plugin</Gerrit-ApiType>
-    <Gerrit-ApiVersion>2.13</Gerrit-ApiVersion>
+    <Gerrit-ApiVersion>2.14</Gerrit-ApiVersion>
     <GitBlit-Version>1.7.1</GitBlit-Version>
     <Wicket-Version>1.4.22</Wicket-Version>
     <Gerrit-ReloadMode>restart</Gerrit-ReloadMode>
@@ -125,8 +125,8 @@ limitations under the License.
                   </includes>
                 </resource>
               </resources>
-			</configuration>   
-	      </execution>     	
+			</configuration>
+	      </execution>
         </executions>
       </plugin>
       <plugin>
@@ -134,8 +134,8 @@ limitations under the License.
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.5.1</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
       <plugin>
@@ -175,8 +175,8 @@ limitations under the License.
               <!-- We can't exclude org.apache.lucene:* because gitblit uses also lucene-memory and lucene-highlighter, which apparently are not in the Gerrit API -->
               <exclude>org.apache.lucene:lucene-core</exclude><!-- In Gerrit API. GitBlit 4.6.0, Gerrit 5.3.0 -->
               <exclude>org.apache.lucene:lucene-analyzers-commons</exclude><!-- In Gerrit API. GitBlit 4.6.0, Gerrit 5.3.0 -->
-              <exclude>org.apache.lucene:lucene-queries</exclude><!-- In Gerrit API. -->             
-              <exclude>org.apache.lucene:lucene-queryparser</exclude><!-- In Gerrit API. GitBlit 4.6.0, Gerrit 5.3.0 -->             
+              <exclude>org.apache.lucene:lucene-queries</exclude><!-- In Gerrit API. -->
+              <exclude>org.apache.lucene:lucene-queryparser</exclude><!-- In Gerrit API. GitBlit 4.6.0, Gerrit 5.3.0 -->
               <exclude>commons-codec:commons-codec</exclude><!-- In Gerrit API. GitBlit 1.7, Gerrit 1.4 -->
               <exclude>org.tukaani:*</exclude><!-- In Gerrit API. GitBlit 1.0, Gerrit 1.4 -->
               <exclude>com.toedter:*</exclude><!-- Used only in GitBlit client, which doesn't run -->
@@ -233,7 +233,7 @@ limitations under the License.
                     <exclude>com/gitblit/models/RepositoryCommit.class</exclude><!-- StackOverflowError; issue #21 -->
                     <exclude>com/gitblit/models/RepositoryCommit$*.class</exclude>
                     <exclude>com/gitblit/wicket/SessionlessForm.class</exclude><!-- Non-transient logger; issue #21 -->
-                    <exclude>com/gitblit/wicket/SessionlessForm$*.class</exclude>    
+                    <exclude>com/gitblit/wicket/SessionlessForm$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/BasePage.class</exclude><!-- Gerrit footer link -->
                     <exclude>com/gitblit/wicket/pages/BasePage$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/BlamePage.class</exclude><!-- Non-transient logger; issue #21 -->
@@ -297,7 +297,7 @@ limitations under the License.
                     <exclude>com/gitblit/wicket/panels/ChoiceOption.class</exclude>
                     <exclude>com/gitblit/wicket/panels/ChoiceOption$*.class</exclude>
                     <exclude>com/gitblit/wicket/SafeTextModel.class</exclude>
-                    <exclude>com/gitblit/wicket/SafeTextModel$*.class</exclude>    
+                    <exclude>com/gitblit/wicket/SafeTextModel$*.class</exclude>
                   </excludes>
                 </filter>
                 <filter>
@@ -313,7 +313,7 @@ limitations under the License.
                 </filter>
               </filters>
             </configuration>
-            
+
           </execution>
         </executions>
       </plugin>

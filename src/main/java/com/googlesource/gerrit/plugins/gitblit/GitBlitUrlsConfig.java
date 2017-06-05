@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.gerrit.reviewdb.client.AuthType;
+import com.google.gerrit.extensions.client.AuthType;
 import com.google.gerrit.server.ssh.SshAddressesModule;
 
 public class GitBlitUrlsConfig {
@@ -62,7 +62,7 @@ public class GitBlitUrlsConfig {
 	/**
 	 * Gets the login Url to use for GitBlit. If non-null, the plugin will only display a "Log in" link going to this Url instead of GitBlit's normal
 	 * username-password login form. This makes it possible to use the plugin with an external authentication provider as configured for Gerrit.
-	 * 
+	 *
 	 * @return the login Url to use, if any, or {@code null} if GitBlit's normal login form shall be used (for instance, if Gerrit uses LDAP for
 	 *         authentication).
 	 */
@@ -72,7 +72,7 @@ public class GitBlitUrlsConfig {
 
 	/**
 	 * Gets Gerrit's canonical web URL.
-	 * 
+	 *
 	 * @return the Url
 	 */
 	public String getCanonicalWebUrl() {
