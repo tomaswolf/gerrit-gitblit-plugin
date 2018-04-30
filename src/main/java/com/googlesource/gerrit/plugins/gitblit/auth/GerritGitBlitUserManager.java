@@ -35,7 +35,7 @@ import com.google.gerrit.server.AnonymousUser;
 import com.google.gerrit.server.CurrentUser;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.account.GetDiffPreferences;
-import com.google.gerrit.server.project.ProjectControl;
+import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -46,7 +46,7 @@ public class GerritGitBlitUserManager implements IUserManager {
 
 	private static final Logger log = LoggerFactory.getLogger(GerritGitBlitUserManager.class);
 
-	private final ProjectControl.GenericFactory projectControl;
+	private final PermissionBackend permissions;
 
 	private final Provider<CurrentUser> userProvider;
 
@@ -55,9 +55,9 @@ public class GerritGitBlitUserManager implements IUserManager {
 	private final GetDiffPreferences getDiffPreferences;
 
 	@Inject
-	public GerritGitBlitUserManager(final ProjectControl.GenericFactory projectControl, final GitBlitSettings settings,
+	public GerritGitBlitUserManager(final PermissionBackend permissions, final GitBlitSettings settings,
 			final DynamicItem<WebSession> gerritSession, final Provider<AnonymousUser> anonymousUser, final GetDiffPreferences getDiffPreferences) {
-		this.projectControl = projectControl;
+		this.permissions = permissions;
 		this.userProvider = new Provider<CurrentUser>() {
 			@Override
 			public CurrentUser get() {
@@ -88,22 +88,22 @@ public class GerritGitBlitUserManager implements IUserManager {
 	@Override
 	public UserModel getUserModel(String username) {
 		if (username == null || GerritGitBlitUserModel.ANONYMOUS_USER.equals(username)) {
-			return new GerritGitBlitUserModel(projectControl, anonymousUser, getDiffPreferences);
+			return new GerritGitBlitUserModel(permissions, anonymousUser, getDiffPreferences);
 		}
-		return new GerritGitBlitUserModel(username, projectControl, userProvider, getDiffPreferences);
+		return new GerritGitBlitUserModel(username, permissions, userProvider, getDiffPreferences);
 	}
 
 	/**
 	 * GitBlit assumes all users (or user accounts) have a username (account name or login name). Gerrit allows users (accounts) to not have a
 	 * username, for instance if the account is created or logged in via Google OAuth. I such cases, we have to fake a username for GitBlit.
-	 * 
+	 *
 	 * @return a GitBlit {@link UserModel} for an unnamed Gerrit account.
 	 */
 	public UserModel getUnnamedGerritUser() {
 		CurrentUser user = userProvider.get();
 		if (!user.isIdentifiedUser()) {
 			log.warn("\"Logged-in\" user according to session is anonymous.");
-			return new GerritGitBlitUserModel(projectControl, anonymousUser, getDiffPreferences);
+			return new GerritGitBlitUserModel(permissions, anonymousUser, getDiffPreferences);
 		}
 		IdentifiedUser loggedInUser = (IdentifiedUser) user;
 		// We know that this user has no username. Synthesize one for GitBlit.
@@ -114,7 +114,7 @@ public class GerritGitBlitUserManager implements IUserManager {
 				fakeUserName = "external" + loggedInUser.getAccountId().toString();
 			}
 		}
-		return new GerritGitBlitUserModel(fakeUserName, projectControl, userProvider, getDiffPreferences);
+		return new GerritGitBlitUserModel(fakeUserName, permissions, userProvider, getDiffPreferences);
 	}
 
 	@Override
@@ -229,7 +229,7 @@ public class GerritGitBlitUserManager implements IUserManager {
 
 	/**
 	 * Tries to ensure that GitBlit's "anonymous" user obeys the branch visibility defined by Gerrit.
-	 * 
+	 *
 	 * @return {@code true} if sucessful, {@code false} if unsuccessful
 	 */
 	private boolean fixAnonymousUser() {
@@ -255,7 +255,7 @@ public class GerritGitBlitUserManager implements IUserManager {
 					modifiers.setAccessible(true);
 					int modifierFlags = anonymousField.getModifiers();
 					modifiers.set(anonymousField, modifierFlags & ~Modifier.FINAL); // Remove "final" from the "ANONYMOUS" field
-					anonymousField.set(null, new GerritGitBlitUserModel(projectControl, anonymousUser, getDiffPreferences));
+					anonymousField.set(null, new GerritGitBlitUserModel(permissions, anonymousUser, getDiffPreferences));
 					modifiers.set(anonymousField, modifierFlags); // Make the field "final" again.
 					modifiers.setAccessible(false); // Re-enable Java-language accessibility checks
 				}
