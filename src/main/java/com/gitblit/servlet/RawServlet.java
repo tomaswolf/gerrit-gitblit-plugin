@@ -62,9 +62,9 @@ import com.google.inject.Singleton;
 
 /**
  * Serves the content of a branch.
- * 
+ *
  * @author James Moger
- * 
+ *
  */
 @Singleton
 public class RawServlet extends HttpServlet {
@@ -86,7 +86,7 @@ public class RawServlet extends HttpServlet {
 
 	/**
 	 * Returns an url to this servlet for the specified parameters.
-	 * 
+	 *
 	 * @param baseURL
 	 * @param repository
 	 * @param branch
@@ -142,7 +142,7 @@ public class RawServlet extends HttpServlet {
 
 	/**
 	 * Retrieves the specified resource from the specified branch of the repository.
-	 * 
+	 *
 	 * @param request
 	 * @param response
 	 * @throws javax.servlet.ServletException
@@ -219,6 +219,9 @@ public class RawServlet extends HttpServlet {
 			List<PathModel> pathEntries = JGitUtils.getFilesInPath(r, requestedPath, commit);
 			if (pathEntries.isEmpty()) {
 				// requested a specific resource
+				if (requestedPath.startsWith("/")) {
+					requestedPath = requestedPath.substring(1);
+				}
 				String file = StringUtils.getLastPathElement(requestedPath);
 				try {
 
@@ -274,7 +277,7 @@ public class RawServlet extends HttpServlet {
 					} else {
 						// stream binary content directly from the repository
 						if (!streamFromRepo(request, response, r, commit, requestedPath)) {
-							logger.error("RawServlet Failed to load {} {} {}", repository, commit.getName(), path);
+							logger.error("RawServlet Failed to stream {} {} {}", repository, commit.getName(), path);
 							notFound(response, requestedPath, branch);
 						}
 					}
@@ -395,13 +398,13 @@ public class RawServlet extends HttpServlet {
 
 	/**
 	 * Override all text types to be plain text.
-	 * 
+	 *
 	 * @param response
 	 * @param contentType
 	 */
 	protected void setContentType(HttpServletResponse response, String contentType) {
 		if (isTextType(contentType)) {
-			response.setContentType("text/plain");
+			response.setContentType("text/plain; charset=" + Constants.ENCODING);
 		} else {
 			response.setContentType(contentType);
 		}
