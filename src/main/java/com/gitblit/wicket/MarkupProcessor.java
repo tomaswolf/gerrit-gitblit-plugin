@@ -22,7 +22,6 @@ import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,11 +39,6 @@ import org.eclipse.mylyn.wikitext.mediawiki.core.MediaWikiLanguage;
 import org.eclipse.mylyn.wikitext.textile.core.TextileLanguage;
 import org.eclipse.mylyn.wikitext.tracwiki.core.TracWikiLanguage;
 import org.eclipse.mylyn.wikitext.twiki.core.TWikiLanguage;
-import org.pegdown.DefaultVerbatimSerializer;
-import org.pegdown.LinkRenderer;
-import org.pegdown.ToHtmlSerializer;
-import org.pegdown.VerbatimSerializer;
-import org.pegdown.plugins.ToHtmlSerializerPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -413,36 +407,5 @@ public class MarkupProcessor {
 				return path;
 			}
 		}
-	}
-
-	/**
-	 * This class implements a workaround for a bug reported in issue-379.
-	 * The bug was introduced by my own pegdown pull request #115.
-	 *
-	 * @author James Moger
-	 *
-	 */
-	public static class WorkaroundHtmlSerializer extends ToHtmlSerializer {
-
-		 public WorkaroundHtmlSerializer(final LinkRenderer linkRenderer) {
-			 super(linkRenderer,
-					 Collections.<String, VerbatimSerializer>singletonMap(VerbatimSerializer.DEFAULT, DefaultVerbatimSerializer.INSTANCE),
-					 Collections.<ToHtmlSerializerPlugin>emptyList());
-		    }
-	    private void printAttribute(String name, String value) {
-	        printer.print(' ').print(name).print('=').print('"').print(value).print('"');
-	    }
-
-	    /* Reimplement print image tag to eliminate a trailing double-quote */
-		@Override
-	    protected void printImageTag(LinkRenderer.Rendering rendering) {
-	        printer.print("<img");
-	        printAttribute("src", rendering.href);
-	        printAttribute("alt", rendering.text);
-	        for (LinkRenderer.Attribute attr : rendering.attributes) {
-	            printAttribute(attr.name, attr.value);
-	        }
-	        printer.print("/>");
-	    }
 	}
 }
