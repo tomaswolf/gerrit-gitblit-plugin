@@ -13,7 +13,7 @@ forked originally from [master revision 28d2c98](https://gerrit.googlesource.com
 
 It integrates [GitBlit](https://github.com/gitblit/gitblit) as a repository browser into [Gerrit](https://code.google.com/p/gerrit/) as a Gerrit plugin.
 
-Pre-built jars (Java 7, as of v2.15.171.0 Java 8) are available as **[releases](https://github.com/tomaswolf/gerrit-gitblit-plugin/releases)**. Pick one with a version number
+Pre-built jars (Java 8, before v2.14.171.0 Java 7) are available as **[releases](https://github.com/tomaswolf/gerrit-gitblit-plugin/releases)**. Pick one with a version number
 matching your Gerrit version. Version numbering for this plugin is the Gerrit API version it was built for, followed by the collapsed GitBlit version,
 followed by the plugin version.So "v2.9.1.162.2" is version 2 of this plugin, integrating GitBlit 1.6.2 into Gerrit 2.9.1.
 
