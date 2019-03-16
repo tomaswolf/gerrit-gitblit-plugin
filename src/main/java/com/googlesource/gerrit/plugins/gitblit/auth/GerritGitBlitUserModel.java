@@ -24,18 +24,18 @@ import com.gitblit.models.UserModel;
 import com.gitblit.utils.StringUtils;
 import com.google.common.base.Strings;
 import com.google.gerrit.extensions.client.DiffPreferencesInfo;
-import com.google.gerrit.extensions.restapi.AuthException;
+import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.reviewdb.client.Project.NameKey;
 import com.google.gerrit.server.CurrentUser;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.account.AccountResource;
-import com.google.gerrit.server.account.GetDiffPreferences;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackend.ForProject;
 import com.google.gerrit.server.permissions.PermissionBackend.ForRef;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.gerrit.server.permissions.ProjectPermission;
 import com.google.gerrit.server.permissions.RefPermission;
+import com.google.gerrit.server.restapi.account.GetDiffPreferences;
 import com.google.inject.Provider;
 
 /**
@@ -81,7 +81,7 @@ public class GerritGitBlitUserModel extends UserModel {
 
 	@Override
 	protected boolean canAccess(final RepositoryModel repository, final AccessRestrictionType ifRestriction, final AccessPermission requirePermission) {
-		ForProject projectPermissions = permissions.user(userProvider).project(new NameKey(StringUtils.stripDotGit(repository.name)));
+		ForProject projectPermissions = permissions.user(userProvider.get()).project(new NameKey(StringUtils.stripDotGit(repository.name)));
 		if (projectPermissions == null) {
 			return false;
 		}
@@ -99,13 +99,13 @@ public class GerritGitBlitUserModel extends UserModel {
 
 	@Override
 	public boolean hasRepositoryPermission(String name) {
-		ForProject projectPermissions = permissions.user(userProvider).project(new NameKey(StringUtils.stripDotGit(name)));
+		ForProject projectPermissions = permissions.user(userProvider.get()).project(new NameKey(StringUtils.stripDotGit(name)));
 		return projectPermissions != null && projectPermissions.testOrFalse(ProjectPermission.ACCESS);
 	}
 
 	@Override
 	public boolean canView(RepositoryModel repository, String ref) {
-		ForProject projectPermissions = permissions.user(userProvider).project(new NameKey(StringUtils.stripDotGit(repository.name)));
+		ForProject projectPermissions = permissions.user(userProvider.get()).project(new NameKey(StringUtils.stripDotGit(repository.name)));
 		if (projectPermissions != null) {
 			ForRef refPermissions = projectPermissions.ref(ref);
 			return refPermissions != null && refPermissions.testOrFalse(RefPermission.READ);
@@ -128,7 +128,7 @@ public class GerritGitBlitUserModel extends UserModel {
 				if (diffPrefs != null) {
 					return diffPrefs.context;
 				}
-			} catch (AuthException | ConfigInvalidException | PermissionBackendException | IOException e) {
+			} catch (RestApiException | ConfigInvalidException | PermissionBackendException | IOException e) {
 				// Ignore and return default below.
 			}
 		}

@@ -178,7 +178,7 @@ public final class BugtraqConfig {
 			RevWalk rw = new RevWalk(repository);
 			try (TreeWalk tw = new TreeWalk(repository)) {
 				tw.setFilter(PathFilterGroup.createFromStrings(configFileName));
-				Ref head = repository.getRef(Constants.HEAD);
+				Ref head = repository.exactRef(Constants.HEAD);
 				if (head == null) {
 					return null;
 				}

@@ -414,6 +414,8 @@ public class RawServlet extends HttpServlet {
 			String requestedPath) throws IOException {
 
 		boolean served = false;
+		// RevWalk is disposed in finally
+		@SuppressWarnings("resource")
 		RevWalk rw = new RevWalk(repository);
 		TreeWalk tw = new TreeWalk(repository);
 		try {

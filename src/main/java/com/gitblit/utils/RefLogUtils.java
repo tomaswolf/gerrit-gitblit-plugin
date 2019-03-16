@@ -65,9 +65,9 @@ import com.gitblit.models.UserModel;
 
 /**
  * Utility class for maintaining a reflog within a git repository on an orphan branch.
- * 
+ *
  * @author James Moger
- * 
+ *
  */
 public class RefLogUtils {
 
@@ -77,7 +77,7 @@ public class RefLogUtils {
 
 	/**
 	 * Log an error message and exception.
-	 * 
+	 *
 	 * @param t
 	 * @param repository
 	 *            if repository is not null it MUST be the {0} parameter in the pattern.
@@ -99,13 +99,13 @@ public class RefLogUtils {
 
 	/**
 	 * Returns true if the repository has a reflog branch.
-	 * 
+	 *
 	 * @param repository
 	 * @return true if the repository has a reflog branch
 	 */
 	public static boolean hasRefLogBranch(Repository repository) {
 		try {
-			return repository.getRef(GB_REFLOG) != null;
+			return repository.exactRef(GB_REFLOG) != null;
 		} catch (Exception e) {
 			LOGGER.error("failed to determine hasRefLogBranch", e);
 		}
@@ -114,7 +114,7 @@ public class RefLogUtils {
 
 	/**
 	 * Returns a RefModel for the reflog branch in the repository. If the branch can not be found, null is returned.
-	 * 
+	 *
 	 * @param repository
 	 * @return a refmodel for the reflog branch or null
 	 */
@@ -173,7 +173,7 @@ public class RefLogUtils {
 
 	/**
 	 * Logs a ref deletion.
-	 * 
+	 *
 	 * @param user
 	 * @param repository
 	 * @param ref
@@ -204,7 +204,7 @@ public class RefLogUtils {
 
 	/**
 	 * Updates the reflog with the received commands.
-	 * 
+	 *
 	 * @param user
 	 * @param repository
 	 * @param commands
@@ -293,7 +293,7 @@ public class RefLogUtils {
 
 	/**
 	 * Creates an in-memory index of the reflog entry.
-	 * 
+	 *
 	 * @param repo
 	 * @param headId
 	 * @param commands
@@ -405,7 +405,7 @@ public class RefLogUtils {
 
 	/**
 	 * Returns the list of reflog entries as they were recorded by Gitblit. Each RefLogEntry may represent multiple ref updates.
-	 * 
+	 *
 	 * @param repositoryName
 	 * @param repository
 	 * @param minimumDate
@@ -489,7 +489,7 @@ public class RefLogUtils {
 
 	/**
 	 * Returns the list of entries organized by ref (e.g. each ref has it's own RefLogEntry object).
-	 * 
+	 *
 	 * @param repositoryName
 	 * @param repository
 	 * @param maxCount
@@ -501,7 +501,7 @@ public class RefLogUtils {
 
 	/**
 	 * Returns the list of entries organized by ref (e.g. each ref has it's own RefLogEntry object).
-	 * 
+	 *
 	 * @param repositoryName
 	 * @param repository
 	 * @param offset
@@ -547,7 +547,7 @@ public class RefLogUtils {
 
 	/**
 	 * Returns the list of ref changes separated by ref (e.g. each ref has it's own RefLogEntry object).
-	 * 
+	 *
 	 * @param repositoryName
 	 * @param repository
 	 * @param minimumDate
@@ -584,7 +584,7 @@ public class RefLogUtils {
 
 	/**
 	 * Returns a commit log grouped by day.
-	 * 
+	 *
 	 * @param repositoryName
 	 * @param repository
 	 * @param minimumDate
@@ -679,7 +679,7 @@ public class RefLogUtils {
 
 	/**
 	 * Returns the list of commits separated by ref (e.g. each ref has it's own RefLogEntry object for each day).
-	 * 
+	 *
 	 * @param repositoryName
 	 * @param repository
 	 * @param minimumDate

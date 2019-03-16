@@ -64,9 +64,9 @@ import com.gitblit.utils.StringUtils;
 
 /**
  * Indexes tickets in a Lucene database.
- * 
+ *
  * @author James Moger
- * 
+ *
  */
 public class TicketIndexer {
 
@@ -174,8 +174,7 @@ public class TicketIndexer {
 			IndexWriter writer = getWriter();
 			StandardAnalyzer analyzer = new StandardAnalyzer();
 			QueryParser qp = new QueryParser(Lucene.rid.name(), analyzer);
-			BooleanQuery query = new BooleanQuery();
-			query.add(qp.parse(repository.getRID()), Occur.MUST);
+			BooleanQuery query = (new BooleanQuery.Builder()).add(qp.parse(repository.getRID()), Occur.MUST).build();
 
 			int numDocsBefore = writer.numDocs();
 			writer.deleteDocuments(query);
@@ -197,7 +196,7 @@ public class TicketIndexer {
 
 	/**
 	 * Bulk Add/Update tickets in the Lucene index
-	 * 
+	 *
 	 * @param tickets
 	 */
 	public void index(List<TicketModel> tickets) {
@@ -216,7 +215,7 @@ public class TicketIndexer {
 
 	/**
 	 * Add/Update a ticket in the Lucene index
-	 * 
+	 *
 	 * @param ticket
 	 */
 	public void index(TicketModel ticket) {
@@ -234,7 +233,7 @@ public class TicketIndexer {
 
 	/**
 	 * Delete a ticket from the Lucene index.
-	 * 
+	 *
 	 * @param ticket
 	 * @throws Exception
 	 * @return true, if deleted, false if no record was deleted
@@ -251,7 +250,7 @@ public class TicketIndexer {
 
 	/**
 	 * Delete a ticket from the Lucene index.
-	 * 
+	 *
 	 * @param repository
 	 * @param ticketId
 	 * @throws Exception
@@ -260,8 +259,7 @@ public class TicketIndexer {
 	private boolean delete(String repository, long ticketId, IndexWriter writer) throws Exception {
 		StandardAnalyzer analyzer = new StandardAnalyzer();
 		QueryParser qp = new QueryParser(Lucene.did.name(), analyzer);
-		BooleanQuery query = new BooleanQuery();
-		query.add(qp.parse(StringUtils.getSHA1(repository + ticketId)), Occur.MUST);
+		BooleanQuery query = (new BooleanQuery.Builder()).add(qp.parse(StringUtils.getSHA1(repository + ticketId)), Occur.MUST).build();
 
 		int numDocsBefore = writer.numDocs();
 		writer.deleteDocuments(query);
@@ -279,7 +277,7 @@ public class TicketIndexer {
 
 	/**
 	 * Returns true if the repository has tickets in the index.
-	 * 
+	 *
 	 * @param repository
 	 * @return true if there are indexed tickets
 	 */
@@ -289,7 +287,7 @@ public class TicketIndexer {
 
 	/**
 	 * Search for tickets matching the query. The returned tickets are shadows of the real ticket, but suitable for a results list.
-	 * 
+	 *
 	 * @param repository
 	 * @param text
 	 * @param page
@@ -304,22 +302,23 @@ public class TicketIndexer {
 		StandardAnalyzer analyzer = new StandardAnalyzer();
 		try {
 			// search the title, description and content
-			BooleanQuery query = new BooleanQuery();
+			BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
 			QueryParser qp;
 
 			qp = new QueryParser(Lucene.title.name(), analyzer);
 			qp.setAllowLeadingWildcard(true);
-			query.add(qp.parse(text), Occur.SHOULD);
+			queryBuilder.add(qp.parse(text), Occur.SHOULD);
 
 			qp = new QueryParser(Lucene.body.name(), analyzer);
 			qp.setAllowLeadingWildcard(true);
-			query.add(qp.parse(text), Occur.SHOULD);
+			queryBuilder.add(qp.parse(text), Occur.SHOULD);
 
 			qp = new QueryParser(Lucene.content.name(), analyzer);
 			qp.setAllowLeadingWildcard(true);
-			query.add(qp.parse(text), Occur.SHOULD);
+			queryBuilder.add(qp.parse(text), Occur.SHOULD);
 
 			IndexSearcher searcher = getSearcher();
+			BooleanQuery query = queryBuilder.build();
 			Query rewrittenQuery = searcher.rewrite(query);
 
 			log.debug(rewrittenQuery.toString());
@@ -347,7 +346,7 @@ public class TicketIndexer {
 
 	/**
 	 * Search for tickets matching the query. The returned tickets are shadows of the real ticket, but suitable for a results list.
-	 * 
+	 *
 	 * @param text
 	 * @param page
 	 * @param pageSize
@@ -378,7 +377,7 @@ public class TicketIndexer {
 				sort = new Sort(Lucene.fromString(sortBy).asSortField(desc));
 			}
 			int maxSize = 5000;
-			TopFieldDocs docs = searcher.search(rewrittenQuery, null, maxSize, sort, false, false);
+			TopFieldDocs docs = searcher.search(rewrittenQuery, maxSize, sort, false, false);
 			int size = (pageSize <= 0) ? maxSize : pageSize;
 			int offset = Math.max(0, (page - 1) * size);
 			ScoreDoc[] hits = subset(docs.scoreDocs, offset, size);
@@ -440,7 +439,7 @@ public class TicketIndexer {
 
 	private IndexSearcher getSearcher() throws IOException {
 		if (searcher == null) {
-			searcher = new IndexSearcher(DirectoryReader.open(getWriter(), true));
+			searcher = new IndexSearcher(DirectoryReader.open(getWriter(), true, true));
 		}
 		return searcher;
 	}
@@ -459,7 +458,7 @@ public class TicketIndexer {
 
 	/**
 	 * Creates a Lucene document from a ticket.
-	 * 
+	 *
 	 * @param ticket
 	 * @return a Lucene document
 	 */
@@ -536,7 +535,7 @@ public class TicketIndexer {
 	/**
 	 * Creates a query result from the Lucene document. This result is not a high-fidelity representation of the real ticket, but it is suitable for
 	 * display in a table of search results.
-	 * 
+	 *
 	 * @param doc
 	 * @return a query result
 	 * @throws ParseException

@@ -51,18 +51,14 @@ public class GitBlitInitStep implements InitStep {
 	}
 
 	private void configureGitBlit() {
-		Section gitWeb = sections.get("gitweb", null);
-		gitWeb.set("type", "custom");
-		gitWeb.set("url", "plugins/" + pluginName + '/');
-		gitWeb.set("project", "summary/?r=${project}");
-		gitWeb.set("revision", "commit/?r=${project}&h=${commit}");
-		gitWeb.set("branch", "log/?r=${project}&h=${branch}");
-		gitWeb.set("filehistory", "history/?f=${file}&r=${project}&h=${branch}");
-		gitWeb.set("file", "blob/?r=${project}&h=${commit}&f=${file}");
-		gitWeb.set("roottree", "tree/?r=${project}&h=${commit}");
-		gitWeb.string("Link name", "linkname", "GitBlit");
+		String defaultLinkName = cfg.getString("gitweb", null, "linkname");
+		if (defaultLinkName == null || defaultLinkName.isEmpty()) {
+			defaultLinkName = "GitBlit";
+		}
+		cfg.unsetSection("gitweb", null);
 		Section pluginCfg = sections.get("plugin", pluginName);
 		// These values are displayed in the UI.
+		pluginCfg.string("Link name", "linkname", defaultLinkName, true);
 		pluginCfg.string("\"Repositories\" submenu title", "repositories", "Repositories", true);
 		pluginCfg.string("\"Activity\" submenu title", "activity", "Activity", true);
 		pluginCfg.string("\"Documentation\" submenu title", "documentation", "Documentation", true);
@@ -78,7 +74,7 @@ public class GitBlitInitStep implements InitStep {
 				pluginCfg.set("search", newValue);
 			}
 		}
-		pluginCfg.string("\"Browse\" submenu title for the \"Projects\" top-level menu", "browse", "Browse", true);
+		pluginCfg.unset("browse");
 		// If everything is at the default, then make sure we don't have the section at all.
 		if (cfg.getNames("plugin", pluginName).isEmpty()) {
 			cfg.unsetSection("plugin", pluginName);

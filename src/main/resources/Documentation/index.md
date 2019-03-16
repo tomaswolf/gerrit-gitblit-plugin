@@ -15,30 +15,11 @@ This is a privately maintained fork of the official Gerrit-Gitblit plugin. Pleas
 
 # Configuration
 
-There are two different configurations: one for Gerrit so it knows how to generate links that will be processed by the plugin, and
-an optional GitBlit configuration for the plugin itself.
+The plugin in configured in Gerrit's global configuration file `gerrit.config`.
+As of v2.16.171.0, this plugin does _not_ use the `[gitweb]` section anymore.
+Configuration is done in the `[plugin "@PLUGIN@"]` section.
 
-## Gerrit configuration
-
-In Gerrit's `gerrit.config`, define the `[gitweb]` section as follows:
-
-	[gitweb]
-	        type = custom
-	        url = plugins/@PLUGIN@/
-	        linkname = browse
-	        project = summary/?r=${project}
-	        revision = commit/?r=${project}&h=${commit}
-	        branch = log/?r=${project}&h=${branch}
-	        filehistory = history/?f=${file}&r=${project}&h=${branch}
-	        file = blob/?r=${project}&h=${commit}&f=${file}
-	        roottree = tree/?r=${project}&h=${commit}
-
-This is normally done automatically if you add the plugin and run through `java -jar gerrit.war init -d site_path`, but you can also
-add this manually to Gerrit's config file. The `linkname` can be adapted to your taste.
-
-### Configuring the top menu
-
-This plugin adds a "GitBlit" top menu to Gerrit, and also a new sub-menu item to the "Projects" top menu. Since v2.11.162.2 of this plugin, the link
+This plugin adds a "GitBlit" top menu to Gerrit. Since v2.11.162.2 of this plugin, the link
 texts for all sub-menu items can be configured to your taste in a `[plugin "@PLUGIN@"]` section in your `gerrit.config`. If the section is not present,
 or some values in that section are not defined, the plugin uses built-in default texts. The default configuration would correspond to
 
@@ -47,14 +28,14 @@ or some values in that section are not defined, the plugin uses built-in default
 	        activity = Activity
 	        documentation = Documentation
 	        search =
-	        browse = Browse
+	        linkname = Gitblit
 
-The first four are sub-menu items of the "GitBlit" top menu, the last one is a new "browse" sub-menu item in Gerrit's "Projects" menu that is shown
-for Gerrit's "current" project (since v2.11.162.2).
+The first four are sub-menu items of the "GitBlit" top menu, the last one is the link text shown on links to Gitblit for individual files
+or in the project list.
 
 The "search" sub-menu item is by default not set and will thus not be shown. Setting it makes only sense if you enable GitBlit indexing on some of
 your projects. See the [GitBlit documentation](http://gitblit.com/setup_lucene.html) for more information on that.
- 
+
 ## GitBlit configuration
 
 The plugin includes a minimal default configuration to make GitBlit act only as a repository viewer. You can augment that with further
@@ -66,7 +47,7 @@ To see the built-in configuration, access it at [`gitblit.properties`](@URL@plug
 
 By default, the built-in configuration does allow anonymous browsing, subject to the repository and ref-level access restrictions defined in Gerrit.
 If you want to lock the GitBlit plugin to allow only logged-in users to browse, set in `$GERRIT_SITE/etc/gitblit.properties` the key
-`web.authenticateViewPages = true`. This is the only key of the built-in configuration that you _can_ override. 
+`web.authenticateViewPages = true`. This is the only key of the built-in configuration that you _can_ override.
 
 GitBlit's ticket service, fan-out service, and its plugin mechanism are disabled in this plugin, as is ssh access through GitBlit since Gerrit
 already provides that. Also disabled is Gitblit's LFS implementation.
@@ -95,7 +76,7 @@ The GitBlit `${baseFolder}` is the plugin's data directory provided by Gerrit at
 		</p>
 	</dd>
 </dl>
-	
+
 
 # Issue tracking
 

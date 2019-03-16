@@ -19,7 +19,6 @@ import java.util.List;
 import com.google.common.collect.Lists;
 import com.google.gerrit.extensions.annotations.PluginCanonicalWebUrl;
 import com.google.gerrit.extensions.annotations.PluginName;
-import com.google.gerrit.extensions.client.GerritTopMenu;
 import com.google.gerrit.extensions.client.MenuItem;
 import com.google.gerrit.extensions.webui.TopMenu;
 import com.google.gerrit.server.CurrentUser;
@@ -35,7 +34,6 @@ public class GitBlitTopMenu implements TopMenu {
 
 	private final MenuEntry fullMenuEntries;
 	private final MenuEntry restrictedMenuEntries;
-	private final MenuEntry extraProjectEntries;
 	private final Provider<CurrentUser> userProvider;
 
 	@Inject
@@ -63,15 +61,10 @@ public class GitBlitTopMenu implements TopMenu {
 		}
 		fullMenuItems.add(documentation);
 		fullMenuEntries = new MenuEntry(GITBLIT_TOPMENU_NAME, fullMenuItems);
-		// Actually, I'd like to give the project "browse" link only if the user has the right to see the contents of the repository. But how would
-		// I know in getEntries() below which is the "current" project? Since I don't know how to do that, we show that link always, based on the
-		// assumption that if a user can see a project at all, he can also see its contents. If not, gitblit will tell him so...
-		extraProjectEntries = new MenuEntry(GerritTopMenu.PROJECTS, Arrays.asList(new MenuItem(cfg.getString("browse", "Browse"), gitBlitBaseUrl
-				+ "summary/?r=${projectName}", "")));
 	}
 
 	@Override
 	public List<MenuEntry> getEntries() {
-		return Arrays.asList(userProvider.get().isIdentifiedUser() ? fullMenuEntries : restrictedMenuEntries, extraProjectEntries);
+		return Arrays.asList(userProvider.get().isIdentifiedUser() ? fullMenuEntries : restrictedMenuEntries);
 	}
 }

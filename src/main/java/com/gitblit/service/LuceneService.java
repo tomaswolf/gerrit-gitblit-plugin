@@ -97,9 +97,9 @@ import com.gitblit.utils.StringUtils;
 
 /**
  * The Lucene service handles indexing and searching repositories.
- * 
+ *
  * @author James Moger
- * 
+ *
  */
 public class LuceneService implements Runnable {
 
@@ -185,7 +185,7 @@ public class LuceneService implements Runnable {
 
 	/**
 	 * Synchronously indexes a repository. This may build a complete index of a repository or it may update an existing index.
-	 * 
+	 *
 	 * @param displayName
 	 *            the name of the repository
 	 * @param repository
@@ -226,7 +226,7 @@ public class LuceneService implements Runnable {
 
 	/**
 	 * Close the writer/searcher objects for a repository.
-	 * 
+	 *
 	 * @param repositoryName
 	 */
 	public synchronized void close(String repositoryName) {
@@ -251,7 +251,7 @@ public class LuceneService implements Runnable {
 
 	/**
 	 * Close all Lucene indexers.
-	 * 
+	 *
 	 */
 	public synchronized void close() {
 		// close all writers
@@ -277,7 +277,7 @@ public class LuceneService implements Runnable {
 
 	/**
 	 * Deletes the Lucene index for the specified repository.
-	 * 
+	 *
 	 * @param repositoryName
 	 * @return true, if successful
 	 */
@@ -305,7 +305,7 @@ public class LuceneService implements Runnable {
 
 	/**
 	 * Returns the author for the commit, if this information is available.
-	 * 
+	 *
 	 * @param commit
 	 * @return an author or unknown
 	 */
@@ -323,7 +323,7 @@ public class LuceneService implements Runnable {
 
 	/**
 	 * Returns the committer for the commit, if this information is available.
-	 * 
+	 *
 	 * @param commit
 	 * @return an committer or unknown
 	 */
@@ -341,7 +341,7 @@ public class LuceneService implements Runnable {
 
 	/**
 	 * Get the tree associated with the given commit.
-	 * 
+	 *
 	 * @param walk
 	 * @param commit
 	 * @return tree
@@ -358,7 +358,7 @@ public class LuceneService implements Runnable {
 
 	/**
 	 * Construct a keyname from the branch.
-	 * 
+	 *
 	 * @param branchName
 	 * @return a keyname appropriate for the Git config file format
 	 */
@@ -368,7 +368,7 @@ public class LuceneService implements Runnable {
 
 	/**
 	 * Returns the Lucene configuration for the specified repository.
-	 * 
+	 *
 	 * @param repository
 	 * @return a config object
 	 */
@@ -381,7 +381,7 @@ public class LuceneService implements Runnable {
 	/**
 	 * Reads the Lucene config file for the repository to check the index version. If the index version is different, then rebuild the repository
 	 * index.
-	 * 
+	 *
 	 * @param repository
 	 * @return true of the on-disk index format is different than INDEX_VERSION
 	 */
@@ -399,7 +399,7 @@ public class LuceneService implements Runnable {
 
 	/**
 	 * This completely indexes the repository and will destroy any existing index.
-	 * 
+	 *
 	 * @param repositoryName
 	 * @param repository
 	 * @return IndexResult
@@ -613,7 +613,7 @@ public class LuceneService implements Runnable {
 
 	/**
 	 * Incrementally update the index with the specified commit for the repository.
-	 * 
+	 *
 	 * @param repositoryName
 	 * @param repository
 	 * @param branch
@@ -688,7 +688,7 @@ public class LuceneService implements Runnable {
 
 	/**
 	 * Delete a blob from the specified branch of the repository index.
-	 * 
+	 *
 	 * @param repositoryName
 	 * @param branch
 	 * @param path
@@ -699,10 +699,9 @@ public class LuceneService implements Runnable {
 		String pattern = MessageFormat.format("{0}:'{'0} AND {1}:\"'{'1'}'\" AND {2}:\"'{'2'}'\"", FIELD_OBJECT_TYPE, FIELD_BRANCH, FIELD_PATH);
 		String q = MessageFormat.format(pattern, SearchObjectType.blob.name(), branch, path);
 
-		BooleanQuery query = new BooleanQuery();
 		StandardAnalyzer analyzer = new StandardAnalyzer();
 		QueryParser qp = new QueryParser(FIELD_SUMMARY, analyzer);
-		query.add(qp.parse(q), Occur.MUST);
+		BooleanQuery query = (new BooleanQuery.Builder()).add(qp.parse(q), Occur.MUST).build();
 
 		IndexWriter writer = getIndexWriter(repositoryName);
 		int numDocsBefore = writer.numDocs();
@@ -720,7 +719,7 @@ public class LuceneService implements Runnable {
 
 	/**
 	 * Updates a repository index incrementally from the last indexed commits.
-	 * 
+	 *
 	 * @param model
 	 * @param repository
 	 * @return IndexResult
@@ -849,7 +848,7 @@ public class LuceneService implements Runnable {
 
 	/**
 	 * Creates a Lucene document for a commit
-	 * 
+	 *
 	 * @param commit
 	 * @param tags
 	 * @return a Lucene document
@@ -871,7 +870,7 @@ public class LuceneService implements Runnable {
 
 	/**
 	 * Incrementally index an object for the repository.
-	 * 
+	 *
 	 * @param repositoryName
 	 * @param doc
 	 * @return true, if successful
@@ -917,7 +916,7 @@ public class LuceneService implements Runnable {
 
 	/**
 	 * Gets an index searcher for the repository.
-	 * 
+	 *
 	 * @param repository
 	 * @return
 	 * @throws IOException
@@ -926,7 +925,7 @@ public class LuceneService implements Runnable {
 		IndexSearcher searcher = searchers.get(repository);
 		if (searcher == null) {
 			IndexWriter writer = getIndexWriter(repository);
-			searcher = new IndexSearcher(DirectoryReader.open(writer, true));
+			searcher = new IndexSearcher(DirectoryReader.open(writer, true, true));
 			searchers.put(repository, searcher);
 		}
 		return searcher;
@@ -934,7 +933,7 @@ public class LuceneService implements Runnable {
 
 	/**
 	 * Gets an index writer for the repository. The index will be created if it does not already exist or if forceCreate is specified.
-	 * 
+	 *
 	 * @param repository
 	 * @return an IndexWriter
 	 * @throws IOException
@@ -960,7 +959,7 @@ public class LuceneService implements Runnable {
 
 	/**
 	 * Searches the specified repositories for the given text or query
-	 * 
+	 *
 	 * @param text
 	 *            if the text is null or empty, null is returned
 	 * @param page
@@ -970,7 +969,7 @@ public class LuceneService implements Runnable {
 	 * @param repositories
 	 *            a list of repositories to search. if no repositories are specified null is returned.
 	 * @return a list of SearchResults in order from highest to the lowest score
-	 * 
+	 *
 	 */
 	public List<SearchResult> search(String text, int page, int pageSize, List<String> repositories) {
 		if (ArrayUtils.isEmpty(repositories)) {
@@ -981,7 +980,7 @@ public class LuceneService implements Runnable {
 
 	/**
 	 * Searches the specified repositories for the given text or query
-	 * 
+	 *
 	 * @param text
 	 *            if the text is null or empty, null is returned
 	 * @param page
@@ -991,7 +990,7 @@ public class LuceneService implements Runnable {
 	 * @param repositories
 	 *            a list of repositories to search. if no repositories are specified null is returned.
 	 * @return a list of SearchResults in order from highest to the lowest score
-	 * 
+	 *
 	 */
 	public List<SearchResult> search(String text, int page, int pageSize, String... repositories) {
 		if (StringUtils.isEmpty(text)) {
@@ -1004,15 +1003,15 @@ public class LuceneService implements Runnable {
 		StandardAnalyzer analyzer = new StandardAnalyzer();
 		try {
 			// default search checks summary and content
-			BooleanQuery query = new BooleanQuery();
+			BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
 			QueryParser qp;
 			qp = new QueryParser(FIELD_SUMMARY, analyzer);
 			qp.setAllowLeadingWildcard(true);
-			query.add(qp.parse(text), Occur.SHOULD);
+			queryBuilder.add(qp.parse(text), Occur.SHOULD);
 
 			qp = new QueryParser(FIELD_CONTENT, analyzer);
 			qp.setAllowLeadingWildcard(true);
-			query.add(qp.parse(text), Occur.SHOULD);
+			queryBuilder.add(qp.parse(text), Occur.SHOULD);
 
 			IndexSearcher searcher;
 			if (repositories.length == 1) {
@@ -1030,6 +1029,7 @@ public class LuceneService implements Runnable {
 				searcher = new IndexSearcher(reader);
 			}
 
+			BooleanQuery query = queryBuilder.build();
 			Query rewrittenQuery = searcher.rewrite(query);
 			logger.debug(rewrittenQuery.toString());
 
@@ -1062,7 +1062,7 @@ public class LuceneService implements Runnable {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param analyzer
 	 * @param query
 	 * @param content
@@ -1192,7 +1192,7 @@ public class LuceneService implements Runnable {
 	/**
 	 * Custom subclass of MultiReader to identify the source index for a given doc id. This would not be necessary of there was a public method to
 	 * obtain this information.
-	 * 
+	 *
 	 */
 	private class MultiSourceReader extends MultiReader {
 

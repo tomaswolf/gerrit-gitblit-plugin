@@ -47,6 +47,7 @@ import com.google.gerrit.server.config.AuthConfig;
 import com.google.gerrit.server.config.CanonicalWebUrl;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.googlesource.gerrit.plugins.gitblit.HttpUtils;
 
 @Singleton
 public class GerritGitBlitAuthenticationManager implements IAuthenticationManager {
@@ -114,9 +115,9 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 	@Override
 	public UserModel authenticate(final HttpServletRequest httpRequest) {
 		// Added by the GerritAuthenticationFilter.
-		String username = (String) httpRequest.getAttribute("gerrit-username");
-		String token = (String) httpRequest.getAttribute("gerrit-token");
-		String password = (String) httpRequest.getAttribute("gerrit-password");
+		String username = HttpUtils.getAttribute(httpRequest, "gerrit-username", String.class);
+		String token = HttpUtils.getAttribute(httpRequest, "gerrit-token", String.class);
+		String password = HttpUtils.getAttribute(httpRequest, "gerrit-password", String.class);
 
 		if (!Strings.isNullOrEmpty(token)) {
 			return authenticateFromSession(httpRequest, username, token);
@@ -154,7 +155,7 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 			return null;
 		}
 
-		String userName = session.getUser().getUserName();
+		String userName = session.getUser().getUserName().orElse(null);
 		// Gerrit users not necessarily have a username. Google OAuth returns users without user names.
 		UserModel user;
 		if (Strings.isNullOrEmpty(userName)) {
@@ -227,7 +228,7 @@ public class GerritGitBlitAuthenticationManager implements IAuthenticationManage
 			return false;
 		}
 		HttpSession session = request.getSession();
-		AuthenticationType authenticationType = (AuthenticationType) session.getAttribute(Constants.ATTRIB_AUTHTYPE);
+		AuthenticationType authenticationType = HttpUtils.getAttribute(session, Constants.ATTRIB_AUTHTYPE, AuthenticationType.class);
 		return authenticationType != null && authenticationType.isStandard();
 	}
 

@@ -79,12 +79,13 @@ import com.gitblit.wicket.panels.AvatarImage;
 import com.gitblit.wicket.panels.LinkPanel;
 import com.gitblit.wicket.panels.NavigationPanel;
 import com.google.common.base.Strings;
+import com.googlesource.gerrit.plugins.gitblit.HttpUtils;
 
 /**
  * Root page is a topbar, navigable page like Repositories, Users, or Federation.
- * 
+ *
  * @author James Moger
- * 
+ *
  */
 public abstract class RootPage extends BasePage {
 
@@ -618,7 +619,7 @@ public abstract class RootPage extends BasePage {
 			UserModel user = session.getUser();
 			boolean editCredentials = app().authentication().supportsCredentialChanges(user);
 			HttpServletRequest request = ((WebRequest) getRequest()).getHttpServletRequest();
-			AuthenticationType authenticationType = (AuthenticationType) request.getSession().getAttribute(Constants.ATTRIB_AUTHTYPE);
+			AuthenticationType authenticationType = HttpUtils.getAttribute(request.getSession(), Constants.ATTRIB_AUTHTYPE, AuthenticationType.class);
 			boolean standardLogin = (null != authenticationType) ? authenticationType.isStandard() : true;
 
 			if (app().settings().getBoolean(Keys.web.allowGravatar, true)) {
@@ -681,7 +682,7 @@ public abstract class RootPage extends BasePage {
 
 		/**
 		 * Creates a submenu. This is not actually submenu because we're using an older Twitter Bootstrap which is pre-submenu.
-		 * 
+		 *
 		 * @param wicketId
 		 * @param submenuTitle
 		 * @param menuItems

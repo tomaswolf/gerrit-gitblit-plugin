@@ -14,6 +14,13 @@
 package com.googlesource.gerrit.plugins.gitblit;
 
 import com.google.gerrit.extensions.registration.DynamicSet;
+import com.google.gerrit.extensions.webui.BranchWebLink;
+import com.google.gerrit.extensions.webui.FileHistoryWebLink;
+import com.google.gerrit.extensions.webui.FileWebLink;
+import com.google.gerrit.extensions.webui.ParentWebLink;
+import com.google.gerrit.extensions.webui.PatchSetWebLink;
+import com.google.gerrit.extensions.webui.ProjectWebLink;
+import com.google.gerrit.extensions.webui.TagWebLink;
 import com.google.gerrit.extensions.webui.TopMenu;
 import com.google.inject.AbstractModule;
 
@@ -22,6 +29,13 @@ public class GitBlitModule extends AbstractModule {
 	@Override
 	protected void configure() {
 		DynamicSet.bind(binder(), TopMenu.class).to(GitBlitTopMenu.class);
+		DynamicSet.bind(binder(), BranchWebLink.class).to(GitBlitWebUrls.class);
+		DynamicSet.bind(binder(), FileHistoryWebLink.class).to(GitBlitWebUrls.class);
+		DynamicSet.bind(binder(), FileWebLink.class).to(GitBlitWebUrls.class);
+		DynamicSet.bind(binder(), ParentWebLink.class).to(GitBlitWebUrls.class);
+		DynamicSet.bind(binder(), PatchSetWebLink.class).to(GitBlitWebUrls.class);
+		DynamicSet.bind(binder(), ProjectWebLink.class).to(GitBlitWebUrls.class);
+		DynamicSet.bind(binder(), TagWebLink.class).to(GitBlitWebUrls.class);
 	}
 
 }

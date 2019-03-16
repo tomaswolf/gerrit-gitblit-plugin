@@ -56,6 +56,7 @@ import com.google.gerrit.httpd.WebSession;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.googlesource.gerrit.plugins.gitblit.HttpUtils;
 
 @Singleton
 public class GerritGitBlitWebApp extends GitBlitWebApp {
@@ -93,7 +94,7 @@ public class GerritGitBlitWebApp extends GitBlitWebApp {
 
 	/**
 	 * Sets a unique key that is different for each plugin instance (i.e., different for each load of the plugin.)
-	 * 
+	 *
 	 * @param key
 	 *            for this plugin instance.
 	 */
@@ -166,7 +167,7 @@ public class GerritGitBlitWebApp extends GitBlitWebApp {
 				WebRequest request = requestCycle.getWebRequest();
 				HttpSession realSession = request.getHttpServletRequest().getSession();
 				if (realSession != null) {
-					Object sessionPluginInstanceKey = realSession.getAttribute(INSTANCE_ATTRIBUTE);
+					Object sessionPluginInstanceKey = HttpUtils.getAttribute(realSession, INSTANCE_ATTRIBUTE, String.class);
 					String currentPluginInstanceKey = getPluginInstanceKey();
 					if (sessionPluginInstanceKey instanceof String) {
 						if (!sessionPluginInstanceKey.equals(currentPluginInstanceKey)) {
