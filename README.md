@@ -1,3 +1,11 @@
+> **WARNING**
+>
+> [Gitblit](https://github.com/gitblit/gitblit) is apparently no longer actively maintained. As of this writing, the last commit on its master branch was in June 2017. With that state of affairs it is unclear how long it will still be possible to get Gitblit to work inside Gerrit.
+>
+> > Gitblit is based on old libraries; Gerrit uses much newer ones. When running inside Gerrit, Gitblit needs to use the Gerrit versions of libraries they have in common (like JGit or Lucene). The gap is getting larger with each Gerrit release, and there will be a point where it cannot be bridged anymore.
+>
+> In the long run, this is a dead end.
+
 # Gerrit-GitBlit plugin
 
 This is a fork of the [official Gerrit-GitBlit plugin](https://gerrit.googlesource.com/plugins/gitblit/),
@@ -5,7 +13,7 @@ forked originally from [master revision 28d2c98](https://gerrit.googlesource.com
 
 It integrates [GitBlit](https://github.com/gitblit/gitblit) as a repository browser into [Gerrit](https://code.google.com/p/gerrit/) as a Gerrit plugin.
 
-Pre-built jars (Java 7) are available as **[releases](https://github.com/tomaswolf/gerrit-gitblit-plugin/releases)**. Pick one with a version number
+Pre-built jars (Java 7, as of v2.15.171.0 Java 8) are available as **[releases](https://github.com/tomaswolf/gerrit-gitblit-plugin/releases)**. Pick one with a version number
 matching your Gerrit version. Version numbering for this plugin is the Gerrit API version it was built for, followed by the collapsed GitBlit version,
 followed by the plugin version.So "v2.9.1.162.2" is version 2 of this plugin, integrating GitBlit 1.6.2 into Gerrit 2.9.1.
 
@@ -92,11 +100,11 @@ is enabled in Gerrit, this can be done for instance by doing (assuming you downl
 ```
 ssh YOUR_GERRIT_URL gerrit plugin install - -n gitblit.jar < gitblit-plugin.VERSION.jar
 ssh YOUR_GERRIT_URL gerrit plugin reload gitblit
-``` 
+```
 
 This is a fairly large plugin, adding many classes to the JVM Gerrit runs in. Depending on what kind of JVM you're using, I
 cannot exclude the possibility that adding GitBlit to Gerrit might lead to "java.lang.OutOfMemoryError: PermGen space". If you
-ever observe this, increase the "PermGen" memory for Gerrit. For the Oracle HotSpot JVM < 8.0, you'd do that by adding the option 
+ever observe this, increase the "PermGen" memory for Gerrit. For the Oracle HotSpot JVM < 8.0, you'd do that by adding the option
 `container.javaOptions = -XX:MaxPermSize=320m` (or whatever size you deem appropriate) to `gerrit.config`. Possibly you
 then also might want to increase Gerrit's maximum heap size a bit (that's `container.heapLimit`).
 See the [Gerrit documentation](https://gerrit-documentation.storage.googleapis.com/Documentation/2.9.1/config-gerrit.html#container).
@@ -115,7 +123,7 @@ which since version v2.11.162.2 is after installation also available as _\<Your_
 
 * I have not gotten around to try out Lucene indexing of Gerrit repositories in GitBlit. Since this is a feature I don't use, I have no plans
   to do anything about this in case it doesn't work.
-  
+
 * I run this plugin in a firewalled private network, and it seems to me that the authentication stuff is good enough. I do _not_ know
   whether it would be good enough for running this on a public network, or whether I goofed somewhere big time. I'm no web security
   expert and cannot make any guarantees. I strongly suspect that the RSS feed does not honour ref-level visibility restrictions; it only
@@ -126,7 +134,7 @@ which since version v2.11.162.2 is after installation also available as _\<Your_
   Additionally, he gives "[Small workgroups that require centralized repositories.](http://gitblit.com/faq.html#H15)" as the target
   audience. I run this plugin for such a group, and it appears to work fine.
 
-* In any case, see **points 7 and 8 of the [`LICENSE`](https://github.com/tomaswolf/gerrit-gitblit-plugin/blob/master/LICENSE)** 
+* In any case, see **points 7 and 8 of the [`LICENSE`](https://github.com/tomaswolf/gerrit-gitblit-plugin/blob/master/LICENSE)**
   (no guarantees, no warranty, no liability).
 
 # Building
