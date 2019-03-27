@@ -32,7 +32,7 @@ limitations under the License.
     <Gerrit-ApiVersion>2.16.7</Gerrit-ApiVersion>
     <GitBlit-Version>1.7.1</GitBlit-Version>
     <Wicket-Version>1.4.22</Wicket-Version>
-	<Lucene-Version>6.6.5</Lucene-Version>
+    <Lucene-Version>6.6.5</Lucene-Version>
     <Gerrit-ReloadMode>restart</Gerrit-ReloadMode>
     <Gerrit-InitStep>com.googlesource.gerrit.plugins.gitblit.GitBlitInitStep</Gerrit-InitStep>
     <Gerrit-Module>com.googlesource.gerrit.plugins.gitblit.GitBlitModule</Gerrit-Module>
@@ -71,36 +71,36 @@ limitations under the License.
       <artifactId>wicket-extensions</artifactId>
       <version>${Wicket-Version}</version>
     </dependency>
-   	<dependency>
-		<groupId>org.apache.lucene</groupId>
-		<artifactId>lucene-core</artifactId>
-		<version>${Lucene-Version}</version>
-	</dependency>
-	<dependency>
-		<groupId>org.apache.lucene</groupId>
-		<artifactId>lucene-highlighter</artifactId>
-		<version>${Lucene-Version}</version>
-	</dependency>
-	<dependency>
-		<groupId>org.apache.lucene</groupId>
-		<artifactId>lucene-analyzers-common</artifactId>
-		<version>${Lucene-Version}</version>
-	</dependency>
-	<dependency>
-		<groupId>org.apache.lucene</groupId>
-		<artifactId>lucene-memory</artifactId>
-		<version>${Lucene-Version}</version>
-	</dependency>
-	<dependency>
-		<groupId>org.apache.lucene</groupId>
-		<artifactId>lucene-queryparser</artifactId>
-		<version>${Lucene-Version}</version>
-	</dependency>
-	<dependency>
-		<groupId>org.apache.lucene</groupId>
-		<artifactId>lucene-sandbox</artifactId>
-		<version>${Lucene-Version}</version>
-	</dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>${Lucene-Version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-highlighter</artifactId>
+      <version>${Lucene-Version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-common</artifactId>
+      <version>${Lucene-Version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-memory</artifactId>
+      <version>${Lucene-Version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-queryparser</artifactId>
+      <version>${Lucene-Version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-sandbox</artifactId>
+        <version>${Lucene-Version}</version>
+    </dependency>
   </dependencies>
   <build>
     <resources>
@@ -156,8 +156,8 @@ limitations under the License.
                   </includes>
                 </resource>
               </resources>
-			</configuration>
-	      </execution>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <plugin>
@@ -362,13 +362,13 @@ limitations under the License.
       <id>gerrit-api-repository</id>
       <url>https://gerrit-api.commondatastorage.googleapis.com/release</url>
     </repository>
-	<repository>
-	  <id>com.gitblit</id>
-	  <name>Gitblit</name>
-	  <url>http://gitblit.github.io/gitblit-maven/</url>
-	  <layout>default</layout>
-	</repository>
-	<repository>
+    <repository>
+        <id>com.gitblit</id>
+        <name>Gitblit</name>
+        <url>http://gitblit.github.io/gitblit-maven/</url>
+        <layout>default</layout>
+    </repository>
+    <repository>
       <id>jgit-snapshots</id>
       <url>https://repo.eclipse.org/content/groups/snapshots</url>
     </repository>
