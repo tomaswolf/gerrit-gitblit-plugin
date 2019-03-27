@@ -29,8 +29,8 @@ import java.util.Set;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.document.IntField;
-import org.apache.lucene.document.LongField;
+import org.apache.lucene.document.LegacyIntField;
+import org.apache.lucene.document.LegacyLongField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
@@ -514,15 +514,15 @@ public class TicketIndexer {
 		if (value == null) {
 			return;
 		}
-		doc.add(new LongField(lucene.name(), value.getTime(), Store.YES));
+		doc.add(new LegacyLongField(lucene.name(), value.getTime(), Store.YES));
 	}
 
 	private void toDocField(Document doc, Lucene lucene, long value) {
-		doc.add(new LongField(lucene.name(), value, Store.YES));
+		doc.add(new LegacyLongField(lucene.name(), value, Store.YES));
 	}
 
 	private void toDocField(Document doc, Lucene lucene, int value) {
-		doc.add(new IntField(lucene.name(), value, Store.YES));
+		doc.add(new LegacyIntField(lucene.name(), value, Store.YES));
 	}
 
 	private void toDocField(Document doc, Lucene lucene, String value) {
