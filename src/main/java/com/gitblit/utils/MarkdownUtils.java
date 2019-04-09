@@ -19,6 +19,7 @@ import static com.vladsch.flexmark.ext.wikilink.WikiLinkExtension.WIKI_LINK;
 import static com.vladsch.flexmark.profiles.pegdown.Extensions.ALL;
 import static com.vladsch.flexmark.profiles.pegdown.Extensions.ANCHORLINKS;
 import static com.vladsch.flexmark.profiles.pegdown.Extensions.SMARTYPANTS;
+import static com.vladsch.flexmark.profiles.pegdown.Extensions.HARDWRAPS;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -92,9 +93,9 @@ public class MarkdownUtils {
 		MutableDataHolder options;
 
 		if (linkRenderer == null) {
-			options = PegdownOptionsAdapter.flexmarkOptions(ALL & ~SMARTYPANTS & ~ANCHORLINKS).toMutable();
+			options = PegdownOptionsAdapter.flexmarkOptions(ALL & ~SMARTYPANTS & ~ANCHORLINKS & ~HARDWRAPS).toMutable();
 		} else {
-			options = PegdownOptionsAdapter.flexmarkOptions(ALL & ~SMARTYPANTS & ~ANCHORLINKS, new CustomExtension(linkRenderer)).toMutable();
+			options = PegdownOptionsAdapter.flexmarkOptions(ALL & ~SMARTYPANTS & ~ANCHORLINKS & ~HARDWRAPS, new CustomExtension(linkRenderer)).toMutable();
 		}
 		Node document = Parser.builder(options).build().parse(markdown);
 		return HtmlRenderer.builder(options).build().render(document);
