@@ -449,8 +449,11 @@ public class LuceneService implements Runnable {
 					break;
 				}
 			}
-			branches.remove(defaultBranch);
-			branches.add(0, defaultBranch);
+
+			if (defaultBranch != null) {
+				branches.remove(defaultBranch);
+				branches.add(0, defaultBranch);
+			}
 
 			// walk through each branch
 			for (RefModel branch : branches) {
@@ -772,8 +775,11 @@ public class LuceneService implements Runnable {
 					break;
 				}
 			}
-			branches.remove(defaultBranch);
-			branches.add(0, defaultBranch);
+
+			if (defaultBranch != null) {
+				branches.remove(defaultBranch);
+				branches.add(0, defaultBranch);
+			}
 
 			// walk through each branches
 			for (RefModel branch : branches) {
