@@ -322,6 +322,8 @@ limitations under the License.
                     <exclude>com/gitblit/utils/RefLogUtils$*.class</exclude>
                     <exclude>com/gitblit/wicket/pages/NewRepositoryPage.class</exclude>
                     <exclude>com/gitblit/wicket/pages/NewRepositoryPage$*.class</exclude>
+                    <exclude>com/gitblit/wicket/pages/LuceneSearchPage.class</exclude>
+                    <exclude>com/gitblit/wicket/pages/LuceneSearchPage$*.class</exclude>
                     <exclude>com/gitblit/wicket/panels/BranchesPanel.class</exclude>
                     <exclude>com/gitblit/wicket/panels/BranchesPanel$*.class</exclude>
                     <exclude>com/gitblit/wicket/panels/HistoryPanel.class</exclude><!-- Also StackOverflowError; issue #21 -->
