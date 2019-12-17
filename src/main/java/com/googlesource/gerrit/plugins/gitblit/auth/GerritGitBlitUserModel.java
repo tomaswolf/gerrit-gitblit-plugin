@@ -13,26 +13,21 @@
 // limitations under the License.
 package com.googlesource.gerrit.plugins.gitblit.auth;
 
-import java.io.IOException;
-
-import org.eclipse.jgit.errors.ConfigInvalidException;
-
 import com.gitblit.Constants.AccessPermission;
 import com.gitblit.Constants.AccessRestrictionType;
 import com.gitblit.models.RepositoryModel;
 import com.gitblit.models.UserModel;
 import com.gitblit.utils.StringUtils;
 import com.google.common.base.Strings;
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.client.DiffPreferencesInfo;
-import com.google.gerrit.extensions.restapi.RestApiException;
-import com.google.gerrit.reviewdb.client.Project.NameKey;
+import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.server.CurrentUser;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.account.AccountResource;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackend.ForProject;
 import com.google.gerrit.server.permissions.PermissionBackend.ForRef;
-import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.gerrit.server.permissions.ProjectPermission;
 import com.google.gerrit.server.permissions.RefPermission;
 import com.google.gerrit.server.restapi.account.GetDiffPreferences;
@@ -71,17 +66,17 @@ public class GerritGitBlitUserModel extends UserModel {
 		this.getDiffPreferences = getDiffPreferences;
 		CurrentUser user = userProvider.get();
 		if (user != null && user.isIdentifiedUser()) {
-			this.displayName = ((IdentifiedUser) user).getAccount().getFullName();
+			this.displayName = ((IdentifiedUser) user).getAccount().fullName();
 			if (Strings.isNullOrEmpty(this.displayName)) {
 				this.displayName = this.username;
 			}
-			this.emailAddress = ((IdentifiedUser) user).getAccount().getPreferredEmail();
+			this.emailAddress = ((IdentifiedUser) user).getAccount().preferredEmail();
 		}
 	}
 
 	@Override
 	protected boolean canAccess(final RepositoryModel repository, final AccessRestrictionType ifRestriction, final AccessPermission requirePermission) {
-		ForProject projectPermissions = permissions.user(userProvider.get()).project(new NameKey(StringUtils.stripDotGit(repository.name)));
+		ForProject projectPermissions = permissions.user(userProvider.get()).project(Project.nameKey(StringUtils.stripDotGit(repository.name)));
 		if (projectPermissions == null) {
 			return false;
 		}
@@ -99,13 +94,13 @@ public class GerritGitBlitUserModel extends UserModel {
 
 	@Override
 	public boolean hasRepositoryPermission(String name) {
-		ForProject projectPermissions = permissions.user(userProvider.get()).project(new NameKey(StringUtils.stripDotGit(name)));
+		ForProject projectPermissions = permissions.user(userProvider.get()).project(Project.nameKey(StringUtils.stripDotGit(name)));
 		return projectPermissions != null && projectPermissions.testOrFalse(ProjectPermission.ACCESS);
 	}
 
 	@Override
 	public boolean canView(RepositoryModel repository, String ref) {
-		ForProject projectPermissions = permissions.user(userProvider.get()).project(new NameKey(StringUtils.stripDotGit(repository.name)));
+		ForProject projectPermissions = permissions.user(userProvider.get()).project(Project.nameKey(StringUtils.stripDotGit(repository.name)));
 		if (projectPermissions != null) {
 			ForRef refPermissions = projectPermissions.ref(ref);
 			return refPermissions != null && refPermissions.testOrFalse(RefPermission.READ);
@@ -124,11 +119,14 @@ public class GerritGitBlitUserModel extends UserModel {
 		if (user != null && user.isIdentifiedUser()) {
 			AccountResource accountRsc = new AccountResource((IdentifiedUser) user);
 			try {
-				DiffPreferencesInfo diffPrefs = getDiffPreferences.apply(accountRsc);
+				Response<DiffPreferencesInfo> diffPrefs = getDiffPreferences.apply(accountRsc);
 				if (diffPrefs != null) {
-					return diffPrefs.context;
+					DiffPreferencesInfo info = diffPrefs.value();
+					if (info != null) {
+						return info.context;
+					}
 				}
-			} catch (RestApiException | ConfigInvalidException | PermissionBackendException | IOException e) {
+			} catch (Exception e) {
 				// Ignore and return default below.
 			}
 		}

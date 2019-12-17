@@ -107,9 +107,9 @@ public class GerritGitBlitUserManager implements IUserManager {
 		}
 		IdentifiedUser loggedInUser = (IdentifiedUser) user;
 		// We know that this user has no username. Synthesize one for GitBlit.
-		String fakeUserName = loggedInUser.getAccount().getPreferredEmail();
+		String fakeUserName = loggedInUser.getAccount().preferredEmail();
 		if (Strings.isNullOrEmpty(fakeUserName)) {
-			fakeUserName = loggedInUser.getAccount().getFullName();
+			fakeUserName = loggedInUser.getAccount().fullName();
 			if (Strings.isNullOrEmpty(fakeUserName)) {
 				fakeUserName = "external" + loggedInUser.getAccountId().toString();
 			}
