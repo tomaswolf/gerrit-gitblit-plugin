@@ -16,9 +16,11 @@
 package com.gitblit.utils;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -255,7 +257,7 @@ public class RefLogUtils {
 				CommitBuilder commit = new CommitBuilder();
 				commit.setAuthor(ident);
 				commit.setCommitter(ident);
-				commit.setEncoding(Constants.ENCODING);
+				commit.setEncoding(StandardCharsets.UTF_8);
 				commit.setMessage(message);
 				commit.setParentId(headId);
 				commit.setTreeId(indexTreeId);
@@ -305,7 +307,7 @@ public class RefLogUtils {
 		DirCache inCoreIndex = DirCache.newInCore();
 		DirCacheBuilder dcBuilder = inCoreIndex.builder();
 
-		long now = System.currentTimeMillis();
+		Instant now = Instant.now();
 		Set<String> ignorePaths = new TreeSet<String>();
 		try (ObjectInserter inserter = repo.newObjectInserter()) {
 			// add receive commands to the temporary index
@@ -345,7 +347,7 @@ public class RefLogUtils {
 				dcEntry.setFileMode(FileMode.REGULAR_FILE);
 
 				// insert object
-				dcEntry.setObjectId(inserter.insert(org.eclipse.jgit.lib.Constants.OBJ_BLOB, content.getBytes("UTF-8")));
+				dcEntry.setObjectId(inserter.insert(org.eclipse.jgit.lib.Constants.OBJ_BLOB, content.getBytes(StandardCharsets.UTF_8)));
 
 				// add to temporary in-core index
 				dcBuilder.add(dcEntry);

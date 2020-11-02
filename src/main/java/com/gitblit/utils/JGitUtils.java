@@ -17,6 +17,7 @@ package com.gitblit.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -2169,7 +2170,7 @@ public class JGitUtils {
 		}
 		try (ObjectInserter odi = repository.newObjectInserter()) {
 			// Create a blob object to insert into a tree
-			ObjectId blobId = odi.insert(Constants.OBJ_BLOB, message.getBytes(Constants.CHARACTER_ENCODING));
+			ObjectId blobId = odi.insert(Constants.OBJ_BLOB, message.getBytes(StandardCharsets.UTF_8));
 
 			// Create a tree object to reference from a commit
 			TreeFormatter tree = new TreeFormatter();
@@ -2180,7 +2181,7 @@ public class JGitUtils {
 			CommitBuilder commit = new CommitBuilder();
 			commit.setAuthor(author);
 			commit.setCommitter(author);
-			commit.setEncoding(Constants.CHARACTER_ENCODING);
+			commit.setEncoding(StandardCharsets.UTF_8);
 			commit.setMessage(message);
 			commit.setTreeId(treeId);
 
@@ -2435,7 +2436,7 @@ public class JGitUtils {
 					CommitBuilder commitBuilder = new CommitBuilder();
 					commitBuilder.setCommitter(committer);
 					commitBuilder.setAuthor(committer);
-					commitBuilder.setEncoding(Constants.CHARSET);
+					commitBuilder.setEncoding(StandardCharsets.UTF_8);
 					if (StringUtils.isEmpty(message)) {
 						message = MessageFormat.format("merge {0} into {1}", srcTip.getName(), branchTip.getName());
 					}
